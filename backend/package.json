@@ -8,8 +8,14 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Stack:\r - NodeJS with Javascript\r - Express.js for web server",
   "dependencies": {
-    "express": "^4.21.2"
-  }
+    "axios": "^1.7.9",
+    "backend": "file:",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "sharp": "^0.33.5"
+  },
+  "keywords": []
 }
