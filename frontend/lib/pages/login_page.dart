@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -99,8 +99,17 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              const Spacer(),
+              // const Spacer(),
 
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
               // sign in button
               ButtonComponent(
                 buttonText: "Login",
@@ -132,12 +141,8 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-
-
-            ],
-          ),
+          ],),
         ),
-      ),
     );
   }
 }

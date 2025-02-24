@@ -11,7 +11,6 @@ class ForgetpasswordPage extends StatefulWidget {
 }
 
 class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
-
   final authService = AuthService();
 
   final emailController = TextEditingController();
@@ -20,18 +19,19 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
     final email = emailController.text;
 
     try {
-
       // ForgetPassword Function from auth_service
       await authService.forgetPassword(email);
-      ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Forget Password")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Forget Password")));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 50,),
+              const SizedBox(height: 50),
 
               //logo
               const Icon(Icons.directions_bus_filled, size: 100),
@@ -60,34 +60,38 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
               ),
 
               const Text(
-                  "Enter your email address and we'll send you a password reset link",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                  ),
-                ),
+                "Enter your email address and we'll send you a password reset link",
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              ),
 
               const SizedBox(height: 50),
 
               // email
               InputtextComponent(
-                controller: emailController, 
-                hintText: "Email", 
+                controller: emailController,
+                hintText: "Email",
                 obscureText: false,
               ),
 
-
               const Spacer(),
-
-              // sign in button
-              ButtonComponent(
-                buttonText: "Send LInk",
-                onTap: () {
-                  forgetPassword();
-                },
-              ),
             ],
           ),
+        ),
+      ),
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // forget password button
+            ButtonComponent(
+              buttonText: "Send LInk",
+              onTap: () {
+                forgetPassword();
+              },
+            ),
+          ],
         ),
       ),
     );
