@@ -31,7 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      // SignUp Functino from auth_service
+      // SignUp Function from auth_service
       await authService.signUp(email, password);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -53,7 +53,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -101,7 +101,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: true,
               ),
 
-              // const Spacer(),
             ],
           ),
         ),

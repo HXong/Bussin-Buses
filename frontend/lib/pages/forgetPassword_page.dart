@@ -59,12 +59,15 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
                 ),
               ),
 
-              const Text(
-                "Enter your email address and we'll send you a password reset link",
-                style: TextStyle(color: Colors.black, fontSize: 15),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  "Enter your email address and we'll send you a password reset link",
+                  style: TextStyle(color: Colors.black, fontSize: 13),
+                ),
               ),
 
-              const SizedBox(height: 50),
+              const  SizedBox(height: 50),
 
               // email
               InputtextComponent(
