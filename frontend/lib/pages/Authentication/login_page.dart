@@ -67,6 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: emailController, 
                 hintText: "Email", 
                 obscureText: false,
+                action: TextInputAction.next,
               ),
 
               const SizedBox(height: 50),
@@ -76,6 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: passwordController,
                 hintText: "Password",
                 obscureText: true,
+                action: TextInputAction.done,
                 ),
 
               const SizedBox(height: 15),

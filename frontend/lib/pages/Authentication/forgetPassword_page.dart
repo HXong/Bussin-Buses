@@ -74,6 +74,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
                 controller: emailController,
                 hintText: "Email",
                 obscureText: false,
+                action: TextInputAction.done,
               ),
 
               const Spacer(),

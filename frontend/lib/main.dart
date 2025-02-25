@@ -1,8 +1,9 @@
 import 'package:bussin_buses/auth/auth_gate.dart';
-import 'package:bussin_buses/pages/forgetPassword_page.dart';
-import 'package:bussin_buses/pages/home_page.dart';
-import 'package:bussin_buses/pages/login_page.dart';
-import 'package:bussin_buses/pages/register_page.dart';
+import 'package:bussin_buses/pages/Authentication/forgetPassword_page.dart';
+import 'package:bussin_buses/pages/home_page_commuter.dart';
+import 'package:bussin_buses/pages/Authentication/login_page.dart';
+import 'package:bussin_buses/pages/Authentication/register_page.dart';
+import 'package:bussin_buses/pages/home_page_driver.dart';
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
         '/forget': (context) => ForgetpasswordPage(),
-        '/home': (context) => HomePage(),
+        '/homeCommuter': (context) => HomePageCommuter(),
+        '/homeDriver': (context) => HomePageDriver(),
       },
     );
   }

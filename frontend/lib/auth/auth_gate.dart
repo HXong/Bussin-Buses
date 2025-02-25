@@ -1,5 +1,5 @@
-import 'package:bussin_buses/pages/home_page.dart';
-import 'package:bussin_buses/pages/login_page.dart';
+import 'package:bussin_buses/pages/Authentication/login_page.dart';
+import 'package:bussin_buses/pages/home_page_commuter.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,7 +21,7 @@ class AuthGate extends StatelessWidget {
         final session = snapshot.hasData ? snapshot.data!.session : null;
 
         if (session != null) {
-          return HomePage();
+          return HomePageCommuter();
         }
         else {
           return LoginPage();

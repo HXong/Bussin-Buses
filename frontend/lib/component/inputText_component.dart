@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 class InputtextComponent extends StatelessWidget {
 
-  final controller;
+  final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final TextInputAction action;
 
   const InputtextComponent({
     super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
+    required this.action,
     });
 
   @override
@@ -34,6 +36,7 @@ class InputtextComponent extends StatelessWidget {
             borderSide: BorderSide.none,
           ),
         ),
+        textInputAction: action,
       ),
     );
   }

@@ -82,6 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: emailController,
                 hintText: "Email",
                 obscureText: false,
+                action: TextInputAction.next,
               ),
 
               const SizedBox(height: 50),
@@ -91,6 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: passwordController,
                 hintText: "Password",
                 obscureText: true,
+                action: TextInputAction.next,
               ),
 
               const SizedBox(height: 50),
@@ -99,8 +101,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: confirmPasswordController,
                 hintText: "Confirm Password",
                 obscureText: true,
+                action: TextInputAction.done,
               ),
-
             ],
           ),
         ),
