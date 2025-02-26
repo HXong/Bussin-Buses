@@ -40,6 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       );
+      Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -130,7 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, "/login");
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       "Sign in",
