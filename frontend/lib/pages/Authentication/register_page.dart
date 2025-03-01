@@ -10,17 +10,26 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
+const List<Widget> Users = <Widget>[
+  Row(children: [Icon(Icons.person), SizedBox(width: 5,), Text('Commuter')]),
+  Row(children: [Icon(Icons.directions_bus_filled_outlined), SizedBox(width: 5,), Text('Driver')])
+];
+
 class _RegisterPageState extends State<RegisterPage> {
   final authService = AuthService();
 
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final List<bool> _selectedUser = <bool>[true, false];
 
   Future<void> signUp() async {
+    final name = nameController.text;
     final email = emailController.text;
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
+    final userType = _selectedUser[0] ? 'commuter' : 'driver';
 
     // Checking for same password
     if (password != confirmPassword) {
@@ -32,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       // SignUp Function from auth_service
-      await authService.signUp(email, password);
+      await authService.signUp(email, password, name, userType);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -43,6 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
+        print(Text("Error: $e"));
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -59,12 +69,12 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
 
               //logo
               const Icon(Icons.directions_bus_filled, size: 100),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
 
               // Bussin Busses
               const Text(
@@ -76,7 +86,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
+
+              //name
+              InputtextComponent(
+                controller: nameController,
+                hintText: "Name",
+                obscureText: false,
+                action: TextInputAction.next,
+              ),
+
+              const SizedBox(height: 30),
 
               //email
               InputtextComponent(
@@ -86,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 action: TextInputAction.next,
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
 
               //password
               InputtextComponent(
@@ -96,14 +116,36 @@ class _RegisterPageState extends State<RegisterPage> {
                 action: TextInputAction.next,
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
 
+              //confirm password
               InputtextComponent(
                 controller: confirmPasswordController,
                 hintText: "Confirm Password",
                 obscureText: true,
                 action: TextInputAction.done,
               ),
+
+              const SizedBox(height: 30),
+
+              ToggleButtons(
+                direction: Axis.horizontal,
+                  onPressed: (int index) {
+                  setState(() {
+                    for (int i = 0; i < _selectedUser.length; i++) {
+                      _selectedUser[i] = i == index;
+                    }
+                  });
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  selectedBorderColor: Colors.lightBlueAccent,
+                  selectedColor: Colors.white70,
+                  fillColor: Colors.lightBlueAccent[200],
+                  color: Colors.lightBlueAccent[400],
+                  constraints: const BoxConstraints(minHeight: 40.0, minWidth: 150.0),
+                  children: Users,
+                  isSelected: _selectedUser
+              )
             ],
           ),
         ),

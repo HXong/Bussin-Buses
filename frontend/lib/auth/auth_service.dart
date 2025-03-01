@@ -11,11 +11,25 @@ class AuthService{
     );
   }
 
-  Future<AuthResponse> signUp(String email, String password) async {
-    return await _supabase.auth.signUp(
+  Future<AuthResponse> signUp(String email, String password, String username, String userType) async {
+    final AuthResponse response = await _supabase.auth.signUp(
       email: email,
       password: password,
     );
+
+    final String? uid = response.user?.id;
+    if (uid == null) throw Exception("User ID is null");
+
+    await _supabase.auth.updateUser(UserAttributes(
+      data: {'display_name': username}, // Updates the display name
+    ));
+
+    final id = getCurrentUser();
+    print("UserID: $id");
+
+    await _supabase.from('profiles').update({'username': username, 'user_type': userType}).eq('id', uid);
+
+    return response;
   }
 
   Future<void> signOut() async {
@@ -29,6 +43,6 @@ class AuthService{
   String? getCurrentUser() {
     final session = _supabase.auth.currentSession;
     final user = session?.user;
-    return user?.email;
+    return user?.id;
   }
 }
