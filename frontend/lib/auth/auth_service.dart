@@ -16,17 +16,12 @@ class AuthService{
       email: email,
       password: password,
     );
-
     final String? uid = response.user?.id;
     if (uid == null) throw Exception("User ID is null");
-
     await _supabase.auth.updateUser(UserAttributes(
       data: {'display_name': username}, // Updates the display name
     ));
-
     final id = getCurrentUser();
-    print("UserID: $id");
-
     await _supabase.from('profiles').update({'username': username, 'user_type': userType}).eq('id', uid);
 
     return response;
