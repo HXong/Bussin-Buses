@@ -42,13 +42,13 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       // SignUp Function from auth_service
       await authService.signUp(email, password, name, userType);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Successfully Register!\n A confirmation email has been send to you!",
-          ),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(
+      //       "Successfully Register!\n A confirmation email has been send to you!",
+      //     ),
+      //   ),
+      // );
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {

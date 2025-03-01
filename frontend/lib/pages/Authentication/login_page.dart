@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       // SignIn Function from auth_service
       await authService.signIn(email, password);
-      ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Successfully Login")));
+      // ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Successfully Login")));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Error: $e")));
