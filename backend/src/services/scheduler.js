@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const fetchAndSaveImages = require("./fetchAndSaveImages");
-const analyzeTraffic = require("./detectCongestion");
+const processTrafficData = require("./LTADataPoller");
+const analyzeTraffic = require("./TrafficDataProcessor");
 
 let isRunning = false
 
@@ -17,7 +17,7 @@ async function runTrafficUpdate() {
 
     try {
         console.log("Fetching new traffic images...");
-        await fetchAndSaveImages();
+        await processTrafficData();
 
         console.log("Analyzing traffic congestion...");
         await analyzeTraffic();

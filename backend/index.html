@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Map - HERE API</title>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #login-container { margin: 50px auto; width: 300px; }
+        #map-container { display: none; }
+        #map { height: 500px; width: 80%; margin: 10px auto; }
+        #notification-area { background: #ffcc00; color: black; padding: 10px; display: none; font-weight: bold; }
+        .button-container { margin-top: 10px; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        #reset-map-btn { background-color: #d9534f; color: white; display: none; }
+        #reset-map-btn:hover { background-color: #c9302c; }
+        #reroute-btn { background-color: #007bff; color: white; display: none; }
+        #reroute-btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="login-container">
+        <h2>Driver Login</h2>
+        <input type="text" id="username" placeholder="Username"><br><br>
+        <input type="password" id="password" placeholder="Password"><br><br>
+        <button onclick="login()">Login</button>
+        <p id="login-message"></p>
+    </div>
+
+    <!-- Map & Controls -->
+    <div id="map-container">
+        <h2>Welcome, <span id="driver-name"></span>!</h2>
+
+        <label for="route-selection">Select Route:</label>
+        <select id="route-selection"></select>
+        <button onclick="selectRoute()">Load Route</button>
+
+        <div id="notification-area"></div>
+        <div id="map"></div>
+
+        <div class="button-container">
+            <button id="reset-map-btn" onclick="resetMap()">Reset Map</button>
+            <button id="reroute-btn" onclick="handleReroute()">Reroute</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        let driverId = null;
+        let origin = null;
+        let destination = null;
+        let driverLocation = null;
+        let currentDriverLocation = null;
+        let currentRoutePolyline = null;
+        let markers = [];
+        let map;
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch("http://localhost:3000/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                driverId = data.driver_id;
+                driverLocation = data.currentLocation;
+
+                if (!localStorage.getItem("driverId")) {
+                    localStorage.setItem("driverId", driverId);
+                    localStorage.setItem("username", data.username);
+                    localStorage.setItem("driverLocation", JSON.stringify(driverLocation));
+                }
+
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("map-container").style.display = "block";
+                document.getElementById("driver-name").innerText = data.username;
+
+                const routeSelection = document.getElementById("route-selection");
+                routeSelection.innerHTML = "";
+                data.scheduled_route.forEach(route => {
+                    const option = document.createElement("option");
+                    option.value = route.route_id;
+                    option.text = `Route ${route.route_id}`;
+                    routeSelection.appendChild(option);
+                });
+
+                loadMap();
+            } else {
+                document.getElementById("login-message").innerText = data.error;
+            }
+        }
+
+        async function logout() {
+            console.log("🚨 Logging out...");
+
+            await fetch("http://localhost:3000/api/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ driver_id: driverId })
+            });
+
+            console.log("🚨 Removing driverId from local storage.");
+            if (localStorage.getItem("driverId")) {
+                localStorage.removeItem("driverId");
+                localStorage.removeItem("username");
+                localStorage.removeItem("driverLocation");
+                localStorage.removeItem("polyline");
+            }
+
+            if (currentRoutePolyline) {
+                map.removeLayer(currentRoutePolyline);
+                currentRoutePolyline = null;
+            }
+
+            document.getElementById("login-container").style.display = "block";
+            document.getElementById("map-container").style.display = "none";
+            document.getElementById("notification-area").style.display = "none"; 
+            document.getElementById("notification-area").innerText = "";
+            driverId = null;
+            origin = null;
+            destination = null;
+            driverLocation = null;
+            removeMarkers();
+
+            console.log("✅ Logout complete. Redirecting to login page.");
+        }
+
+        function checkSession() {
+            const storedDriverId = localStorage.getItem("driverId");
+            const storedUsername = localStorage.getItem("username");
+            const storedDriverLocation = localStorage.getItem("driverLocation");
+
+            console.log("Checking session - Driver ID:", storedDriverId, "Username:", storedUsername);
+
+            if (storedDriverId) {
+                driverId = storedDriverId;
+                driverLocation = storedDriverLocation ? JSON.parse(storedDriverLocation) : null;
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("map-container").style.display = "block";
+                document.getElementById("driver-name").innerText = storedUsername;
+
+                loadMap();
+            } else {
+                console.warn("🚨 Session lost! Redirecting to login...");
+                document.getElementById("login-container").style.display = "block";
+                document.getElementById("map-container").style.display = "none";
+            }
+        }
+
+        function loadMap() {
+            if (!map) {
+                map = L.map('map').setView(driverLocation || [1.3946, 103.8347], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                map.on('click', async function (e) {
+                    const { lat, lng } = e.latlng;
+                    if (!origin) {
+                        origin = [lat, lng];
+                        addMarker(lat, lng, "Origin");
+                    } else if (!destination) {
+                        destination = [lat, lng];
+                        addMarker(lat, lng, "Destination");
+                    } else if (!currentDriverLocation) {
+                        currentDriverLocation = [lat, lng];
+                        driverLocation = currentDriverLocation;
+                        localStorage.setItem("driverLocation", JSON.stringify(driverLocation)); 
+                        currentDriverLocation = null;
+                        addMarker(lat, lng, "Driver");
+                        await fetchRoute();
+                    }
+                });
+            }
+        }
+
+        function addMarker(lat, lng, label) {
+            if (!map) return;
+            const marker = L.marker([lat, lng]).addTo(map).bindPopup(label).openPopup();
+            markers.push(marker);
+        }
+
+        async function fetchRoute() {
+            if (!origin || !destination) return alert("Please select an origin and destination.");
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
+                const data = await response.json();
+
+                if (data.polyline) {
+                    drawRouteOnMap(data.polyline);
+                    removeMarkers();
+                    await updateDriverLocation(driverLocation, data.polyline);
+                    document.getElementById("reset-map-btn").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Error fetching route:", error);
+            }
+        }
+
+        function selectRoute() {
+            const selectedRouteId = document.getElementById("route-selection").value;
+            const selectedRoute = scheduledRoutes.find(route => route.route_id === selectedRouteId);
+
+            if (!selectedRoute) {
+                console.error("Route not found");
+                return;
+            }
+
+            driverLocation = selectedRoute.origin;
+            destination = selectedRoute.destination;
+            drawRouteOnMap(selectedRoute.polyline);
+        }
+
+        function drawRouteOnMap(encodedPolyline) {
+            try {
+                const decoded = H.geo.LineString.fromFlexiblePolyline(encodedPolyline);
+                const coords = decoded.getLatLngAltArray();
+                const leafletCoords = [];
+                for (let i = 0; i < coords.length; i += 3) {
+                    leafletCoords.push([coords[i], coords[i + 1]]);
+                }
+
+                if (currentRoutePolyline) {
+                    map.removeLayer(currentRoutePolyline);
+                }
+
+                currentRoutePolyline = L.polyline(leafletCoords, { color: 'blue', weight: 5 }).addTo(map);
+                map.fitBounds(L.latLngBounds(leafletCoords));
+            } catch (err) {
+                console.error("Error decoding polyline:", err);
+            }
+        }
+
+        async function checkNotifications() {
+            if (!driverId) {
+                console.warn("No driver logged in. Skipping notification check.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/get-notifications/${driverId}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch notifications");
+                }
+
+                const data = await response.json();
+
+                if (data.notifications.length > 0) {
+                    const latestNotification = data.notifications[data.notifications.length - 1];
+
+                    if (document.getElementById("notification-area").innerText !== latestNotification.message) {
+                        showNotification(latestNotification.message);
+                        document.getElementById("reroute-btn").style.display = "block";
+                    }
+        }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        }
+
+        function showNotification(message) {
+            const notificationArea = document.getElementById("notification-area");
+            if (message) {
+                notificationArea.innerText = message;
+                notificationArea.style.display = "block";
+            } else {
+                notificationArea.innerText = "";
+                notificationArea.style.display = "none";
+            }
+        }
+
+        async function handleReroute() {
+            console.log("🔍 Debugging Reroute...");
+            console.log("driverLocation:", driverLocation);
+            console.log("destination:", destination);
+            try {
+                const response = await fetch("http://localhost:3000/api/accept-reroute", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ origin: driverLocation, destination: destination })
+                });
+
+                const data = await response.json();
+                if (data.polyline) {
+                    drawRouteOnMap(data.polyline);
+                    removeMarkers();
+                    await updateDriverLocation(driverLocation, data.polyline);
+                    showNotification("New optimized route applied!");
+                    document.getElementById("reroute-btn").style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error fetching optimized route:", error);
+            }
+        }
+
+        async function updateDriverLocation(location, polyline) {
+            if (!driverId) {
+                console.error("🚨 Error: driverId is undefined. Login might have failed.");
+                return;
+            }
+
+            console.log(`📡 Updating driver location for driverId: ${driverId}, Location: ${location}, Polyline: ${polyline}`);
+
+            try {
+                const response = await fetch("http://localhost:3000/api/update-driver", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driver_id: driverId, currentLocation: location, polyline })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error);
+                }
+
+                const data = await response.json();
+                console.log("✅ Driver location updated successfully:", data);
+            } catch (error) {
+                console.error("🚨 Error updating driver location:", error);
+            }
+
+            // ✅ Store latest location in localStorage for persistence
+            localStorage.setItem("driverLocation", JSON.stringify(location));
+            localStorage.setItem("polyline", polyline);
+        }
+
+        function resetMap() {
+            removeMarkers();
+
+            if (currentRoutePolyline) {
+                map.removeLayer(currentRoutePolyline);
+                currentRoutePolyline = null;
+            }
+
+            origin = null;
+            destination = null;
+            driverLocation = null;
+            currentDriverLocation = null;
+
+            document.getElementById("reset-map-btn").style.display = "none";
+            document.getElementById("reroute-btn").style.display = "none";
+            document.getElementById("notification-area").style.display = "none";
+            document.getElementById("notification-area").innerText = "";
+
+            console.log("map reset");
+        }
+
+        function removeMarkers() {
+            console.log("🗑 Removing markers...");
+
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+
+
+        setInterval(checkNotifications, 10000);
+        window.onload = checkSession;
+    </script>
+</body>
+</html>

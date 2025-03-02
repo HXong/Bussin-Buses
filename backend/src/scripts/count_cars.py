@@ -16,7 +16,7 @@ def count_cars(image_path):
             return {"error": f"Corrupted or invalid image: {image_path}"}
 
         # YOLO11l (better accuracy but slower)
-        model = YOLO("yolo11l.pt")
+        model = YOLO("models/yolo11l.pt")
         try:
             model.to('cuda')
         except:

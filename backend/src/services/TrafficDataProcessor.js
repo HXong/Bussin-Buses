@@ -2,9 +2,12 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { time } = require('console');
+const { getAffectedDrivers, sendNotification } = require("./congestionNotification");
 
 //TODO: Supabase setup
+
+//Local storage
+const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
 
 const IMAGES_DIR = path.join(__dirname, "../../images");
 const PYTHON_PATH = "C:/Python312/python.exe"
@@ -14,6 +17,7 @@ const MAX_CONCURRENT_PROCESSES = Math.max(1, os.cpus().length / 2);
 async function countCars(imagePath){ //cameraId) { to be included
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn(PYTHON_PATH, ['src/scripts/count_cars.py', imagePath]);
+        const cameraId = imagePath.split("\\").pop().split(".")[0];
 
         let output = "";
         let errorOutput = "";
@@ -38,6 +42,36 @@ async function countCars(imagePath){ //cameraId) { to be included
                 try {
                     const result = JSON.parse(output.trim());
                     console.log(`Processed ${imagePath} → Vehicles: ${result.vehicle}, Congestion: ${result.congestion_level}`);
+
+                    let congestionData = [];
+                    if (fs.existsSync(CONGESTION_FILE)) {
+                        try {
+                            congestionData = JSON.parse(fs.readFileSync(CONGESTION_FILE, "utf8"));
+                        } catch (error) {
+                            console.error("Error reading JSON file:", error.message);
+                            congestionData = [];
+                        }
+                    }
+
+
+                    if(result.congestion_level === 'high'){
+                        console.log("entering congestion notification...");
+                        congestionData.forEach(camera => {
+                            if(camera.id === cameraId){
+                                const affectedDrivers = getAffectedDrivers(camera);
+                                if (affectedDrivers.length > 0) {
+                                    try {
+                                        sendNotification(affectedDrivers, cameraId);
+                                    } catch (error) {
+                                        console.error('Error sending notification:', error);
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    console.log("⚡ Calling `updateCongestionData()` for Camera:", cameraId);
+                    updateCongestionData(congestionData, cameraId, result.congestion_level);
 
                     //update supabase
                     // console.log(`Image: ${imagePath} → Vehicles: ${result.vehicle}, Congestion: ${result.congestion_level}`);
@@ -83,6 +117,11 @@ async function analyzeTraffic() {
     const files = fs.readdirSync(IMAGES_DIR).filter(file => file.endsWith(".jpg"));
     if (files.length === 0) {
         console.log("No images found for analysis.");
+        return;
+    }
+
+    if (!fs.existsSync(CONGESTION_FILE)) {
+        console.log("No congestion data file found.");
         return;
     }
 
@@ -133,5 +172,60 @@ async function analyzeTraffic() {
     // }
 }
 
+function updateCongestionData(data, cameraId, congestionLevel) {
+    const timestamp = getTime();
+    const entry = data.find(cam => cam.id === cameraId);
 
-module.exports = analyzeTraffic;
+    if (!entry) {
+        console.error(`Camera ID ${cameraId} not found in data.`);
+        return;
+    }
+
+    entry.timestamps.push({ congestion_level: congestionLevel, timestamp });
+
+    if (entry.timestamps.length > 3) {
+        entry.timestamps.shift();
+    }
+
+    console.log(`Updated Camera ${cameraId} with congestion level: ${congestionLevel}`);
+
+    try {
+        fs.writeFileSync(CONGESTION_FILE, JSON.stringify(data, null, 2));
+        console.log("Congestion data successfully updated in file.");
+    } catch (error) {
+        console.error("Error writing to JSON file:", error.message);
+    }
+}
+
+function getLatestCongestionLevel(cameraId) {
+    if (!fs.existsSync(CONGESTION_FILE)) return "unknown";
+
+    const data = JSON.parse(fs.readFileSync(CONGESTION_FILE));
+    const entry = data.find(cam => cam.id === cameraId);
+
+    if (entry && entry.timestamps.length > 0) {
+        return entry.timestamps[entry.timestamps.length - 1].congestion_level;
+    }
+    return "unknown";
+}
+
+function getTime(){
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      };
+
+    return new Date().toLocaleString('en-SG', options);
+}
+
+
+module.exports = { analyzeTraffic, getTime};
+if (require.main === module) {
+    console.log("TrafficDataProcessor.js is running as a script.");
+    analyzeTraffic();
+}

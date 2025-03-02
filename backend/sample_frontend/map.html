@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Map</title>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+    <h2>Driver Map - Route <span id="route-id">N/A</span></h2>
+    <div id="notification-area"></div>
+
+    <!-- MAP CONTAINER -->
+    <div id="map" style="height: 500px; width: 80%; margin: 10px auto;"></div>
+
+    <!-- BUTTONS -->
+    <div class="button-container">
+        <button onclick="window.location.href='route_selection.html'">Back</button>
+        <button id="start-journey-btn" onclick="startJourney()">Start Journey</button>
+        <button id="stop-journey-btn" onclick="stopJourney()" style="display:none;">Stop Journey</button>
+        <button id="reroute-btn" onclick="handleReroute()" style="display:none;">Reroute</button>
+    </div>
+
+    <script>
+        let map;
+        let routePolyline;
+        let origin;
+        let destination;
+        let driverLocation;
+
+        function loadMap() {
+            driverLocation = localStorage.getItem("driverLocation");
+            map = L.map('map').setView(driverLocation, 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            fetchRoute();
+        }
+
+        async function fetchRoute() {
+            const driverId = localStorage.getItem("driverId");
+            const routeId = localStorage.getItem("selectedRoute");
+            
+
+            document.getElementById("route-id").innerText = routeId;
+            const route = await fetch(`http://localhost:3000/api/scheduled-routes/${driverId}`);
+            const routeData = await route.json();
+
+            const selectedRoute = routeData.scheduled_route.find(route => route.route_id === selectedRouteId);
+
+            if(selectedRoute.polyline){
+                console.log(`✅ Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
+                drawRouteOnMap(selectedRoute.polyline);
+            } else {
+                origin = localStorage.setItem("origin", selectedRoute.origin);
+                destination = localStorage.setItem("destination", selectedRoute.destination);
+                
+                console.log(`✅ Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
+
+                const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
+                const data = await response.json();
+
+                
+                if (data.polyline) {
+                    drawRouteOnMap(data.polyline);
+                }  else {
+                    console.warn("No polyline returned for this route.");
+                }
+            }
+        }
+
+        function drawRouteOnMap(encodedPolyline) {
+            try {
+                const decoded = H.geo.LineString.fromFlexiblePolyline(encodedPolyline);
+                const coords = decoded.getLatLngAltArray();
+                const leafletCoords = [];
+                for (let i = 0; i < coords.length; i += 3) {
+                    leafletCoords.push([coords[i], coords[i + 1]]);
+                }
+
+                if (routePolyline) {
+                    map.removeLayer(routePolyline);
+                }
+
+                routePolyline = L.polyline(leafletCoords, { color: 'blue', weight: 5 }).addTo(map);
+                map.fitBounds(L.latLngBounds(leafletCoords));
+            } catch (err) {
+                console.error("Error decoding polyline:", err);
+            }
+        }
+
+        async function checkNotifications() {
+            const driverId = localStorage.getItem("driverId");
+            if (!driverId) {
+                console.warn("No driver logged in. Skipping notification check.");
+                return;
+            }
+
+            try {
+                console.log("🔄 Checking for notifications...");
+                const response = await fetch(`http://localhost:3000/api/get-notifications/${driverId}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch notifications");
+                }
+
+                const data = await response.json();
+
+                if (data.notifications.length > 0) {
+                    const latestNotification = data.notifications[data.notifications.length - 1];
+
+                    if (document.getElementById("notification-area").innerText !== latestNotification.message) {
+                        showNotification(latestNotification.message);
+                        document.getElementById("reroute-btn").style.display = "block";
+                    }
+                }
+            } catch (error) {
+                console.error("🚨 Error fetching notifications:", error);
+            }
+        }
+
+        function showNotification(message) {
+            const notificationArea = document.getElementById("notification-area");
+            if (message) {
+                notificationArea.innerText = message;
+                notificationArea.style.display = "block";
+            } else {
+                notificationArea.innerText = "";
+                notificationArea.style.display = "none";
+            }
+        }
+
+        async function handleReroute() {
+            console.log("🔍 Debugging Reroute...");
+            console.log("driverLocation:", driverLocation);
+            console.log("destination:", destination);
+
+            try {
+                const response = await fetch("http://localhost:3000/api/accept-reroute", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ origin: driverLocation, destination: destination })
+                });
+
+                const data = await response.json();
+                if (data.polyline) {
+                    drawRouteOnMap(data.polyline);
+                    await updateDriverLocation(driverLocation, data.polyline);
+                    showNotification("New optimized route applied!");
+                    document.getElementById("reroute-btn").style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error fetching optimized route:", error);
+            }
+        }
+
+        async function updateDriverLocation(location, polyline) {
+            const driverId = localStorage.getItem("driverId");
+
+            if (!driverId) {
+                console.error("🚨 Error: driverId is undefined. Login might have failed.");
+                return;
+            }
+
+            console.log(`📡 Updating driver location for driverId: ${driverId}, Location: ${location}, Polyline: ${polyline}`);
+
+            try {
+                const response = await fetch("http://localhost:3000/api/update-driver", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driver_id: driverId, route_id: routeId, currentLocation: location, polyline })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error);
+                }
+
+                const data = await response.json();
+                console.log("✅ Driver location updated successfully:", data);
+            } catch (error) {
+                console.error("🚨 Error updating driver location:", error);
+            }
+
+            
+            localStorage.setItem("driverLocation", JSON.stringify(location));
+            localStorage.setItem("polyline", polyline);
+        }
+
+        
+        async function startJourney() {
+            const driverId = localStorage.getItem("driverId");
+            const routeId = localStorage.getItem("selectedRoute");
+
+            if (!driverId || !routeId) {
+                console.error("🚨 Missing driver ID or route ID.");
+                return;
+            }
+
+            console.log("🚀 Starting Journey for Driver:", driverId, "Route:", routeId);
+
+            try {
+                const response = await fetch("http://localhost:3000/api/start-journey", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driver_id: driverId, route_id: routeId })
+                });
+
+                if (!response.ok) throw new Error("Failed to start journey");
+
+                setInterval(checkNotifications, 10000);
+                map.on("click", updateDriverLocationOnClick);
+
+                // Update UI
+                document.getElementById("start-journey-btn").innerText = "Journey Started";
+                document.getElementById("start-journey-btn").disabled = true;
+                document.getElementById("stop-journey-btn").style.display = "block"; 
+
+                localStorage.setItem("journeyStarted", "true");
+            } catch (error) {
+                console.error("🚨 Error starting journey:", error);
+            }
+        }
+
+        // 🚀 Stop Journey Function
+        async function stopJourney() {
+            const driverId = localStorage.getItem("driverId");
+            const routeId = localStorage.getItem("selectedRoute");
+
+            if (!driverId || !routeId) {
+                console.error("🚨 Missing driver ID or route ID.");
+                return;
+            }
+
+            console.log("🛑 Stopping Journey for Driver:", driverId, "Route:", routeId);
+
+            try {
+                const response = await fetch("http://localhost:3000/api/stop-journey", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driver_id: driverId, route_id: routeId })
+                });
+
+                if (!response.ok) throw new Error("Failed to stop journey");
+
+                // Disable notifications
+                clearInterval(checkNotifications);
+                map.off("click", updateDriverLocationOnClick);
+
+                // Reset UI
+                document.getElementById("start-journey-btn").innerText = "Start Journey";
+                document.getElementById("start-journey-btn").disabled = false;
+                document.getElementById("stop-journey-btn").style.display = "none";
+
+                localStorage.removeItem("journeyStarted");
+                localStorage.removeItem("selectedRoute");
+            } catch (error) {
+                console.error("🚨 Error stopping journey:", error);
+            }
+        }
+
+        window.onload = async function () {
+            const driverId = localStorage.getItem("driverId");
+            const selectedRoute = localStorage.getItem("selectedRoute");
+
+            if (!driverId) {
+                window.location.href = "/";
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/check-journey/${driverId}/${selectedRoute}`);
+                const data = await response.json();
+
+                if (data.journey_started) {
+                    console.log("✅ Resuming Journey...");
+                    startJourney();
+                }
+            } catch (error) {
+                console.error("🚨 Error checking journey status:", error);
+            }
+        };
+
+        loadMap();
+    </script>
+</body>
+</html>

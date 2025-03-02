@@ -8,14 +8,41 @@ const { type } = require('os');
 
 const IMAGES_DIR = path.join(__dirname, '../../images');
 
+//Local storage (temp)
+const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
+
 if (!fs.existsSync(IMAGES_DIR)) {
     fs.mkdirSync(IMAGES_DIR, { recursive: true });
 }
 
+function saveCameraData(cameras){
+    let existingData = [];
+
+    if(fs.existsSync(CONGESTION_FILE)){
+        existingData = JSON.parse(fs.readFileSync(CONGESTION_FILE));
+    }
+
+    const updatedData = cameras.map(cam => ({
+        id: cam.id,
+        image: cam.image,
+        lat: cam.coordinates.latitude,
+        lng: cam.coordinates.longitude,
+        timestamps: [] // Initialize empty timestamps for later updates
+    }));
+
+    existingData.forEach(existing => {
+        const newData = updatedData.find(cam => cam.id === existing.id);
+        if (newData) {
+            newData.timestamps = existing.timestamps || [];
+        }
+    });
+
+    fs.writeFileSync(CONGESTION_FILE, JSON.stringify(updatedData, null, 2));
+    console.log(`🚦 Traffic camera data updated with ${updatedData.length} entries.`);
+}
+
 async function downloadImage(url, filename) {
     try{
-        console.log(`Attempting to download: ${url}`);
-
         const response = await axios({
             url,
             method: "GET",
@@ -28,7 +55,6 @@ async function downloadImage(url, filename) {
             response.data.pipe(writer);
 
             writer.on('finish', () => {
-                console.log(`Successfully downloaded: ${filePath}`);
                 resolve(filePath);
             });
 
@@ -86,19 +112,18 @@ async function downloadImage(url, filename) {
 //         console.error(`Error deleting ${filePath}: ${error.message}`);
 //     }
 // }
-console.log("fetchAndSaveImages.js is being executed...");
 
-async function fetchAndSaveImages() {
-    console.log("fetchAndSaveImages() is running...");
+async function processTrafficData() {
 
-    console.log("Calling fetchTrafficCameras...");
     const cameras = await fetchTrafficCameras();
-    console.log("Cameras received:", cameras);
 
     if (!cameras || cameras.length === 0) {
         console.log("No cameras found. Skipping image downloads.");
         return;
     }
+
+    //local storage
+    saveCameraData(cameras);
 
     //Supabase upload setup
     // const localFilePath = await downloadImage(cam.image, filename);
@@ -113,7 +138,6 @@ async function fetchAndSaveImages() {
     
     const downloadPromises = cameras.map(async cam => {
         const filename = `${cam.id}.jpg`;
-        console.log(`Downloading: ${cam.image} → ${filename}`);
 
         const filePath = await downloadImage(cam.image, filename);
 
@@ -130,9 +154,9 @@ async function fetchAndSaveImages() {
     return true;
 }
 
-module.exports = fetchAndSaveImages;
+module.exports = processTrafficData;
 
 if (require.main === module) {
-    console.log("fetchAndSaveImages.js is running as a script.");
-    fetchAndSaveImages();
+    console.log("LTADataPoller.js is running as a script.");
+    processTrafficData();
 }
