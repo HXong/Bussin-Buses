@@ -29,7 +29,6 @@
                 localStorage.setItem("username", data.username);
                 localStorage.setItem("driverLocation", JSON.stringify(data.currentLocation));
 
-                // Redirect to the menu page
                 window.location.href = "/menu";
             } else {
                 document.getElementById("login-message").innerText = data.error;

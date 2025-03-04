@@ -13,10 +13,8 @@
     <h2>Driver Map - Route <span id="route-id">N/A</span></h2>
     <div id="notification-area"></div>
 
-    <!-- MAP CONTAINER -->
     <div id="map" style="height: 500px; width: 80%; margin: 10px auto;"></div>
 
-    <!-- BUTTONS -->
     <div class="button-container">
         <button onclick="window.location.href='route_selection.html'">Back</button>
         <button id="start-journey-btn" onclick="startJourney()">Start Journey</button>
@@ -30,9 +28,11 @@
         let origin;
         let destination;
         let driverLocation;
+        let refreshIntervalId;
+        let driverMarker = null;
 
         function loadMap() {
-            driverLocation = localStorage.getItem("driverLocation");
+            driverLocation = JSON.parse(localStorage.getItem("driverLocation"));
             map = L.map('map').setView(driverLocation, 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
@@ -50,16 +50,18 @@
             const route = await fetch(`http://localhost:3000/api/scheduled-routes/${driverId}`);
             const routeData = await route.json();
 
-            const selectedRoute = routeData.scheduled_route.find(route => route.route_id === selectedRouteId);
+            const selectedRoute = routeData.scheduled_route.find(route => route.route_id === routeId);
 
             if(selectedRoute.polyline){
-                console.log(`✅ Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
+                origin = localStorage.setItem("origin", selectedRoute.origin);
+                destination = localStorage.setItem("destination", selectedRoute.destination);
+                console.log(`Found Selected Route: ${routeId}, Fetching Optimized Route...`);
                 drawRouteOnMap(selectedRoute.polyline);
             } else {
                 origin = localStorage.setItem("origin", selectedRoute.origin);
                 destination = localStorage.setItem("destination", selectedRoute.destination);
                 
-                console.log(`✅ Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
+                console.log(`Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
 
                 const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
                 const data = await response.json();
@@ -101,7 +103,6 @@
             }
 
             try {
-                console.log("🔄 Checking for notifications...");
                 const response = await fetch(`http://localhost:3000/api/get-notifications/${driverId}`);
 
                 if (!response.ok) {
@@ -111,33 +112,54 @@
                 const data = await response.json();
 
                 if (data.notifications.length > 0) {
-                    const latestNotification = data.notifications[data.notifications.length - 1];
 
-                    if (document.getElementById("notification-area").innerText !== latestNotification.message) {
-                        showNotification(latestNotification.message);
-                        document.getElementById("reroute-btn").style.display = "block";
+                    const ignoredCongestions = JSON.parse(localStorage.getItem("ignoredCongestions")) || [];
+
+                    const latestNotification = data.notifications.find(n => !ignoredCongestions.includes(n.cameraId));
+
+                    if (latestNotification) {
+                        showNotification(latestNotification.message, latestNotification.cameraId);
                     }
                 }
             } catch (error) {
-                console.error("🚨 Error fetching notifications:", error);
+                console.error("Error fetching notifications:", error);
             }
         }
 
-        function showNotification(message) {
+        function showNotification(message, cameraId) {
             const notificationArea = document.getElementById("notification-area");
-            if (message) {
-                notificationArea.innerText = message;
-                notificationArea.style.display = "block";
-            } else {
-                notificationArea.innerText = "";
-                notificationArea.style.display = "none";
+    
+            notificationArea.innerHTML = `
+                <p>${message}</p>
+                <button id="stay-route-btn">Stay on Route</button>
+                <button id="reroute-btn">Reroute</button>
+            `;
+            
+            document.getElementById("stay-route-btn").onclick = function () {
+                ignoreReroute(cameraId);
+            };
+
+            document.getElementById("reroute-btn").onclick = function () {
+                handleReroute();
+            };
+
+            notificationArea.style.display = "block";
+        }
+
+        function ignoreReroute(cameraId) {
+            console.log(`Ignoring reroute for congestion at Camera ${cameraId}`);
+
+            let ignoredCongestions = JSON.parse(localStorage.getItem("ignoredCongestions")) || [];
+            if (!ignoredCongestions.includes(cameraId)) {
+                ignoredCongestions.push(cameraId);
+                localStorage.setItem("ignoredCongestions", JSON.stringify(ignoredCongestions));
             }
+
+            document.getElementById("notification-area").style.display = "none";
         }
 
         async function handleReroute() {
-            console.log("🔍 Debugging Reroute...");
-            console.log("driverLocation:", driverLocation);
-            console.log("destination:", destination);
+            destination = localStorage.getItem("destination");
 
             try {
                 const response = await fetch("http://localhost:3000/api/accept-reroute", {
@@ -160,13 +182,12 @@
 
         async function updateDriverLocation(location, polyline) {
             const driverId = localStorage.getItem("driverId");
+            const routeId = localStorage.getItem("selectedRoute");
 
             if (!driverId) {
-                console.error("🚨 Error: driverId is undefined. Login might have failed.");
+                console.error("Error: driverId is undefined. Login might have failed.");
                 return;
             }
-
-            console.log(`📡 Updating driver location for driverId: ${driverId}, Location: ${location}, Polyline: ${polyline}`);
 
             try {
                 const response = await fetch("http://localhost:3000/api/update-driver", {
@@ -181,14 +202,31 @@
                 }
 
                 const data = await response.json();
-                console.log("✅ Driver location updated successfully:", data);
+                console.log("Driver location updated successfully:", data);
             } catch (error) {
-                console.error("🚨 Error updating driver location:", error);
+                console.error("Error updating driver location:", error);
             }
 
             
             localStorage.setItem("driverLocation", JSON.stringify(location));
             localStorage.setItem("polyline", polyline);
+        }
+
+        function updateDriverLocationOnClick(e) {
+            const { lat, lng } = e.latlng;
+
+            console.log(`New driver location selected: ${lat}, ${lng}`);
+
+            if (driverMarker) {
+                map.removeLayer(driverMarker);
+            }
+
+            driverMarker = L.marker([lat, lng]).addTo(map).bindPopup("Driver Location").openPopup();
+
+            driverLocation = [lat, lng];
+            localStorage.setItem("driverLocation", JSON.stringify(driverLocation));
+
+            updateDriverLocation(driverLocation);
         }
 
         
@@ -197,11 +235,11 @@
             const routeId = localStorage.getItem("selectedRoute");
 
             if (!driverId || !routeId) {
-                console.error("🚨 Missing driver ID or route ID.");
+                console.error("Missing driver ID or route ID.");
                 return;
             }
 
-            console.log("🚀 Starting Journey for Driver:", driverId, "Route:", routeId);
+            console.log("Starting Journey for Driver:", driverId, "Route:", routeId);
 
             try {
                 const response = await fetch("http://localhost:3000/api/start-journey", {
@@ -212,31 +250,29 @@
 
                 if (!response.ok) throw new Error("Failed to start journey");
 
-                setInterval(checkNotifications, 10000);
+                refreshIntervalId = setInterval(checkNotifications, 10000);
                 map.on("click", updateDriverLocationOnClick);
 
-                // Update UI
                 document.getElementById("start-journey-btn").innerText = "Journey Started";
                 document.getElementById("start-journey-btn").disabled = true;
                 document.getElementById("stop-journey-btn").style.display = "block"; 
 
                 localStorage.setItem("journeyStarted", "true");
             } catch (error) {
-                console.error("🚨 Error starting journey:", error);
+                console.error("Error starting journey:", error);
             }
         }
 
-        // 🚀 Stop Journey Function
         async function stopJourney() {
             const driverId = localStorage.getItem("driverId");
             const routeId = localStorage.getItem("selectedRoute");
 
             if (!driverId || !routeId) {
-                console.error("🚨 Missing driver ID or route ID.");
+                console.error("Missing driver ID or route ID.");
                 return;
             }
 
-            console.log("🛑 Stopping Journey for Driver:", driverId, "Route:", routeId);
+            console.log("Stopping Journey for Driver:", driverId, "Route:", routeId);
 
             try {
                 const response = await fetch("http://localhost:3000/api/stop-journey", {
@@ -248,7 +284,7 @@
                 if (!response.ok) throw new Error("Failed to stop journey");
 
                 // Disable notifications
-                clearInterval(checkNotifications);
+                clearInterval(refreshIntervalId);
                 map.off("click", updateDriverLocationOnClick);
 
                 // Reset UI
@@ -258,6 +294,8 @@
 
                 localStorage.removeItem("journeyStarted");
                 localStorage.removeItem("selectedRoute");
+
+                window.location.href = "route_selection.html";
             } catch (error) {
                 console.error("🚨 Error stopping journey:", error);
             }
@@ -277,11 +315,11 @@
                 const data = await response.json();
 
                 if (data.journey_started) {
-                    console.log("✅ Resuming Journey...");
+                    console.log("Resuming Journey...");
                     startJourney();
                 }
             } catch (error) {
-                console.error("🚨 Error checking journey status:", error);
+                console.error("Error checking journey status:", error);
             }
         };
 

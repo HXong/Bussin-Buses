@@ -27,7 +27,7 @@ function saveCameraData(cameras){
         image: cam.image,
         lat: cam.coordinates.latitude,
         lng: cam.coordinates.longitude,
-        timestamps: [] // Initialize empty timestamps for later updates
+        timestamps: []
     }));
 
     existingData.forEach(existing => {
@@ -38,7 +38,7 @@ function saveCameraData(cameras){
     });
 
     fs.writeFileSync(CONGESTION_FILE, JSON.stringify(updatedData, null, 2));
-    console.log(`🚦 Traffic camera data updated with ${updatedData.length} entries.`);
+    console.log(`Traffic camera data updated with ${updatedData.length} entries.`);
 }
 
 async function downloadImage(url, filename) {
@@ -141,15 +141,12 @@ async function processTrafficData() {
 
         const filePath = await downloadImage(cam.image, filename);
 
-        if (filePath) {
-            console.log(`Downloaded: ${filePath}`);
-        } else {
+        if (!filePath) {
             console.log(`Failed to download: ${cam.image}`);
-        }
+        } 
     });
 
     await Promise.all(downloadPromises);
-    console.log("All images downloaded successfully.");
 
     return true;
 }

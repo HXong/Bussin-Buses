@@ -70,7 +70,6 @@ async function countCars(imagePath){ //cameraId) { to be included
                         });
                     }
 
-                    console.log("⚡ Calling `updateCongestionData()` for Camera:", cameraId);
                     updateCongestionData(congestionData, cameraId, result.congestion_level);
 
                     //update supabase
@@ -112,7 +111,6 @@ async function countCars(imagePath){ //cameraId) { to be included
 // }
 
 async function analyzeTraffic() {
-    console.log("Starting traffic analysis...");
 
     const files = fs.readdirSync(IMAGES_DIR).filter(file => file.endsWith(".jpg"));
     if (files.length === 0) {
@@ -137,14 +135,6 @@ async function analyzeTraffic() {
             const file = queue.shift();
             const filePath = path.join(IMAGES_DIR, file);
 
-            //retrieve camera ID from image URL
-            // const cameraId = cameraMap.get(filePath);
-
-            // if (!cameraId) {
-            //     console.error(`Camera ID not found for ${file}`);
-            //     continue;
-            // }
-
             const processPromise = countCars(filePath) //cameraId) to be included
                 .catch(error => {
                     console.error(`Error processing ${file}: ${error.message}`);
@@ -159,21 +149,10 @@ async function analyzeTraffic() {
     }
     console.log("Traffic analysis completed.");
     return true;
-    
-    // for (const file of files) { 
-    //     const filePath = path.join(IMAGES_DIR, file);
-
-    //     try {
-    //         const result = await countCars(filePath);
-    //         console.log(`Processed ${file} → Vehicles: ${result.vehicle}, Congestion: ${result.congestion_level}`);
-    //     } catch (error) {
-    //         console.error(`Error processing ${file}: ${error.message}`);
-    //     }
-    // }
 }
 
 function updateCongestionData(data, cameraId, congestionLevel) {
-    const timestamp = getTime();
+    const timestamp = getSGTime();
     const entry = data.find(cam => cam.id === cameraId);
 
     if (!entry) {
@@ -191,25 +170,12 @@ function updateCongestionData(data, cameraId, congestionLevel) {
 
     try {
         fs.writeFileSync(CONGESTION_FILE, JSON.stringify(data, null, 2));
-        console.log("Congestion data successfully updated in file.");
     } catch (error) {
         console.error("Error writing to JSON file:", error.message);
     }
 }
 
-function getLatestCongestionLevel(cameraId) {
-    if (!fs.existsSync(CONGESTION_FILE)) return "unknown";
-
-    const data = JSON.parse(fs.readFileSync(CONGESTION_FILE));
-    const entry = data.find(cam => cam.id === cameraId);
-
-    if (entry && entry.timestamps.length > 0) {
-        return entry.timestamps[entry.timestamps.length - 1].congestion_level;
-    }
-    return "unknown";
-}
-
-function getTime(){
+function getSGTime(){
     const options = {
         year: 'numeric',
         month: '2-digit',
@@ -224,7 +190,7 @@ function getTime(){
 }
 
 
-module.exports = { analyzeTraffic, getTime};
+module.exports = { analyzeTraffic };
 if (require.main === module) {
     console.log("TrafficDataProcessor.js is running as a script.");
     analyzeTraffic();

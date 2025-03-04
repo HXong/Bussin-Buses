@@ -4,7 +4,6 @@ const axios = require('axios');
 const { decode } = require('@here/flexpolyline');
 
 const { getRoutesNearCamera, getNearestRoutePoint } = require('./routeHandler');
-const getTime = require('./TrafficDataProcessor');
 
 const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 
@@ -25,17 +24,16 @@ function getAffectedDrivers(cameraData) {
     let affectedDrivers = [];
 
     activeDrivers.forEach(driver => {
-        if (!driver.polyline) return; // Skip if no route available
+        if (!driver.onRoute) return; 
 
-        const decodedRoute = decode(driver.polyline).polyline;
+        let route = driver.scheduled_route.find(r => r.journey_started === true);
+
+        const decodedRoute = decode(route.polyline).polyline;
         console.log("Checking route against camera:", cameraData);
 
         if (getRoutesNearCamera(decodedRoute, cameraData)) {
-            console.log("Enter getRouteNearCamera");
             const driverNearestIndex = getNearestRoutePoint(decodedRoute, driver.currentLocation);
             const congestionNearestIndex = getNearestRoutePoint(decodedRoute, [cameraData.lat, cameraData.lng]);
-            console.log("driver Index: ", driverNearestIndex, "congestion Index: ", congestionNearestIndex);
-
             if (driverNearestIndex < congestionNearestIndex) {
                 affectedDrivers.push(driver);
             }
@@ -46,7 +44,7 @@ function getAffectedDrivers(cameraData) {
 
 
 function sendNotification(affectedDrivers, cameraId) {
-    const now = Date.now();
+    const now = getSGTime();
     if (!Array.isArray(affectedDrivers)) {
         console.error('affectedDrivers is not an array:', affectedDrivers);
         return;
@@ -62,15 +60,13 @@ function sendNotification(affectedDrivers, cameraId) {
         //Check if driver was notified about this camera within the last 5 minutes
         const recentNotifications = driverNotifications[driverId].filter(notification =>
             notification.cameraId === cameraId &&
-            (now - new Date(notification.timestamp).getTime()) < 5 * 60 * 1000 
+            (now - notification.timestamp) < 5 * 60 * 1000 
         );
 
         if (recentNotifications.length > 0) {
             console.log(`Skipping duplicate notification for Driver ${driverId} (Camera ${cameraId})`);
             return;
         }
-
-        console.log(`📩 Sending notification to Driver ${driverId} (Camera ${cameraId})`);
 
         axios.post('http://localhost:3000/api/notify-driver', {
             driver_id: driverId,
@@ -81,7 +77,7 @@ function sendNotification(affectedDrivers, cameraId) {
             driverNotifications[driverId].push({ 
                 message: `🚦 High congestion detected ahead!`, 
                 cameraId, 
-                timestamp: getTime()
+                timestamp: getSGTime()
             });
 
             //
@@ -92,9 +88,21 @@ function sendNotification(affectedDrivers, cameraId) {
         }).catch(error => {
             console.error(`Failed to notify Driver ${driverId}:`, error.message);
         });
-
-        console.log("✅ Notification sent without modifying session.");
     });
+}
+
+function getSGTime(){
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      };
+
+    return new Date().toLocaleString('en-SG', options);
 }
 
 module.exports = { getAffectedDrivers, sendNotification };

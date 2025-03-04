@@ -9,8 +9,6 @@ const HERE_API = process.env.HERE_API_KEY;
 //fetching optimised routes from API call
 async function getOptimisedRoute(origin, destination, avoidCongestion = true){
     let avoidAreasQuery = "";
-    console.log("origin: ", origin);
-    console.log("destination: ", destination);
 
     if(avoidCongestion){
         const congestionAreas = getCongestionAreas();
@@ -21,8 +19,6 @@ async function getOptimisedRoute(origin, destination, avoidCongestion = true){
     }
 
     const url = `https://router.hereapi.com/v8/routes?&origin=${origin}${avoidAreasQuery}&destination=${destination}&transportMode=car&return=polyline&apikey=${HERE_API}`;
-
-    console.log("Fetching routes: ", url);
 
     try{
         const response = await axios.get(url);
@@ -77,10 +73,10 @@ function getRoutesNearCamera(routes, cameraData) {
         const routeLine = turf.lineString(formattedRoute); 
         const distance = turf.pointToLineDistance(cameraPoint, routeLine, { units: 'meters' });
 
-        console.log(`📏 Distance from Camera ${cameraData.id} to Route: ${distance} meters`);
+        console.log(`Distance from Camera ${cameraData.id} to Route: ${distance} meters`);
         return distance <= 100;
     } catch (error) {
-        console.error("❌ Error processing route:", formattedRoute, error);
+        console.error("Error processing route:", formattedRoute, error);
         return false;
     }
 }
@@ -98,7 +94,6 @@ function getNearestRoutePoint(routeCoordinates, driverLocation) {
             nearestIndex = index;
         }
     });
-    console.log(nearestIndex);
     return nearestIndex;
 }
 

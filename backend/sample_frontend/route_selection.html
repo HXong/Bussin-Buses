@@ -17,6 +17,11 @@
             const driverId = localStorage.getItem("driverId");
             const response = await fetch(`http://localhost:3000/api/scheduled-routes/${driverId}`);
             const data = await response.json();
+
+            if (!data || !Array.isArray(data.scheduled_route)) {
+                console.warn("No scheduled routes found.");
+                return;
+            }
             
             const routeSelection = document.getElementById("route-selection");
             routeSelection.innerHTML = "";

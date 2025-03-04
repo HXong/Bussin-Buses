@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { getOptimisedRoute } = require('./src/services/routeHandler');
+const { getOptimisedRoute } = require('../services/routeHandler');
 const fs = require('fs');
 const path = require('path');
 
@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 app.use(cors())
 app.use(express.json());
 
-const DRIVERS_FILE = path.join(__dirname, './active_drivers.json');
+const DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 let activeDrivers = JSON.parse(fs.readFileSync(DRIVERS_FILE, 'utf8'));
 let active_sessions = {};
 let driverNotifications = {};
@@ -38,20 +38,19 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/scheduled-routes/:driverId', (req, res) => {
   const driverId = req.params.driverId;
-  const driver = activeDrivers.find(d => d.driverId === driverId);
+  const driver = activeDrivers.find(d => d.driver_id === driverId);
 
   if (!driver) {
     return res.status(401).json({ error: "Invalid username or password" });
   }
 
   res.json({
-    driver
+    scheduled_route: driver.scheduled_route || []
   });
 });
 
 app.post('/api/update-driver', (req, res) => {
   const { driver_id, route_id, currentLocation, polyline } = req.body;
-  console.log(`Received update request for Driver ${driver_id}, Route ${route_id}`);
 
   let driver = activeDrivers.find(d => d.driver_id === driver_id);
 
@@ -126,6 +125,7 @@ app.post('/api/start-journey', (req, res) => {
   const { driver_id, route_id } = req.body;
   let driver = activeDrivers.find(d => d.driver_id === driver_id);
   if (!driver) return res.status(404).json({ error: "Driver not found" });
+  driver.onRoute = true;
 
   let route = driver.scheduled_route.find(r => r.route_id === route_id);
   if (!route) return res.status(404).json({ error: "Route not found" });
@@ -141,8 +141,10 @@ app.post('/api/stop-journey', (req, res) => {
   const { driver_id, route_id } = req.body;
   let driver = activeDrivers.find(d => d.driver_id === driver_id);
   if (!driver) return res.status(404).json({ error: "Driver not found" });
+  driver.onRoute = false;
 
   driver.scheduled_route = driver.scheduled_route.filter(route => route.route_id !== route_id);
+  driverNotifications[driver_id] = [];
   saveActiveDrivers();
   res.json({ message: "Journey stopped" });
 
@@ -216,15 +218,19 @@ app.post('/api/notify-driver', (req, res) => {
       return res.status(400).json({ error: "Missing notification parameters (driver_id, message, cameraId required)." });
   }
 
-  console.log(`📩 Notification received for Driver ${driver_id}: ${message}`);
+  console.log(`Notification received for Driver ${driver_id}: ${message}`);
 
   if (!driverNotifications[driver_id]) {
       driverNotifications[driver_id] = [];
   }
 
-  driverNotifications[driver_id].push({ message, cameraId, timestamp: new Date().toISOString() });
-
-  res.json({ success: true });
+  const existingNotification = driverNotifications[driver_id].find(n => n.cameraId === cameraId);
+  if (!existingNotification) {
+      driverNotifications[driver_id].push({ message, cameraId, timestamp: new Date().toISOString() });
+      res.json({ success: true, message: "Notification added" });
+  } else {
+      res.json({ success: false, message: "Notification already exists for this camera" });
+  }
 });
 
 // API to Fetch Notifications for a Driver (For Frontend)
@@ -233,12 +239,10 @@ app.get('/api/get-notifications/:driverId', (req, res) => {
   const notifications = driverNotifications[driverId] || [];
 
   if (notifications.length > 0) {
-      // Clear notifications after sending them
-      delete driverNotifications[driverId];
-      return res.json({ notifications });
+    res.json({ notifications });  
+  } else {
+    res.json({ notifications: [] });
   }
-
-  res.json({ notifications: [] });
 });
 
 app.listen(port, () => {

@@ -14,8 +14,6 @@ async function fetchTrafficCameras() {
         const response = await axios.get(API_URL);
         const cameras = response.data.items[0].cameras;
 
-        console.log(`✅ Retrieved ${cameras.length} cameras.`);
-
         //For uploading to Supabase
         // for (const cam of cameras) {
         //     const { camera_id, image, location } = cam;
