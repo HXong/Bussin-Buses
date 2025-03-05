@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePageCommuter extends StatefulWidget {
+  const HomePageCommuter({super.key});
+
   @override
   State<HomePageCommuter> createState() => _HomePageCommuterState();
 }
@@ -27,11 +29,11 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
     }
   }
 
-  final List<Widget> widgetOptions = const <Widget>[
-    HomeNav(),
+  final List<Widget> widgetOptions = <Widget>[
+    const HomeNav(),
     BookingNav(),
     TicketNav(),
-    AccountNav(),
+    const AccountNav(),
   ];
 
   @override
