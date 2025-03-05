@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 class RideNav extends StatefulWidget {
@@ -13,9 +15,25 @@ class _RideNavState extends State<RideNav> {
   final mapController = MapController();
   final options = MapOptions(
     initialCenter: LatLng(1.3521, 103.8198),
-    initialZoom: 13.0
+    initialZoom: 16.0
 
   );
+  LocationPermission? _permission;
+
+  Future<void> _checkPermission() async {
+    _permission = await Geolocator.checkPermission();
+
+    // Request permission if initially denied
+    if (_permission == LocationPermission.denied) {
+      _permission = await Geolocator.requestPermission();
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +46,13 @@ class _RideNavState extends State<RideNav> {
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.example.app',
               maxZoom: 19,
-            )
+            ),
+            CurrentLocationLayer(
+              alignPositionOnUpdate: AlignOnUpdate.always,
+            ),
+
           ]),
+
 
     );
   }
