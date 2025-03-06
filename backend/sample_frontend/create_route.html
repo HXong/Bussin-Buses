@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Route</title>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
@@ -27,7 +25,7 @@
     </div>
 
     <script>
-        let map, origin, destination, polylineLayer, encodedPolyline, driverId;
+        let map, origin, destination, polylineLayer, decodedPolyline, driverId;
         let markers = [];
 
         async function loadMap() {
@@ -73,7 +71,7 @@
 
                 if (data.polyline) {
                     encodedPolyline = data.polyline;
-                    drawRouteOnMap(encodedPolyline);
+                    drawRouteOnMap(data.decodedRoute);
                     document.getElementById("confirm-route-btn").style.display = "block";
                 } else {
                     alert("No route found!");
@@ -83,18 +81,15 @@
             }
         }
 
-        function drawRouteOnMap(encodedPolyline) {
+        function drawRouteOnMap(decodedPolyline) {
             if (polylineLayer) {
                 map.removeLayer(polylineLayer);
             }
 
-            const decoded = H.geo.LineString.fromFlexiblePolyline(encodedPolyline);
-            const coords = decoded.getLatLngAltArray();
             const leafletCoords = [];
-
-            for (let i = 0; i < coords.length; i += 3) {
-                leafletCoords.push([coords[i], coords[i + 1]]);
-            }
+            decodedPolyline.forEach(coord => {
+                leafletCoords.push([coord[0], coord[1]]);
+            });
 
             polylineLayer = L.polyline(leafletCoords, { color: 'blue', weight: 5 }).addTo(map);
             map.fitBounds(L.latLngBounds(leafletCoords));

@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const turf = require('@turf/turf');
+require('dotenv').config();
 
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
 const HERE_API = process.env.HERE_API_KEY;

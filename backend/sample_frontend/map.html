@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Driver Map</title>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
-    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
@@ -51,12 +49,14 @@
             const routeData = await route.json();
 
             const selectedRoute = routeData.scheduled_route.find(route => route.route_id === routeId);
+            const decodedPolyline = await fetch(`http://localhost:3000/api/decode-route?encodedPolyline=${selectedRoute.polyline}`);
+            const decodedRoute = await decodedPolyline.json();
 
-            if(selectedRoute.polyline){
+            if(decodedRoute.decodedRoute){
                 origin = localStorage.setItem("origin", selectedRoute.origin);
                 destination = localStorage.setItem("destination", selectedRoute.destination);
                 console.log(`Found Selected Route: ${routeId}, Fetching Optimized Route...`);
-                drawRouteOnMap(selectedRoute.polyline);
+                drawRouteOnMap(decodedRoute.decodedRoute);
             } else {
                 origin = localStorage.setItem("origin", selectedRoute.origin);
                 destination = localStorage.setItem("destination", selectedRoute.destination);
@@ -67,22 +67,20 @@
                 const data = await response.json();
 
                 
-                if (data.polyline) {
-                    drawRouteOnMap(data.polyline);
+                if (data.decodedRoute) {
+                    drawRouteOnMap(data.decodedRoute);
                 }  else {
                     console.warn("No polyline returned for this route.");
                 }
             }
         }
 
-        function drawRouteOnMap(encodedPolyline) {
+        function drawRouteOnMap(decodedPolyline) {
             try {
-                const decoded = H.geo.LineString.fromFlexiblePolyline(encodedPolyline);
-                const coords = decoded.getLatLngAltArray();
                 const leafletCoords = [];
-                for (let i = 0; i < coords.length; i += 3) {
-                    leafletCoords.push([coords[i], coords[i + 1]]);
-                }
+                decodedPolyline.forEach(coord => {
+                    leafletCoords.push([coord[0], coord[1]]);
+                });
 
                 if (routePolyline) {
                     map.removeLayer(routePolyline);
@@ -162,15 +160,10 @@
             destination = localStorage.getItem("destination");
 
             try {
-                const response = await fetch("http://localhost:3000/api/accept-reroute", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ origin: driverLocation, destination: destination })
-                });
-
+                const response = await fetch(`http://localhost:3000/api/get-route?origin=${driverLocation}&destination=${destination}`);
                 const data = await response.json();
-                if (data.polyline) {
-                    drawRouteOnMap(data.polyline);
+                if (data.decodedRoute) {
+                    drawRouteOnMap(data.decodedRoute);
                     await updateDriverLocation(driverLocation, data.polyline);
                     showNotification("New optimized route applied!");
                     document.getElementById("reroute-btn").style.display = "none";

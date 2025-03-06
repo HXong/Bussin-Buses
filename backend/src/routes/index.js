@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { getOptimisedRoute } = require('../services/routeHandler');
 const fs = require('fs');
 const path = require('path');
+const { decode } = require('@here/flexpolyline');
+const { getOptimisedRoute } = require('../services/routeHandler');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,6 +19,16 @@ let driverNotifications = {};
 
 function saveActiveDrivers() {
   fs.writeFileSync(DRIVERS_FILE, JSON.stringify(activeDrivers, null, 2));
+}
+
+function decodeRoute(encodedPolyline){
+  try {
+    const decoded = decode(encodedPolyline).polyline; 
+    return decoded;
+  } catch (error) {
+      console.error("Error decoding route:", error.message);
+      return null;
+  }
 }
 
 app.post('/api/login', (req, res) => {
@@ -36,17 +47,15 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-app.get('/api/scheduled-routes/:driverId', (req, res) => {
-  const driverId = req.params.driverId;
-  const driver = activeDrivers.find(d => d.driver_id === driverId);
-
-  if (!driver) {
-    return res.status(401).json({ error: "Invalid username or password" });
+app.post('/api/logout', (req, res) => {
+  const { driver_id } = req.body;
+  
+  if (active_sessions[driver_id]) {
+      delete active_sessions[driver_id];
+      return res.json({ message: "Logout successful" });
   }
 
-  res.json({
-    scheduled_route: driver.scheduled_route || []
-  });
+  res.status(400).json({ error: "Driver not logged in" });
 });
 
 app.post('/api/update-driver', (req, res) => {
@@ -70,17 +79,6 @@ app.post('/api/update-driver', (req, res) => {
   saveActiveDrivers();
 
   res.json({ message: "Driver location updated", driver });
-});
-
-app.post('/api/logout', (req, res) => {
-  const { driver_id } = req.body;
-  
-  if (active_sessions[driver_id]) {
-      delete active_sessions[driver_id];
-      return res.json({ message: "Logout successful" });
-  }
-
-  res.status(400).json({ error: "Driver not logged in" });
 });
 
 app.get('/api/get-next-route-id', (req, res) => {
@@ -117,6 +115,64 @@ app.post('/api/add-route', (req, res) => {
   saveActiveDrivers();
 
   res.json({ message: "Route added successfully", route });
+});
+
+//find all scheduled routes of driver
+app.get('/api/scheduled-routes/:driverId', (req, res) => {
+  const driverId = req.params.driverId;
+  const driver = activeDrivers.find(d => d.driver_id === driverId);
+
+  if (!driver) {
+    return res.status(401).json({ error: "Invalid username or password" });
+  }
+
+  res.json({
+    scheduled_route: driver.scheduled_route || []
+  });
+});
+
+//forming of polyline and coordinates for defined routes
+app.get('/api/get-route', async(req, res) => {
+
+  try{
+    const { origin, destination } = req.query;
+
+    if (!origin || !destination) {
+        return res.status(400).json({ error: "Missing parameters: origin, destination required." });
+    }
+
+    const polyline = await getOptimisedRoute(origin, destination);
+    if (!polyline) {
+        return res.status(404).json({ error: "No route found." });
+    }
+
+    const decodedRoute = decodeRoute(polyline);
+
+    res.json({
+        polyline: polyline,
+        decodedRoute: decodedRoute
+    });
+
+  } catch (error){
+    res.status(500).json({ error: 'Error fetching route data', details: error.message });
+  }
+});
+
+app.get('/api/decode-route', async(req, res) => {
+
+  try{
+    const { encodedPolyline } = req.query;
+
+    const decodedRoute = decodeRoute(encodedPolyline);
+
+    res.json({
+      decodedRoute: decodedRoute
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching route data', details: error.message });
+  }
+
 });
 
 
@@ -164,50 +220,6 @@ app.get('/api/check-journey/:driver_id/:route_id', (req, res) => {
 
   res.json({ journey_started: route.journey_started });
 
-});
-
-app.get('/api/get-route', async(req, res) => {
-
-  try{
-    const { origin, destination } = req.query;
-
-    if (!origin || !destination) {
-        return res.status(400).json({ error: "Missing parameters: origin, destination required." });
-    }
-
-    const polyline = await getOptimisedRoute(origin, destination);
-    if (!polyline) {
-        return res.status(404).json({ error: "No route found." });
-    }
-
-    res.json({
-        polyline: polyline
-    });
-
-  } catch (error){
-    res.status(500).json({ error: 'Error fetching route data', details: error.message });
-  }
-});
-
-app.post('/api/accept-reroute', async (req, res) => {
-  try {
-      const { origin, destination } = req.body;
-
-      if (!origin || !destination) {
-          return res.status(400).json({ error: "Missing parameters: origin and destination required." });
-      }
-
-      const optimizedRoute = await getOptimisedRoute(origin, destination, true);
-      if (!optimizedRoute) {
-          return res.status(404).json({ error: "No optimized route found." });
-      }
-
-      res.json({ polyline: optimizedRoute });
-
-  } catch (error) {
-      console.error("Error fetching optimized route:", error.message);
-      res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
 });
 
 // API to Receive Notifications and Store them
