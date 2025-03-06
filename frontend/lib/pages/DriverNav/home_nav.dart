@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class HomeNav extends StatefulWidget {
   const HomeNav({super.key});
 
@@ -37,7 +38,7 @@ class _HomeNavState extends State<HomeNav> {
             'start_time': '08:30',
             'end_time': '09:45',
             'duration': '1h 15mins',
-            'pickup': 'Changi Airport',
+            'pickup': 'NTU',
             'destination': 'Downtown MRT',
           },
           {
@@ -45,7 +46,7 @@ class _HomeNavState extends State<HomeNav> {
             'start_time': '10:00',
             'end_time': '11:15',
             'duration': '1h 15mins',
-            'pickup': 'Woodlands MRT',
+            'pickup': 'NTU',
             'destination': 'Jurong East',
           },
         ];
