@@ -39,7 +39,7 @@ class _HomePageDriverState extends State<HomePageDriver> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Welcome Back Bob"),
+        title: const Text("Welcome Driver"),
         actions: [
           GestureDetector(
             onTap: () {
@@ -87,4 +87,3 @@ class _HomePageDriverState extends State<HomePageDriver> {
     );
   }
 }
-
