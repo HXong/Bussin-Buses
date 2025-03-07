@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';  // Import Supabase package
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ScheduleNav extends StatefulWidget {
   const ScheduleNav({super.key});
@@ -9,58 +9,100 @@ class ScheduleNav extends StatefulWidget {
 }
 
 class _ScheduleNavState extends State<ScheduleNav> {
-  final TextEditingController _pickupPointController = TextEditingController();
-  final TextEditingController _destinationController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+
+  List<String> _locations = []; // List to hold location names
+  String? _selectedPickup; // Variable to hold the selected pickup point
+  String? _selectedDestination; // Variable to hold the selected destination
 
   @override
   void initState() {
     super.initState();
+    _fetchLocations(); // Fetch locations when the widget is initialized
   }
 
-  // Function to handle form submission
+  // Function to fetch locations from Supabase
+  Future<void> _fetchLocations() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('location')
+          .select('location_name');
+
+      setState(() {
+        _locations = response.map<String>((row) => row['location_name'] as String).toList();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching locations: $e")),
+      );
+    }
+  }
+
+  Future<int?> _getLocationIdByName(String locationName) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('location')
+          .select('location_id')
+          .eq('location_name', locationName)
+          .single();
+
+      if (response != null) {
+        return response['location_id'];
+      }
+      return null;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching location ID: $e')),
+      );
+      return null; // Return null if an error occurs
+    }
+  }
+
+// submitForm function to store the response
   Future<void> _submitForm() async {
-    final pickupPoint = _pickupPointController.text;
-    final destination = _destinationController.text;
+    final pickupPoint = _selectedPickup;
+    final destination = _selectedDestination;
     final date = _dateController.text;
     final time = _timeController.text;
 
-    if (pickupPoint.isEmpty || destination.isEmpty || date.isEmpty || time.isEmpty) {
+    // Check if any of the fields are empty or null
+    if (pickupPoint == null || destination == null || date.isEmpty || time.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill in all fields.")),
       );
       return;
     }
 
-    // Date validation: Check if the date is in the correct format (YYYY-MM-DD)
+    // Validate date format (yyyy-MM-dd)
     if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid date format. Please use YYYY-MM-DD.")),
+        const SnackBar(content: Text("Invalid date format. Use yyyy-MM-dd.")),
       );
       return;
     }
 
-    // Date range validation: Check if the entered date is not in the past
-    final enteredDate = DateTime.tryParse(date);
-    final today = DateTime.now();
-    if (enteredDate == null || enteredDate.isBefore(today)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Date must be today or later.")),
-      );
-      return;
-    }
-
-    // Time validation: Check if the time is in the correct format (HH:MM)
+    // Validate time format (HH:mm)
     if (!RegExp(r'^\d{2}:\d{2}$').hasMatch(time)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid time format. Please use HH:MM.")),
+        const SnackBar(content: Text("Invalid time format. Use HH:mm.")),
+      );
+      return;
+    }
+
+    // Fetch the IDs for the selected pickup and destination
+    final pickupId = await _getLocationIdByName(pickupPoint);
+    final destinationId = await _getLocationIdByName(destination);
+
+    // Check if the IDs are found
+    if (pickupId == null || destinationId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error fetching location IDs.")),
       );
       return;
     }
 
     try {
-      // Get the current authenticated user ID
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,25 +111,25 @@ class _ScheduleNavState extends State<ScheduleNav> {
         return;
       }
 
-      // Insert the schedule into the Supabase database with the user ID
       final response = await Supabase.instance.client.from('schedules').insert({
-        'pickup': pickupPoint,
-        'destination': destination,
+        'pickup': pickupId, // Store the location ID for pickup
+        'destination': destinationId, // Store the location ID for destination
         'date': date,
         'time': time,
-        'id': userId,
+        'driver_id': userId,
       }).select();
 
-      // Show a success message after successfully adding the schedule
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Journey added successfully!")),
       );
 
-      // Clear the text fields after submission
-      _pickupPointController.clear();
-      _destinationController.clear();
+      // Clear all fields after successful submission
       _dateController.clear();
       _timeController.clear();
+      setState(() {
+        _selectedPickup = null;
+        _selectedDestination = null;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding journey: $e')),
@@ -116,72 +158,113 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 ),
               ),
               const SizedBox(height: 30),
-              Padding(
+
+              // Pick-Up Point Dropdown with Downward Arrow
+              _locations.isEmpty
+                  ? const CircularProgressIndicator()
+                  : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: TextField(
-                  controller: _pickupPointController,
+                child: DropdownButtonFormField<String>(
+                  value: _selectedPickup,
+                  items: _locations.map((location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(location),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedPickup = value;
+                    });
+                  },
                   decoration: InputDecoration(
                     labelText: "Pick-Up Point",
                     filled: true,
                     fillColor: Colors.grey[400],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
-              Padding(
+
+              // Destination Dropdown with Downward Arrow
+              _locations.isEmpty
+                  ? const CircularProgressIndicator()
+                  : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: TextField(
-                  controller: _destinationController,
+                child: DropdownButtonFormField<String>(
+                  value: _selectedDestination,
+                  items: _locations.map((location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(location),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedDestination = value;
+                    });
+                  },
                   decoration: InputDecoration(
                     labelText: "Destination",
                     filled: true,
                     fillColor: Colors.grey[400],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              // Date Input
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
-                    labelText: "Date (YYYY-MM-DD)",
+                    labelText: "Date",
                     filled: true,
                     fillColor: Colors.grey[400],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              // Time Input
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: TextField(
                   controller: _timeController,
                   decoration: InputDecoration(
-                    labelText: "Time (HH:MM)",
+                    labelText: "Time",
                     filled: true,
                     fillColor: Colors.grey[400],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: const Text(
-                    "Add Journey",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // Submit Button
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: const Text("Add Journey"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
               ),
