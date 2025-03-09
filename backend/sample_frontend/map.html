@@ -49,30 +49,11 @@
             const routeData = await route.json();
 
             const selectedRoute = routeData.scheduled_route.find(route => route.route_id === routeId);
-            const decodedPolyline = await fetch(`http://localhost:3000/api/decode-route?encodedPolyline=${selectedRoute.polyline}`);
-            const decodedRoute = await decodedPolyline.json();
-
-            if(decodedRoute.decodedRoute){
-                origin = localStorage.setItem("origin", selectedRoute.origin);
-                destination = localStorage.setItem("destination", selectedRoute.destination);
-                console.log(`Found Selected Route: ${routeId}, Fetching Optimized Route...`);
-                drawRouteOnMap(decodedRoute.decodedRoute);
-            } else {
-                origin = localStorage.setItem("origin", selectedRoute.origin);
-                destination = localStorage.setItem("destination", selectedRoute.destination);
-                
-                console.log(`Found Selected Route: ${selectedRouteId}, Fetching Optimized Route...`);
-
-                const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
-                const data = await response.json();
-
-                
-                if (data.decodedRoute) {
-                    drawRouteOnMap(data.decodedRoute);
-                }  else {
-                    console.warn("No polyline returned for this route.");
-                }
-            }
+            origin = localStorage.setItem("origin", selectedRoute.origin);
+            destination = localStorage.setItem("destination", selectedRoute.destination);
+            console.log(`Found Selected Route: ${routeId}, Fetching Optimized Route...`);
+            // const decodedPolyline = await fetch(`http://localhost:3000/api/decode-route?encodedPolyline=${selectedRoute.polyline}`);
+            // const decodedRoute = await decodedPolyline.json();
         }
 
         function drawRouteOnMap(decodedPolyline) {
@@ -240,8 +221,14 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ driver_id: driverId, route_id: routeId })
                 });
+                const data = await response.json();
 
-                if (!response.ok) throw new Error("Failed to start journey");
+                if (data.decodedRoute){
+                    drawRouteOnMap(data.decodedRoute);
+                    //store response.polyline in session
+                } else {
+                    console.log("failed to retrieve route");
+                }
 
                 refreshIntervalId = setInterval(checkNotifications, 10000);
                 map.on("click", updateDriverLocationOnClick);

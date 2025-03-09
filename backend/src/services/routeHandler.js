@@ -19,6 +19,9 @@ async function getOptimisedRoute(origin, destination, avoidCongestion = true){
         console.log(avoidAreasQuery);
     }
 
+    console.log(origin);
+    console.log(destination);
+
     const url = `https://router.hereapi.com/v8/routes?&origin=${origin}${avoidAreasQuery}&destination=${destination}&transportMode=car&return=polyline&apikey=${HERE_API}`;
 
     try{

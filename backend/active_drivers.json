@@ -1,13 +1,1 @@
-[
-  {
-    "driver_id": "D001",
-    "username": "driver1",
-    "password": "password123",
-    "currentLocation": [
-      1.337320508968384,
-      103.94324062818384
-    ],
-    "onRoute": false,
-    "scheduled_route": []
-  }
-]
+[]

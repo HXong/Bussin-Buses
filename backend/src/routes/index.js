@@ -4,7 +4,10 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { decode } = require('@here/flexpolyline');
+const { supabase } = require('../config/supabaseClient');
 const { getOptimisedRoute } = require('../services/routeHandler');
+
+const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,13 +15,13 @@ const port = process.env.PORT || 3000;
 app.use(cors())
 app.use(express.json());
 
-const DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
-let activeDrivers = JSON.parse(fs.readFileSync(DRIVERS_FILE, 'utf8'));
-let active_sessions = {};
-let driverNotifications = {};
+function loadActiveDrivers() {
+  if (!fs.existsSync(ACTIVE_DRIVERS_FILE)) return [];
+  return JSON.parse(fs.readFileSync(ACTIVE_DRIVERS_FILE, 'utf8'));
+}
 
-function saveActiveDrivers() {
-  fs.writeFileSync(DRIVERS_FILE, JSON.stringify(activeDrivers, null, 2));
+function saveActiveDrivers(activeDrivers) {
+  fs.writeFileSync(ACTIVE_DRIVERS_FILE, JSON.stringify(activeDrivers, null, 2));
 }
 
 function decodeRoute(encodedPolyline){
@@ -31,6 +34,30 @@ function decodeRoute(encodedPolyline){
   }
 }
 
+async function getNextScheduleID() {
+  const { data: schedules, error } = await supabase
+      .from('schedules')
+      .select('schedule_id')
+      .order('schedule_id', { ascending: true });
+
+  if (error) {
+      console.error("Error fetching schedules:", error.message);
+      return null;
+  }
+
+  if (!schedules || schedules.length === 0) return 1;
+
+  let nextID = 1;
+  for (const row of schedules) {
+      if (row.schedule_id !== nextID) {
+          return nextID; 
+      }
+      nextID++;
+  }
+  return nextID; 
+}
+
+/*
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const driver = activeDrivers.find(d => d.username === username && d.password === password);
@@ -80,7 +107,9 @@ app.post('/api/update-driver', (req, res) => {
 
   res.json({ message: "Driver location updated", driver });
 });
+*/
 
+/*
 app.get('/api/get-next-route-id', (req, res) => {
   const driverId = req.query.driver_id;
   const driver = activeDrivers.find(d => d.driver_id === driverId);
@@ -102,22 +131,76 @@ app.get('/api/get-next-route-id', (req, res) => {
 
   res.json({ next_route_id: `R${nextId.toString().padStart(3, '0')}` });
 });
+*/
 
-app.post('/api/add-route', (req, res) => {
-  const { driver_id, route } = req.body;
+/*
+app.post('/api/confirm-route', (req, res) => {
+  const { driver_id, origin, destination } = req.body;
   const driver = activeDrivers.find(d => d.driver_id === driver_id);
 
   if (!driver) {
       return res.status(404).json({ error: "Driver not found" });
   }
 
-  driver.scheduled_route.push(route);
+  const routeId = getNextRouteID(driver_id);
+
+  const newRoute = {
+    route_id: routeId,
+    origin: origin,
+    destination: destination,
+    journey_started: false
+  };
+
+  driver.scheduled_route.push(newRoute);
   saveActiveDrivers();
 
-  res.json({ message: "Route added successfully", route });
+  res.json({ message: "Route added successfully", newRoute });
+});
+*/
+
+app.post('/api/confirm-route', async (req, res) => {
+  try {
+      const { driver_id, pickup, destination, date, time } = req.body;
+
+      if (!driver_id || !pickup || !destination) {
+          return res.status(400).json({ error: "Missing required fields: driver_id, origin, destination" });
+      }
+
+      const schedule_id = await getNextScheduleID();
+
+      const { error: scheduleError } = await supabase
+          .from('schedules')
+          .insert([
+              {
+                  schedule_id,
+                  driver_id,
+                  pickup,
+                  destination,
+                  date,
+                  time
+              }
+          ]);
+
+      if (scheduleError) throw scheduleError;
+
+      const { error: journeyError } = await supabase
+          .from('journey')
+          .insert([{ schedule_id, journey_started: false }]);
+
+      if (journeyError) throw journeyError;
+
+      res.json({
+          message: "Route added successfully",
+          newRoute: { schedule_id, driver_id, pickup, destination, journey_started: false }
+      });
+
+  } catch (error) {
+      console.error("Error confirming route:", error.message);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
 });
 
-//find all scheduled routes of driver
+/*
 app.get('/api/scheduled-routes/:driverId', (req, res) => {
   const driverId = req.params.driverId;
   const driver = activeDrivers.find(d => d.driver_id === driverId);
@@ -130,6 +213,59 @@ app.get('/api/scheduled-routes/:driverId', (req, res) => {
     scheduled_route: driver.scheduled_route || []
   });
 });
+*/
+
+app.get('/api/scheduled-routes/:driverId', async (req, res) => {
+  try {
+      const driverId = req.params.driverId;
+
+      const { data: schedules, error } = await supabase
+          .from('schedules')
+          .select('schedule_id, pickup, destination, date, time')
+          .eq('driver_id', driverId);
+
+      if (error) {
+          console.error("Error fetching schedules:", error.message);
+          return res.status(500).json({ error: "Error retrieving schedules", details: error.message });
+      }
+
+      if (!schedules || schedules.length === 0) {
+          return res.json({ scheduled_route: [] }); 
+      }
+
+      const scheduleIds = schedules.map(s => s.schedule_id);
+
+      const { data: journeys, error: journeyError } = await supabase
+          .from('journey')
+          .select('schedule_id, journey_started')
+          .in('schedule_id', scheduleIds);
+
+      if (journeyError) {
+          console.error("Error fetching journey statuses:", journeyError.message);
+          return res.status(500).json({ error: "Error retrieving journey statuses", details: journeyError.message });
+      }
+
+      const journeyMap = journeys.reduce((map, journey) => {
+          map[journey.schedule_id] = journey.journey_started;
+          return map;
+      }, {});
+
+      const formattedRoutes = schedules.map(schedule => ({
+          schedule_id: schedule.schedule_id,
+          pickup: schedule.pickup,
+          destination: schedule.destination,
+          date: schedule.date,
+          time: schedule.time,
+          journey_started: journeyMap[schedule.schedule_id] || false
+      }));
+
+      res.json({ scheduled_route: formattedRoutes });
+
+  } catch (error) {
+      console.error("Internal Server Error:", error.message);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+});
 
 //forming of polyline and coordinates for defined routes
 app.get('/api/get-route', async(req, res) => {
@@ -141,7 +277,33 @@ app.get('/api/get-route', async(req, res) => {
         return res.status(400).json({ error: "Missing parameters: origin, destination required." });
     }
 
-    const polyline = await getOptimisedRoute(origin, destination);
+    const { data: originData, error: originError } = await supabase
+        .from('location')
+        .select('latitude, longitude')
+        .eq('location_id', origin)
+        .single();
+
+    if (originError || !originData) {
+        return res.status(404).json({ error: "Origin location not found" });
+    }
+
+    // Fetch coordinates for destination
+    const { data: destinationData, error: destinationError } = await supabase
+        .from('location')
+        .select('latitude, longitude')
+        .eq('location_id', destination)
+        .single();
+
+    if (destinationError || !destinationData) {
+        return res.status(404).json({ error: "Destination location not found" });
+    }
+
+    const originCoords = `${originData.latitude},${originData.longitude}`;
+    const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
+
+    console.log(`Resolved Coordinates: Origin(${originCoords}) → Destination(${destinationCoords})`);
+
+    const polyline = await getOptimisedRoute(originCoords, destinationCoords);
     if (!polyline) {
         return res.status(404).json({ error: "No route found." });
     }
@@ -158,46 +320,87 @@ app.get('/api/get-route', async(req, res) => {
   }
 });
 
-app.get('/api/decode-route', async(req, res) => {
-
-  try{
-    const { encodedPolyline } = req.query;
-
-    const decodedRoute = decodeRoute(encodedPolyline);
-
-    res.json({
-      decodedRoute: decodedRoute
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching route data', details: error.message });
-  }
-
-});
-
-
-app.post('/api/start-journey', (req, res) => {
+/*
+app.post('/api/start-journey', async (req, res) => {
 
   const { driver_id, route_id } = req.body;
   let driver = activeDrivers.find(d => d.driver_id === driver_id);
   if (!driver) return res.status(404).json({ error: "Driver not found" });
-  driver.onRoute = true;
 
   let route = driver.scheduled_route.find(r => r.route_id === route_id);
   if (!route) return res.status(404).json({ error: "Route not found" });
 
   route.journey_started = true;
   saveActiveDrivers();
-  res.json({ message: "Journey started" });
+  
+  const polyline = await getOptimisedRoute(route.origin, route.destination);
+  if (!polyline) {
+      return res.status(404).json({ error: "No route found." });
+  }
+
+  const decodedRoute = decodeRoute(polyline);
+
+  res.json({
+      polyline: polyline,
+      decodedRoute: decodedRoute
+  });
 
 });
+*/
 
+app.post('/api/start-journey', async (req, res) => {
+  try {
+      const { driver_id, schedule_id } = req.body;
+
+      const { data: driver, error: driverError } = await supabase
+          .from('schedules')
+          .select('*')
+          .eq('driver_id', driver_id)
+          .eq('schedule_id', schedule_id)
+          .single();
+
+      if (driverError || !driver) {
+          return res.status(404).json({ error: "Driver or route not found" });
+      }
+
+      const { error: journeyError } = await supabase
+          .from('journey')
+          .update({ journey_started: true })
+          .eq('schedule_id', schedule_id);
+
+      if (journeyError) {
+          console.error("Error updating journey status:", journeyError.message);
+          return res.status(500).json({ error: "Failed to update journey status", details: journeyError.message });
+      }
+
+      const polyline = await getOptimisedRoute(driver.pickup, driver.destination);
+      if (!polyline) {
+          return res.status(404).json({ error: "No optimized route found." });
+      }
+
+      let activeDrivers = loadActiveDrivers();
+      activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id);
+      activeDrivers.push({ driver_id, schedule_id, polyline });
+
+      const decodedRoute = decodeRoute(polyline);
+
+      res.json({
+          polyline: polyline,
+          decodedRoute: decodedRoute
+      });
+
+  } catch (error) {
+      console.error("Internal Server Error:", error.message);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+});
+
+/*
 app.post('/api/stop-journey', (req, res) => {
 
   const { driver_id, route_id } = req.body;
   let driver = activeDrivers.find(d => d.driver_id === driver_id);
   if (!driver) return res.status(404).json({ error: "Driver not found" });
-  driver.onRoute = false;
 
   driver.scheduled_route = driver.scheduled_route.filter(route => route.route_id !== route_id);
   driverNotifications[driver_id] = [];
@@ -205,26 +408,100 @@ app.post('/api/stop-journey', (req, res) => {
   res.json({ message: "Journey stopped" });
 
 });
+*/
+
+app.post('/api/stop-journey', async (req, res) => {
+  try {
+      const { driver_id, schedule_id } = req.body;
+
+      const { data: schedule, error: scheduleError } = await supabase
+          .from('schedules')
+          .select('*')
+          .eq('driver_id', driver_id)
+          .eq('schedule_id', schedule_id)
+          .single();
+
+      if (scheduleError || !schedule) {
+          return res.status(404).json({ error: "Schedule not found for this driver" });
+      }
+
+      const { error: deleteJourneyError } = await supabase
+          .from('journey')
+          .delete()
+          .eq('schedule_id', schedule_id);
+
+      if (deleteJourneyError) {
+          console.error("Error deleting journey:", deleteJourneyError.message);
+          return res.status(500).json({ error: "Failed to delete journey", details: deleteJourneyError.message });
+      }
+
+      const { error: deleteScheduleError } = await supabase
+          .from('schedules')
+          .delete()
+          .eq('schedule_id', schedule_id);
+
+      if (deleteScheduleError) {
+          console.error("Error deleting schedule:", deleteScheduleError.message);
+          return res.status(500).json({ error: "Failed to delete schedule", details: deleteScheduleError.message });
+      }
+
+      const { error: deleteNotificationError } = await supabase
+          .from('notifications')
+          .delete()
+          .eq('driver_id', driver_id);
+
+      if (deleteNotificationError) {
+          console.error("Error deleting notifications:", deleteNotificationError.message);
+          return res.status(500).json({ error: "Database error", details: deleteNotificationError.message });
+      }
+
+      let activeDrivers = loadActiveDrivers();
+      activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id); 
+      saveActiveDrivers(activeDrivers);
+
+      res.json({ message: "Journey stopped successfully" });
+
+  } catch (error) {
+      console.error("Internal Server Error:", error.message);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+});
 
 
-app.get('/api/check-journey/:driver_id/:route_id', (req, res) => {
+app.get('/api/check-journey/:schedule_id', async (req, res) => {
 
-  const { driver_id, route_id } = req.params;
+  try{
+    const { schedule_id } = req.params;
 
-  let driver = activeDrivers.find(d => d.driver_id === driver_id);
+    const { data: journeyData, error } = await supabase
+        .from('journey')
+        .select('journey_started')
+        .eq('schedule_id', schedule_id)
+        .single();
 
-  if (!driver) return res.status(404).json({ error: "Driver not found" });
+    if (error) {
+        console.error("Error fetching journey status:", error.message);
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
 
-  let route = driver.scheduled_route.find(r => r.route_id === route_id);
-  if (!route) return res.json({ journey_started: false });
+    if (!journeyData) {
+        return res.json({ journey_started: false });
+    }
 
-  res.json({ journey_started: route.journey_started });
+    res.json({ journey_started: journeyData.journey_started });
+
+  } catch (error) {
+
+    console.error("Error checking journey:", error.message);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
+
+  }
 
 });
 
 // API to Receive Notifications and Store them
-app.post('/api/notify-driver', (req, res) => {
-  const { driver_id, message, cameraId } = req.body;
+app.post('/api/notify-driver', async (req, res) => {
+  const { driver_id, message, cameraId, seen } = req.body;
 
   if (!driver_id || !message || !cameraId) {
       return res.status(400).json({ error: "Missing notification parameters (driver_id, message, cameraId required)." });
@@ -232,6 +509,41 @@ app.post('/api/notify-driver', (req, res) => {
 
   console.log(`Notification received for Driver ${driver_id}: ${message}`);
 
+  
+  const { data: existingNotification, error: checkError } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('driverId', driver_id)
+          .eq('cameraId', cameraId)
+          .single();
+  
+  if (checkError && checkError.code !== 'PGRST116') {
+      console.error("Error checking existing notification:", checkError.message);
+      return res.status(500).json({ error: "Error checking existing notification", details: checkError.message });
+  }
+
+  if (existingNotification) {
+      return res.json({ success: false, message: "Notification already exists for this camera" });
+  }
+
+  const { error: insertError } = await supabase
+      .from('notifications')
+      .insert([{ 
+          driverId: driver_id,
+          cameraId: cameraId,
+          message: message,
+          timestamp: new Date().toISOString(),
+          seen: seen
+      }]);
+
+  if (insertError) {
+      console.error("Error inserting notification:", insertError.message);
+      return res.status(500).json({ error: "Error inserting notification", details: insertError.message });
+  }
+
+  res.json({ success: true, message: "Notification added" });
+  
+  /*
   if (!driverNotifications[driver_id]) {
       driverNotifications[driver_id] = [];
   }
@@ -243,10 +555,12 @@ app.post('/api/notify-driver', (req, res) => {
   } else {
       res.json({ success: false, message: "Notification already exists for this camera" });
   }
+  */
 });
 
 // API to Fetch Notifications for a Driver (For Frontend)
-app.get('/api/get-notifications/:driverId', (req, res) => {
+app.get('/api/get-notifications/:driverId', async (req, res) => {
+  /*
   const driverId = req.params.driverId;
   const notifications = driverNotifications[driverId] || [];
 
@@ -255,6 +569,30 @@ app.get('/api/get-notifications/:driverId', (req, res) => {
   } else {
     res.json({ notifications: [] });
   }
+  */
+
+  
+  try{
+      const driverId = req.params.driverId;
+      const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('driverId', driverId)
+          .eq('seen', false)
+          .order('timestamp', { ascending: false });
+
+      if (error) {
+          console.error("Error fetching notifications:", error.message);
+          return res.status(500).json({ error: "Error fetching notifications", details: error.message });
+      }
+
+      res.json({ notifications: data });
+
+  } catch (error) {
+      console.error("Internal Server Error:", error.message);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }  
+  
 });
 
 app.listen(port, () => {

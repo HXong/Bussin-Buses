@@ -25,7 +25,7 @@
     </div>
 
     <script>
-        let map, origin, destination, polylineLayer, decodedPolyline, driverId;
+        let map, origin, destination, driverId;
         let markers = [];
 
         async function loadMap() {
@@ -63,37 +63,39 @@
             if (!origin || !destination) {
                 alert("Please select both origin and destination.");
                 return;
+            } else {
+                document.getElementById("confirm-route-btn").style.display = "block";
             }
 
-            try {
-                const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
-                const data = await response.json();
+            // try {
+            //     const response = await fetch(`http://localhost:3000/api/get-route?origin=${origin}&destination=${destination}`);
+            //     const data = await response.json();
 
-                if (data.polyline) {
-                    encodedPolyline = data.polyline;
-                    drawRouteOnMap(data.decodedRoute);
-                    document.getElementById("confirm-route-btn").style.display = "block";
-                } else {
-                    alert("No route found!");
-                }
-            } catch (error) {
-                console.error("Error fetching route:", error);
-            }
+            //     if (data.polyline) {
+            //         encodedPolyline = data.polyline;
+            //         drawRouteOnMap(data.decodedRoute);
+            //         document.getElementById("confirm-route-btn").style.display = "block";
+            //     } else {
+            //         alert("No route found!");
+            //     }
+            // } catch (error) {
+            //     console.error("Error fetching route:", error);
+            // }
         }
 
-        function drawRouteOnMap(decodedPolyline) {
-            if (polylineLayer) {
-                map.removeLayer(polylineLayer);
-            }
+        // function drawRouteOnMap(decodedPolyline) {
+        //     if (polylineLayer) {
+        //         map.removeLayer(polylineLayer);
+        //     }
 
-            const leafletCoords = [];
-            decodedPolyline.forEach(coord => {
-                leafletCoords.push([coord[0], coord[1]]);
-            });
+        //     const leafletCoords = [];
+        //     decodedPolyline.forEach(coord => {
+        //         leafletCoords.push([coord[0], coord[1]]);
+        //     });
 
-            polylineLayer = L.polyline(leafletCoords, { color: 'blue', weight: 5 }).addTo(map);
-            map.fitBounds(L.latLngBounds(leafletCoords));
-        }
+        //     polylineLayer = L.polyline(leafletCoords, { color: 'blue', weight: 5 }).addTo(map);
+        //     map.fitBounds(L.latLngBounds(leafletCoords));
+        // }
 
         function resetMap() {
             markers.forEach(marker => map.removeLayer(marker));
@@ -101,37 +103,19 @@
             origin = null;
             destination = null;
 
-            if (polylineLayer) {
-                map.removeLayer(polylineLayer);
-                polylineLayer = null;
-            }
-
             document.getElementById("confirm-route-btn").style.display = "none";
         }
 
         async function confirmRoute() {
-            const response = await fetch(`http://localhost:3000/api/get-next-route-id?driver_id=${driverId}`);
-            const data = await response.json();
-            const routeId = data.next_route_id;
-
-            if (!routeId) {
-                alert("Error generating route ID.");
-                return;
-            }
-
-            const newRoute = {
-                route_id: routeId,
-                polyline: encodedPolyline,
-                origin: origin,
-                destination: destination,
-                journey_started: false
-            };
-
             try {
-                await fetch("http://localhost:3000/api/add-route", {
+                await fetch("http://localhost:3000/api/confirm-route", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ driver_id: driverId, route: newRoute })
+                    body: JSON.stringify({ 
+                        driver_id: driverId, 
+                        origin: origin,
+                        destination: destination
+                    })
                 });
 
                 alert("Route successfully created!");

@@ -1,9 +1,9 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/routes/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/routes/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -11,6 +11,7 @@
   "description": "Stack:\r - NodeJS with Javascript\r - Express.js for web server",
   "dependencies": {
     "@here/flexpolyline": "^0.1.0",
+    "@supabase/supabase-js": "^2.49.1",
     "@turf/turf": "^7.2.0",
     "axios": "^1.7.9",
     "backend": "file:",
