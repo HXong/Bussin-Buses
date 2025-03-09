@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class HomeNav extends StatefulWidget {
   const HomeNav({super.key});
@@ -9,8 +10,7 @@ class HomeNav extends StatefulWidget {
 }
 
 class _HomeNavState extends State<HomeNav> {
-  // Simulate dynamic data fetching for the driver
-  List<Map<String, String>> upcomingTrips = [];
+  List<Map<String, dynamic>> upcomingTrips = [];
 
   @override
   void initState() {
@@ -18,69 +18,112 @@ class _HomeNavState extends State<HomeNav> {
     _fetchUpcomingTrips();
   }
 
-  // Simulating fetching trips for the driver
-  void _fetchUpcomingTrips() {
-    // Replace with actual fetching logic
-    // Simulating dynamic trips for this example
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        upcomingTrips = [
-          {
-            'date': 'JAN 20, 2025',
-            'start_time': '17:00',
-            'end_time': '18:15',
-            'duration': '1h 15mins',
-            'pickup': 'NTU',
-            'destination': 'Tampines',
-          },
-          {
-            'date': 'JAN 21, 2025',
-            'start_time': '08:30',
-            'end_time': '09:45',
-            'duration': '1h 15mins',
-            'pickup': 'NTU',
-            'destination': 'Downtown MRT',
-          },
-          {
-            'date': 'JAN 22, 2025',
-            'start_time': '10:00',
-            'end_time': '11:15',
-            'duration': '1h 15mins',
-            'pickup': 'NTU',
-            'destination': 'Jurong East',
-          },
-        ];
+  // Fetch upcoming trips for the current driver from Supabase
+  Future<void> _fetchUpcomingTrips() async {
+    final driverId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (driverId == null) {
+      debugPrint('No user is logged in.');
+      return;
+    }
+
+    final response = await Supabase.instance.client
+        .from('schedules')
+        .select()
+        .eq('driver_id', driverId)
+        .order('date', ascending: true);
+
+    List<Map<String, dynamic>> tripsWithLocations = [];
+
+    for (var trip in response) {
+      debugPrint("Fetched trip: $trip");
+
+      // Fetch pickup and destination names
+      String pickupName = await _getLocationName(trip['pickup']);
+      String destinationName = await _getLocationName(trip['destination']);
+
+      // Parse date & time correctly
+      String dateStr = trip['date']; // YYYY-MM-DD
+      String timeStr = trip['time']; // HH:MM:SS
+
+      // Format time to only show hours and minutes (hh:mm)
+      String startTimeFormatted = timeStr.substring(0, 5);
+
+      // Format date to show as day month (e.g., 20 JAN)
+      String formattedDate = _formatDate(dateStr);
+
+      // Add 1 hour and 15 minutes to calculate end time
+      DateTime startTime = DateTime.parse('$dateStr $timeStr');
+      DateTime endTime = startTime.add(const Duration(minutes: 75));
+      String endTimeFormatted = endTime.toIso8601String().substring(11, 16);
+
+      tripsWithLocations.add({
+        'schedule_id': trip['schedule_id'], // int
+        'date': formattedDate, // formatted date
+        'start_time': startTimeFormatted,
+        'end_time': endTimeFormatted,
+        'duration': '1h 15min',
+        'pickup': pickupName,
+        'destination': destinationName,
       });
-    });
+    }
+
+    if (mounted) {
+      setState(() {
+        upcomingTrips = tripsWithLocations;
+      });
+    }
   }
 
-  void _deleteTrip(Map<String, String> trip) {
-    setState(() {
-      upcomingTrips.remove(trip);
-    });
+  // Fetch location name from location_id
+  Future<String> _getLocationName(int locationId) async {
+    final response = await Supabase.instance.client
+        .from('location')
+        .select('location_name')
+        .eq('location_id', locationId)
+        .single();
+
+    return response?['location_name'] ?? 'Unknown Location';
+  }
+
+  // Format date to "day month" (e.g., "20 JAN")
+  String _formatDate(String dateStr) {
+    DateTime date = DateTime.parse(dateStr); // Convert to DateTime
+    return DateFormat('dd MMM')
+        .format(date)
+        .toUpperCase(); // Format to "20 JAN"
+  }
+
+  // Delete a trip from Supabase
+  Future<void> _deleteTrip(Map<String, dynamic> trip) async {
+    await Supabase.instance.client
+        .from('schedules')
+        .delete()
+        .eq('schedule_id', trip['schedule_id']); // int
+
+    if (mounted) {
+      setState(() {
+        upcomingTrips.remove(trip);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upcoming Trips'),
-        backgroundColor: Colors.grey,
-      ),
+      appBar: AppBar(title: const Text('Upcoming Trips',
+          style: TextStyle(fontSize: 25,
+              fontWeight: FontWeight.bold))),
       body: SafeArea(
         child: upcomingTrips.isEmpty
-            ? const Center(
-          child: CircularProgressIndicator(), // Loading indicator
-        )
+            ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
           itemCount: upcomingTrips.length,
           itemBuilder: (context, index) {
             final trip = upcomingTrips[index];
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
+              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               elevation: 5,
               color: Colors.grey.shade300,
               child: ListTile(
@@ -88,115 +131,50 @@ class _HomeNavState extends State<HomeNav> {
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Date
+                    // Formatted Date
+                    Text(trip['date'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+
+                    // Time Range and Duration
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          trip['date']!,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Text(trip['start_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
                           ),
                         ),
+                        Text(trip['duration'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
+                          ),
+                        ),
+                        Text(trip['end_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 10),
 
-                    // Time Range and Duration with Separators
+                    // Pickup & Destination
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Start Time
-                        Text(
-                          trip['start_time']!,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        // First Separator
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Text(
-                              '-----',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Duration
-                        Text(
-                          trip['duration']!,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            //color: Colors.grey,
-                          ),
-                        ),
-                        // Second Separator
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Text(
-                              '-----',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // End Time
-                        Text(
-                          trip['end_time']!,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Pick-Up and Destination
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          trip['pickup']!,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          trip['destination']!,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        Text(trip['pickup'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                        Text(trip['destination'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                       ],
                     ),
                   ],
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
+                  icon: const Icon(Icons.chevron_right, size:30),
                   onPressed: () {
-                    // Navigate to the trip details screen
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TripDetailsScreen(
-                          trip: trip,
-                          onDelete: _deleteTrip,
-                        ),
+                        builder: (context) => TripDetailsScreen(trip: trip, onDelete: _deleteTrip),
                       ),
                     );
                   },
@@ -210,68 +188,63 @@ class _HomeNavState extends State<HomeNav> {
   }
 }
 
-class TripDetailsScreen extends StatelessWidget {
-  final Map<String, String> trip;
-  final Function(Map<String, String>) onDelete;
+  class TripDetailsScreen extends StatelessWidget {
+  final Map<String, dynamic> trip;
+  final Function(Map<String, dynamic>) onDelete;
 
   const TripDetailsScreen({Key? key, required this.trip, required this.onDelete}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trip Details'),
-      ),
+      appBar: AppBar(title: const Text('Trip Details')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${trip['pickup']} - ${trip['destination']} ',
-                  style: const TextStyle(fontSize: 35,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
+            Center(
+              child: Text(
+                '${trip['pickup']} - ${trip['destination']}',
+                style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+              ),
             ),
             const SizedBox(height: 5),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${trip['date']} | ',
-                  style: const TextStyle(fontSize: 20),
-                ),
-                Text(
-                  '${trip['start_time']}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ],
+            Center(
+              child: Text(
+                '${trip['date']} | ${trip['start_time']}',
+                style: const TextStyle(fontSize: 20),
+              ),
             ),
             const SizedBox(height: 20),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Passenger Details ',
-                  style: const TextStyle(fontSize: 25,
-                      fontWeight: FontWeight.bold),
+            // Centering the Passenger Manifest and Button
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Keeps column's size minimal
+                  children: [
+                    const Text(
+                      'Passenger Manifest',
+                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF000066),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
+                      onPressed: () {
+                        _showDeleteConfirmationDialog(context);
+                      },
+                      child: const Text(
+                        'Delete Trip',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: () {
-                _showDeleteConfirmationDialog(context);
-              },
-              child: const Text('Delete Trip'),
+              ),
             ),
           ],
         ),
@@ -279,7 +252,6 @@ class TripDetailsScreen extends StatelessWidget {
     );
   }
 
-  // Method to show confirmation dialog before deleting the trip
   void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -291,16 +263,15 @@ class TripDetailsScreen extends StatelessWidget {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text('Delete'),
-              onPressed: () {
-                // Call the onDelete callback and remove the trip
-                onDelete(trip);
-                Navigator.of(context).pop(); // Close the dialog
-                Navigator.of(context).pop(); // Go back to the HomeNav screen
+              onPressed: () async {
+                await onDelete(trip);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
             ),
           ],
