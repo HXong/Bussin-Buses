@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'trip_function.dart';
+import 'trip_list_UI.dart';
 
 class HomeNav extends StatefulWidget {
   const HomeNav({super.key});
@@ -15,11 +17,11 @@ class _HomeNavState extends State<HomeNav> {
   @override
   void initState() {
     super.initState();
-    _fetchUpcomingTrips();
+    _fetchUpcomingTrips(DateTime.now());
   }
 
   // Fetch upcoming trips for the current driver from Supabase
-  Future<void> _fetchUpcomingTrips() async {
+  Future<void> _fetchUpcomingTrips(DateTime targetDate) async {
     final driverId = Supabase.instance.client.auth.currentUser?.id;
 
     if (driverId == null) {
@@ -27,46 +29,7 @@ class _HomeNavState extends State<HomeNav> {
       return;
     }
 
-    final response = await Supabase.instance.client
-        .from('schedules')
-        .select()
-        .eq('driver_id', driverId)
-        .order('date', ascending: true);
-
-    List<Map<String, dynamic>> tripsWithLocations = [];
-
-    for (var trip in response) {
-      debugPrint("Fetched trip: $trip");
-
-      // Fetch pickup and destination names
-      String pickupName = await _getLocationName(trip['pickup']);
-      String destinationName = await _getLocationName(trip['destination']);
-
-      // Parse date & time correctly
-      String dateStr = trip['date']; // YYYY-MM-DD
-      String timeStr = trip['time']; // HH:MM:SS
-
-      // Format time to only show hours and minutes (hh:mm)
-      String startTimeFormatted = timeStr.substring(0, 5);
-
-      // Format date to show as day month (e.g., 20 JAN)
-      String formattedDate = _formatDate(dateStr);
-
-      // Add 1 hour and 15 minutes to calculate end time
-      DateTime startTime = DateTime.parse('$dateStr $timeStr');
-      DateTime endTime = startTime.add(const Duration(minutes: 75));
-      String endTimeFormatted = endTime.toIso8601String().substring(11, 16);
-
-      tripsWithLocations.add({
-        'schedule_id': trip['schedule_id'], // int
-        'date': formattedDate, // formatted date
-        'start_time': startTimeFormatted,
-        'end_time': endTimeFormatted,
-        'duration': '1h 15min',
-        'pickup': pickupName,
-        'destination': destinationName,
-      });
-    }
+    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, false);
 
     if (mounted) {
       setState(() {
@@ -75,31 +38,12 @@ class _HomeNavState extends State<HomeNav> {
     }
   }
 
-  // Fetch location name from location_id
-  Future<String> _getLocationName(int locationId) async {
-    final response = await Supabase.instance.client
-        .from('location')
-        .select('location_name')
-        .eq('location_id', locationId)
-        .single();
-
-    return response?['location_name'] ?? 'Unknown Location';
-  }
-
-  // Format date to "day month" (e.g., "20 JAN")
-  String _formatDate(String dateStr) {
-    DateTime date = DateTime.parse(dateStr); // Convert to DateTime
-    return DateFormat('dd MMM')
-        .format(date)
-        .toUpperCase(); // Format to "20 JAN"
-  }
-
   // Delete a trip from Supabase
   Future<void> _deleteTrip(Map<String, dynamic> trip) async {
     await Supabase.instance.client
         .from('schedules')
         .delete()
-        .eq('schedule_id', trip['schedule_id']); // int
+        .eq('schedule_id', trip['schedule_id']);
 
     if (mounted) {
       setState(() {
@@ -111,74 +55,21 @@ class _HomeNavState extends State<HomeNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Upcoming Trips',
-          style: TextStyle(fontSize: 25,
-              fontWeight: FontWeight.bold))),
+      appBar: AppBar(
+        title: const Text(
+          'Upcoming Trips',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: SafeArea(
-        child: upcomingTrips.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-          itemCount: upcomingTrips.length,
-          itemBuilder: (context, index) {
-            final trip = upcomingTrips[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              elevation: 5,
-              color: Colors.grey.shade300,
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(15),
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Formatted Date
-                    Text(trip['date'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-
-                    // Time Range and Duration
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(trip['start_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
-                          ),
-                        ),
-                        Text(trip['duration'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
-                          ),
-                        ),
-                        Text(trip['end_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Pickup & Destination
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(trip['pickup'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                        Text(trip['destination'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.chevron_right, size:30),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TripDetailsScreen(trip: trip, onDelete: _deleteTrip),
-                      ),
-                    );
-                  },
-                ),
+        child: TripList(
+          trips: upcomingTrips,
+          noTripsMessage: 'No upcoming trips available.',
+          onTap: (trip) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TripDetailsScreen(trip: trip, onDelete: _deleteTrip),
               ),
             );
           },
@@ -188,7 +79,7 @@ class _HomeNavState extends State<HomeNav> {
   }
 }
 
-  class TripDetailsScreen extends StatelessWidget {
+class TripDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> trip;
   final Function(Map<String, dynamic>) onDelete;
 
@@ -213,7 +104,7 @@ class _HomeNavState extends State<HomeNav> {
             Center(
               child: Text(
                 '${trip['date']} | ${trip['start_time']}',
-                style: const TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 20),

@@ -169,9 +169,8 @@ class _ScheduleNavState extends State<ScheduleNav> {
               const Text(
                 "Add Journey",
                 style: TextStyle(
-                  color: Colors.black,
                   fontSize: 25,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 30),
@@ -244,7 +243,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
-                    labelText: "Date",
+                    labelText: "Date(YY-MM-DD)",
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
@@ -262,7 +261,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 child: TextField(
                   controller: _timeController,
                   decoration: InputDecoration(
-                    labelText: "Time",
+                    labelText: "Time(HH:MM)",
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
