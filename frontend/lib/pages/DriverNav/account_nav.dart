@@ -393,6 +393,8 @@ class _FeedbackState extends State<Feedback> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Feedback submitted successfully!")),
     );
+
+    _feedbackController.clear();
   }
 
   @override
