@@ -1,9 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+//use the list first, when combine with other UI then use this fuctions
+/*class TicketNav extends StatefulWidget {
+  @override
+  _TicketNavState createState() => _TicketNavState();
+}
+
+class _TicketNavState extends State<TicketNav> {
+  final SupabaseClient supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> bookings = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBookings();
+  }
+
+  Future<void> fetchBookings() async {
+    try {
+      final response = await supabase.from('bookings').select(); // Fetch all bookings
+      setState(() {
+        bookings = response.map((data) => data as Map<String, dynamic>).toList();
+        isLoading = false;
+      });
+    } catch (error) {
+      print("Error fetching bookings: $error");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }*/
+
 
 class TicketNav extends StatelessWidget {
   final List<Map<String, dynamic>> bookings = [
     {
-      "date": "20 JAN",
+      "date": "20 JAN, 2025",
       "pickup": "NTU",
       "departure": "17:00",
       "destination": "TAMPINES",
@@ -12,7 +47,7 @@ class TicketNav extends StatelessWidget {
       "busNumber": "SMB123S"
     },
     {
-      "date": "22 JAN",
+      "date": "22 JAN, 2025",
       "pickup": "NTU",
       "departure": "17:00",
       "destination": "TAMPINES",
@@ -21,7 +56,7 @@ class TicketNav extends StatelessWidget {
       "busNumber": "SMB123S"
     },
     {
-      "date": "24 JAN",
+      "date": "24 JAN, 2025",
       "pickup": "NTU",
       "departure": "17:00",
       "destination": "TAMPINES",
@@ -150,16 +185,6 @@ class BookingCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  child: Text("Check In", style: TextStyle(color: Colors.white)),
-                ),
-                SizedBox(width: 8),
-                ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -169,11 +194,11 @@ class BookingCard extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pinkAccent,
+                    backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  child: Text("Cancel", style: TextStyle(color: Colors.white)),
+                  child: Text("Details", style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -184,33 +209,211 @@ class BookingCard extends StatelessWidget {
   }
 }
 
-
-class BookingDetailScreen extends StatelessWidget {
+class BookingDetailScreen extends StatefulWidget {
   final Map<String, dynamic> booking;
 
   BookingDetailScreen({required this.booking});
 
   @override
+  _BookingDetailScreenState createState() => _BookingDetailScreenState();
+}
+
+class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  bool isCanceled = false;
+  bool isCheckIn = false;
+
+  /// Handles Check-In
+  void checkInBooking() async {
+    setState(() {
+      isCheckIn = true;
+    });
+  }
+
+  /// Handles Cancel Booking
+  void cancelBooking() async {
+    setState(() {
+      isCanceled = true;
+    });
+  }
+
+  /// Exits the screen when **either** action is completed
+  void exitScreen() {
+    if (isCanceled || isCheckIn) {
+      Navigator.pop(context, true); // Ensures the UI updates
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Booking Detail")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      onTap: (isCanceled || isCheckIn) ? exitScreen : null, // Tap anywhere to exit
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Booking Detail",
+            style: TextStyle(color: (isCanceled || isCheckIn) ? Colors.black38 : Colors.black),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
+        backgroundColor: Colors.white,
+        body: Stack(
           children: [
-            Text("${booking['date']} - ${booking['pickup']} to ${booking['destination']}", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Text("Seat: ${booking['seat']}", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Confirm Cancellation"),
+            // 🔹 Dim Background if booking is canceled or checked in
+            Opacity(
+              opacity: (isCanceled || isCheckIn) ? 0.3 : 1,
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Booking Detail",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: (isCanceled || isCheckIn) ? Colors.black26 : Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("${widget.booking['date']}",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Pickup", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                                  Text("${widget.booking['pickup']}",
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text("Departure", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                                  Text("${widget.booking['departure']}",
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Destination", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                                  Text("${widget.booking['destination']}",
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text("Arrival", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                                  Text("~${widget.booking['arrival']}",
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 30),
+
+                          Row(
+                            children: [
+                              Icon(Icons.person, size: 20),
+                              SizedBox(width: 4),
+                              Text("1", style: TextStyle(fontSize: 14)),
+                              SizedBox(width: 10),
+                              Icon(Icons.event_seat, size: 20),
+                              SizedBox(width: 4),
+                              Text("${widget.booking['seat']}",
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          SizedBox(height: 40),
+
+                          ElevatedButton(
+                            onPressed: isCheckIn ? null : checkInBooking,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[400],
+                              minimumSize: Size(double.infinity, 45),
+                            ),
+                            child: Text("Check In", style: TextStyle(color: Colors.black)),
+                          ),
+                          SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: isCanceled ? null : cancelBooking,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[400],
+                              minimumSize: Size(double.infinity, 45),
+                            ),
+                            child: Text("Cancel Booking", style: TextStyle(color: Colors.black)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+
+            // 🔹 Check-In Overlay (Same Style as Cancel)
+            if (isCheckIn)
+              overlayMessage("Checked In"),
+
+            // 🔹 Cancel Booking Overlay (Same Style as Check-In)
+            if (isCanceled)
+              overlayMessage("Booking Canceled"),
           ],
         ),
       ),
     );
   }
+
+  /// 🔹 Extracted Overlay UI for Reusability
+  Widget overlayMessage(String message) {
+    return Container(
+      color: Colors.black.withOpacity(0.2), // Semi-transparent overlay
+      child: Center(
+        child: Container(
+          width: 280,
+          height: 270,
+          padding: EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.grey[350],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+
+
+

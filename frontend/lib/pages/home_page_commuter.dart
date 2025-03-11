@@ -31,6 +31,7 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
 
   final List<Widget> widgetOptions = <Widget>[
     const HomeNav(),
+    //BookingNav(date: '', pickup: '', departure: '', destination: '', arrival: '', seat: '', passengers: 1,),
     BookingNav(),
     TicketNav(),
     const AccountNav(),
