@@ -79,9 +79,9 @@ class TripList extends StatelessWidget {
             trailing: onTap != null
                 ? IconButton(
               icon: const Icon(Icons.chevron_right, size: 30),
-              onPressed: () => onTap!(trip),  // Call onTap function
+              onPressed: () => onTap!(trip),
             )
-                : null,  // Remove button if onTap is not provided
+                : null,
           ),
         );
       },

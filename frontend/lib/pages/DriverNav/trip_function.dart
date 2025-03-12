@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Function to fetch trips based on the boolean condition (before or after today)
-Future<List<Map<String, dynamic>>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore) async {
+Future<List<Map<String, dynamic>>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
   final response = await Supabase.instance.client
       .from('schedules')
       .select()
@@ -27,15 +27,37 @@ Future<List<Map<String, dynamic>>> fetchTrips(String driverId, DateTime targetDa
 
     // Determine if we should include the trip based on the boolean condition
     bool includeTrip = false;
+    String status = "CONFIRMED";
+    targetDate = DateTime.now();
     if (fetchBefore && tripDate.isBefore(targetDate)) {
       includeTrip = true;
+      {
+        if (trip['delete_schedule'])
+        {
+          status = "CANCELLED";
+        }
+        else
+        {
+          status = "COMPLETED";
+        }
+      }
     } else if (!fetchBefore && tripDate.isAfter(targetDate)) {
       includeTrip = true;
+      {
+        if (trip['delete_schedule'])
+        {
+          status = "CANCELLED";
+        }
+        else
+        {
+          status = "CONFIRMED";
+        }
+      }
     }
 
-    String status = "CONFIRMED";
-    if (trip['delete_schedule'])
-      status = "DELETED";
+    if (onlyConfirmed && trip['delete_schedule'] == true) {
+      includeTrip = false;
+    }
 
     if (includeTrip) {
       tripsWithLocations.add({

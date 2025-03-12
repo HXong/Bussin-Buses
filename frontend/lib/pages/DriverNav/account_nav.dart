@@ -261,6 +261,7 @@ class PastTrips extends StatefulWidget {
 
 class _PastTripsState extends State<PastTrips> {
   List<Map<String, dynamic>> pastTrips = [];
+  bool pastTripLoading = true;
 
   @override
   void initState() {
@@ -278,11 +279,12 @@ class _PastTripsState extends State<PastTrips> {
     }
 
     // Use the imported function to fetch past trips
-    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, true);
+    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, true, false);
 
     if (mounted) {
       setState(() {
         pastTrips = tripsWithLocations;
+        pastTripLoading = false;
       });
     }
   }
@@ -297,9 +299,11 @@ class _PastTripsState extends State<PastTrips> {
         ),
       ),
       body: SafeArea(
-        child: TripList(
+        child: pastTripLoading
+            ? const Center(child: CircularProgressIndicator())
+            : TripList(
           trips: pastTrips,
-          noTripsMessage: 'No past trips available.',
+          noTripsMessage: 'No upcoming trips available.',
         ),
       ),
     );
@@ -315,6 +319,7 @@ class UpcomingTrips extends StatefulWidget {
 
 class _UpcomingTripsState extends State<UpcomingTrips> {
   List<Map<String, dynamic>> upcomingTrips = [];
+  bool upcomingTripLoading = true;
 
   @override
   void initState() {
@@ -332,11 +337,12 @@ class _UpcomingTripsState extends State<UpcomingTrips> {
     }
 
     // Use the imported function to fetch past trips
-    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, false);
+    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, false, false);
 
     if (mounted) {
       setState(() {
         upcomingTrips = tripsWithLocations;
+        upcomingTripLoading = false;
       });
     }
   }
@@ -351,7 +357,9 @@ class _UpcomingTripsState extends State<UpcomingTrips> {
         ),
       ),
       body: SafeArea(
-        child: TripList(
+        child: upcomingTripLoading
+            ? const Center(child: CircularProgressIndicator())
+            : TripList(
           trips: upcomingTrips,
           noTripsMessage: 'No upcoming trips available.',
         ),
@@ -381,7 +389,7 @@ class _FeedbackState extends State<Feedback> {
     final feedback = _feedbackController.text;
     if (feedback.isEmpty){
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields.")));
+          const SnackBar(content: Text("Please fill in all fields.")));
       return;
     }
 
@@ -418,20 +426,20 @@ class _FeedbackState extends State<Feedback> {
                 ),
               ),
               const SizedBox(height: 60),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                    child: TextField(
-                     controller: _feedbackController,
-                      decoration: InputDecoration(
-                        labelText: "Feedback",
-                        filled: true,
-                        fillColor: Colors.grey[400],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                      ),
-                    ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: TextField(
+                  controller: _feedbackController,
+                  decoration: InputDecoration(
+                    labelText: "Feedback",
+                    filled: true,
+                    fillColor: Colors.grey[400],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
                 ),
-                const SizedBox(height: 170),
-                ElevatedButton(
+              ),
+              const SizedBox(height: 170),
+              ElevatedButton(
                 onPressed: _getFeedback,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF000066),
@@ -440,7 +448,7 @@ class _FeedbackState extends State<Feedback> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                  child: const Text("Submit Feedback", style: TextStyle(color: Colors.white,)),
+                child: const Text("Submit Feedback", style: TextStyle(color: Colors.white,)),
               ),
             ],
           ),
@@ -449,5 +457,3 @@ class _FeedbackState extends State<Feedback> {
     );
   }
 }
-
-

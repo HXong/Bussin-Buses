@@ -128,6 +128,22 @@ class _ScheduleNavState extends State<ScheduleNav> {
       }
 
       // Insert new schedule if no clash found
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        print("HEre Authenticated user ID: ${user.id}");
+      } else {
+        print("Here No authenticated user found.");
+      }
+
+      print({
+        'pickup': pickupId,
+        'destination': destinationId,
+        'date': date,
+        'time': time,
+        'driver_id': userId,
+      });
+
+
       await Supabase.instance.client.from('schedules').insert({
         'pickup': pickupId,
         'destination': destinationId,
@@ -243,7 +259,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
-                    labelText: "Date(YY-MM-DD)",
+                    labelText: "Date(YYYY-MM-DD)",
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
