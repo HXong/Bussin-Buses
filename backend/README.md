@@ -10,3 +10,5 @@ After `npm i`, a new folder called `node_modules` will be created. This contains
 
 to start the Express web server:
 `npm start` INSIDE the 2006-SCSD-C2/backend directory
+
+run node src/services/scheduler.js to start query of the LTA Data and start Vehicle detection. 
