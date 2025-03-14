@@ -1,8 +1,13 @@
+import 'dart:convert';
+
+import 'package:bussin_buses/auth/auth_service.dart';
+import 'package:bussin_buses/models/RouteResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
 
 class RideNav extends StatefulWidget {
   const RideNav({super.key});
@@ -12,6 +17,7 @@ class RideNav extends StatefulWidget {
 }
 
 class _RideNavState extends State<RideNav> {
+  final authService = AuthService();
   final mapController = MapController();
   final options = MapOptions(
     initialCenter: LatLng(1.3521, 103.8198),
@@ -27,6 +33,31 @@ class _RideNavState extends State<RideNav> {
     if (_permission == LocationPermission.denied) {
       _permission = await Geolocator.requestPermission();
     }
+  }
+
+  void startJourney() async {
+    final driverId = authService.getCurrentUser();
+    var url = Uri.http("10.0.2.2:3000","api/get-route", {
+      "origin": "1",
+      "destination": "3"
+    });
+    print(driverId);
+    print(url.toString());
+    var response = await http.get(url);
+    var jsonResponse = jsonDecode(response.body);
+    RouteResponse parsedResponse = RouteResponse.fromJson(jsonResponse);
+    print(parsedResponse.decodedRoute);
+    setState(() {
+      coordinates.clear();
+      for (List<double> coords in parsedResponse.decodedRoute) {
+        double lat = coords[0];
+        double lng = coords[1];
+        LatLng latLng = LatLng(lat, lng);
+        coordinates.add(latLng);
+      }
+    });
+
+
   }
   @override
   void initState() {
