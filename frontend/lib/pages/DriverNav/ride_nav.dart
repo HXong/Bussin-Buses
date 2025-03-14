@@ -34,6 +34,7 @@ class _RideNavState extends State<RideNav> {
     _checkPermission();
   }
 
+  var coordinates = [LatLng(1.3721, 103.9474), LatLng(1.3555, 103.9520), LatLng(1.3496, 103.9568)];
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,10 @@ class _RideNavState extends State<RideNav> {
             CurrentLocationLayer(
               alignPositionOnUpdate: AlignOnUpdate.always,
             ),
+            PolylineLayer(polylines: [
+              Polyline(points: coordinates, color: Colors.blue, strokeWidth: 6.0)
+            ]),
+            ElevatedButton(onPressed: () {startJourney();}, child: Text("Start Journey"))
 
           ]),
 
