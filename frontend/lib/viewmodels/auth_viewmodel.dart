@@ -1,9 +1,9 @@
-import 'package:bussin_buses/repositories/auth_repository.dart';
-import 'package:bussin_buses/services/SupabaseClientService.dart';
+import 'package:bussin_buses/services/auth_service.dart';
+import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthViewModel extends ChangeNotifier {
-  final AuthRepository _authRepository;
+  final AuthService _authRepository;
   final supabaseClient = SupabaseClientService.client;
   User? _user;
   String? _errorMsg;

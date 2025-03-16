@@ -1,7 +1,7 @@
-import 'package:bussin_buses/services/SupabaseClientService.dart';
+import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthRepository{
+class AuthService{
   final SupabaseClient _supabase = SupabaseClientService.client;
 
   Future<AuthResponse> signIn(String email, String password) async {

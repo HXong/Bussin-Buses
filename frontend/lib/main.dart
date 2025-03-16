@@ -4,7 +4,7 @@ import 'package:bussin_buses/pages/CommuterNav/home_page_commuter.dart';
 import 'package:bussin_buses/pages/Authentication/login_page.dart';
 import 'package:bussin_buses/pages/Authentication/register_page.dart';
 import 'package:bussin_buses/pages/DriverNav/home_page_driver.dart';
-import 'package:bussin_buses/repositories/auth_repository.dart';
+import 'package:bussin_buses/services/auth_service.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 
 import 'package:flutter/material.dart';
@@ -21,7 +21,7 @@ void main() async{
 
   runApp(
     MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthRepository()))
+      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService()))
     ],
     child: const MyApp(),),
   );
