@@ -5,7 +5,9 @@ import 'package:bussin_buses/pages/Authentication/login_page.dart';
 import 'package:bussin_buses/pages/Authentication/register_page.dart';
 import 'package:bussin_buses/pages/DriverNav/home_page_driver.dart';
 import 'package:bussin_buses/services/auth_service.dart';
+import 'package:bussin_buses/services/driver_service.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +23,8 @@ void main() async{
 
   runApp(
     MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService()))
+      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
+      ChangeNotifierProvider(create: (_) => DriverViewModel(DriverService()))
     ],
     child: const MyApp(),),
   );

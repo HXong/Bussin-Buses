@@ -3,7 +3,7 @@ import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthViewModel extends ChangeNotifier {
-  final AuthService _authRepository;
+  final AuthService _authService;
   final supabaseClient = SupabaseClientService.client;
   User? _user;
   String? _errorMsg;
@@ -11,7 +11,7 @@ class AuthViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _userType;
 
-  AuthViewModel(this._authRepository) {
+  AuthViewModel(this._authService) {
     _listenToAuthChanges();
   }
 
@@ -23,9 +23,9 @@ class AuthViewModel extends ChangeNotifier {
 
   void _listenToAuthChanges() {
     supabaseClient.auth.onAuthStateChange.listen((event) async {
-      _user = _authRepository.getCurrentUser();
+      _user = _authService.getCurrentUser();
       if (_user != null) {
-        _userType = await _authRepository.getUserType(_user!.id);
+        _userType = await _authService.getUserType(_user!.id);
       } else {
         _userType = null;
       }
@@ -37,7 +37,7 @@ class AuthViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final res = await _authRepository.signIn(email, password);
+      final res = await _authService.signIn(email, password);
       _user = res.user;
       _errorMsg = null;
     } catch (e) {
@@ -54,7 +54,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await _authRepository.signUp(email, password, username, userType);
+      final res = await _authService.signUp(email, password, username, userType);
       _user = res.user;
       _successMsg = "Successfully registered!";
     } catch (e) {
@@ -68,7 +68,7 @@ class AuthViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _authRepository.signOut();
+      await _authService.signOut();
       _user = null;
     } catch (e) {
       _errorMsg = "Sign out failed: ${e.toString()}";
@@ -84,7 +84,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authRepository.forgetPassword(email);
+      await _authService.forgetPassword(email);
       _successMsg = "Password reset link sent!";
     } catch (e) {
       _errorMsg = "Error: ${e.toString()}";

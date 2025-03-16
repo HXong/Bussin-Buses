@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-import 'trip_function.dart';
+import '../../viewmodels/driver_viewmodel.dart';
 import 'trip_list_UI.dart';
 
 class AccountNav extends StatefulWidget {
@@ -260,37 +261,17 @@ class PastTrips extends StatefulWidget {
 }
 
 class _PastTripsState extends State<PastTrips> {
-  List<Map<String, dynamic>> pastTrips = [];
-  bool pastTripLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _fetchPastTrips(DateTime.now());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final driverViewModel = Provider.of<DriverViewModel>(context);
+      driverViewModel.fetchPastTrips(DateTime.now());
+    });
   }
-
-  // Fetch past trips for the current driver from Supabase
-  Future<void> _fetchPastTrips(DateTime targetDate) async {
-    final driverId = Supabase.instance.client.auth.currentUser?.id;
-
-    if (driverId == null) {
-      debugPrint('No user is logged in.');
-      return;
-    }
-
-    // Use the imported function to fetch past trips
-    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, true, false);
-
-    if (mounted) {
-      setState(() {
-        pastTrips = tripsWithLocations;
-        pastTripLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final driverViewModel = Provider.of<DriverViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -299,11 +280,11 @@ class _PastTripsState extends State<PastTrips> {
         ),
       ),
       body: SafeArea(
-        child: pastTripLoading
+        child: driverViewModel.isLoading
             ? const Center(child: CircularProgressIndicator())
             : TripList(
-          trips: pastTrips,
-          noTripsMessage: 'No upcoming trips available.',
+          trips: driverViewModel.pastTrips,
+          noTripsMessage: 'No past trips.',
         ),
       ),
     );
@@ -318,37 +299,10 @@ class UpcomingTrips extends StatefulWidget {
 }
 
 class _UpcomingTripsState extends State<UpcomingTrips> {
-  List<Map<String, dynamic>> upcomingTrips = [];
-  bool upcomingTripLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUpcomingTrips(DateTime.now());
-  }
-
-  // Fetch past trips for the current driver from Supabase
-  Future<void> _fetchUpcomingTrips(DateTime targetDate) async {
-    final driverId = Supabase.instance.client.auth.currentUser?.id;
-
-    if (driverId == null) {
-      debugPrint('No user is logged in.');
-      return;
-    }
-
-    // Use the imported function to fetch past trips
-    List<Map<String, dynamic>> tripsWithLocations = await fetchTrips(driverId, targetDate, false, false);
-
-    if (mounted) {
-      setState(() {
-        upcomingTrips = tripsWithLocations;
-        upcomingTripLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final driverViewModel = Provider.of<DriverViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -357,10 +311,10 @@ class _UpcomingTripsState extends State<UpcomingTrips> {
         ),
       ),
       body: SafeArea(
-        child: upcomingTripLoading
+        child: driverViewModel.isLoading
             ? const Center(child: CircularProgressIndicator())
             : TripList(
-          trips: upcomingTrips,
+          trips: driverViewModel.upcomingTrips,
           noTripsMessage: 'No upcoming trips available.',
         ),
       ),
