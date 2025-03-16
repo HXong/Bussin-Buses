@@ -1,7 +1,8 @@
-import 'package:bussin_buses/auth/auth_service.dart';
 import 'package:bussin_buses/component/button_component.dart';
 import 'package:bussin_buses/component/inputText_component.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,30 +13,23 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-  final authService = AuthService();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<void> signIn() async {
-    final email = emailController.text;
-    final password = passwordController.text;
-
-    try {
-      // SignIn Function from auth_service
-      await authService.signIn(email, password);
-      // ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Successfully Login")));
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
-    }
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // show error snackbar
+      if (authViewModel.errorMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.errorMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -116,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
               ButtonComponent(
                 buttonText: "Login",
                 onTap: () {
-                  signIn();
+                  authViewModel.signIn(emailController.text, passwordController.text);
                 },
               ),
 

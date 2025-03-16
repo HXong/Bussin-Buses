@@ -1,11 +1,14 @@
-import 'package:bussin_buses/auth/auth_gate.dart';
+import 'package:bussin_buses/pages/Authentication/auth_gate.dart';
 import 'package:bussin_buses/pages/Authentication/forgetPassword_page.dart';
-import 'package:bussin_buses/pages/home_page_commuter.dart';
+import 'package:bussin_buses/pages/CommuterNav/home_page_commuter.dart';
 import 'package:bussin_buses/pages/Authentication/login_page.dart';
 import 'package:bussin_buses/pages/Authentication/register_page.dart';
-import 'package:bussin_buses/pages/home_page_driver.dart';
+import 'package:bussin_buses/pages/DriverNav/home_page_driver.dart';
+import 'package:bussin_buses/repositories/auth_repository.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async{
@@ -16,7 +19,12 @@ void main() async{
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9neWpvZXl4cXJnbHp2c2lsdnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyMjExNzQsImV4cCI6MjA1NTc5NzE3NH0.BTLr2BXZKZc9eXI8UejsCLeFAcUfIL2Ls7Hf5uPTgUM',
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthRepository()))
+    ],
+    child: const MyApp(),),
+  );
 }
 
 final supabase = Supabase.instance.client;

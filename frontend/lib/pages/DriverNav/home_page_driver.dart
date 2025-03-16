@@ -1,11 +1,12 @@
-import 'package:bussin_buses/auth/auth_service.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
-import 'DriverNav/account_nav.dart';
-import 'DriverNav/home_nav.dart';
-import 'DriverNav/ride_nav.dart';
-import 'DriverNav/schedule_nav.dart';
+import 'account_nav.dart';
+import 'home_nav.dart';
+import 'ride_nav.dart';
+import 'schedule_nav.dart';
 
 class HomePageDriver extends StatefulWidget {
   @override
@@ -13,20 +14,7 @@ class HomePageDriver extends StatefulWidget {
 }
 
 class _HomePageDriverState extends State<HomePageDriver> {
-  final authService = AuthService();
   int _selectedIndex = 0;
-
-  Future<void> logout() async {
-    try {
-      await authService.signOut();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
-    }
-  }
 
   final List<Widget> widgetOptions = const <Widget>[
     HomeNav(),
@@ -37,13 +25,24 @@ class _HomePageDriverState extends State<HomePageDriver> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // show error snackbar
+      if (authViewModel.errorMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.errorMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text("Welcome Driver"),
         actions: [
           GestureDetector(
             onTap: () {
-              logout();
+              authViewModel.signOut();
             },
             child: Container(
               margin: EdgeInsets.all(10),

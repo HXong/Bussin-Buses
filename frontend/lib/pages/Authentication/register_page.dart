@@ -1,7 +1,8 @@
-import 'package:bussin_buses/auth/auth_service.dart';
 import 'package:bussin_buses/component/button_component.dart';
 import 'package:bussin_buses/component/inputText_component.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -16,52 +17,34 @@ const List<Widget> Users = <Widget>[
 ];
 
 class _RegisterPageState extends State<RegisterPage> {
-  final authService = AuthService();
-
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final List<bool> _selectedUser = <bool>[true, false];
 
-  Future<void> signUp() async {
-    final name = nameController.text;
-    final email = emailController.text;
-    final password = passwordController.text;
-    final confirmPassword = confirmPasswordController.text;
-    final userType = _selectedUser[0] ? 'commuter' : 'driver';
-
-    // Checking for same password
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Password don't match")));
-      return;
-    }
-
-    try {
-      // SignUp Function from auth_service
-      await authService.signUp(email, password, name, userType);
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(
-      //       "Successfully Register!\n A confirmation email has been send to you!",
-      //     ),
-      //   ),
-      // );
-      Navigator.pop(context);
-    } catch (e) {
-      if (mounted) {
-        print(Text("Error: $e"));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // show success snackbar
+      if (authViewModel.successMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.successMsg!)),
+        );
+        authViewModel.clearMsg();
+        Navigator.pop(context);
+      }
+
+      // show error snackbar
+      if (authViewModel.errorMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.errorMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+    });
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -159,7 +142,29 @@ class _RegisterPageState extends State<RegisterPage> {
             ButtonComponent(
               buttonText: "Register",
               onTap: () {
-                signUp();
+                if (!authViewModel.isLoading) {
+                  final username = nameController.text;
+                  final email = emailController.text;
+                  final password = passwordController.text;
+                  final confirmPassword = confirmPasswordController.text;
+                  final userType = _selectedUser[0] ? 'commuter' : 'driver';
+
+                  if (password.length < 6) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Password must be at least 6 characters long")),
+                    );
+                    return;
+                  }
+
+                  if (password != confirmPassword) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Passwords don't match")),
+                    );
+                    return;
+                  }
+
+                  authViewModel.signUp(email, password, username, userType);
+                }
               },
             ),
 

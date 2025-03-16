@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-import 'package:bussin_buses/auth/auth_service.dart';
 import 'package:bussin_buses/models/RouteResponse.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class RideNav extends StatefulWidget {
   const RideNav({super.key});
@@ -17,7 +18,6 @@ class RideNav extends StatefulWidget {
 }
 
 class _RideNavState extends State<RideNav> {
-  final authService = AuthService();
   final mapController = MapController();
   final options = MapOptions(
     initialCenter: LatLng(1.3521, 103.8198),
@@ -35,8 +35,7 @@ class _RideNavState extends State<RideNav> {
     }
   }
 
-  void startJourney() async {
-    final driverId = authService.getCurrentUser();
+  void startJourney(String driverId) async {
     var url = Uri.http("10.0.2.2:3000","api/get-route", {
       "origin": "1",
       "destination": "3"
@@ -69,6 +68,8 @@ class _RideNavState extends State<RideNav> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
     return Scaffold(
       body: FlutterMap(
           mapController: mapController,
@@ -85,7 +86,7 @@ class _RideNavState extends State<RideNav> {
             PolylineLayer(polylines: [
               Polyline(points: coordinates, color: Colors.blue, strokeWidth: 6.0)
             ]),
-            ElevatedButton(onPressed: () {startJourney();}, child: Text("Start Journey"))
+            ElevatedButton(onPressed: () {startJourney(authViewModel.user!.id);}, child: Text("Start Journey"))
 
           ]),
 
