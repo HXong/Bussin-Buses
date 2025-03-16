@@ -28,7 +28,7 @@ class _HomePageDriverState extends State<HomePageDriver> {
     }
   }
 
-  final List<Widget> widgetOptions = const <Widget>[
+  final List<Widget> widgetOptions = <Widget>[
     HomeNav(),
     ScheduleNav(),
     RideNav(),
@@ -87,4 +87,3 @@ class _HomePageDriverState extends State<HomePageDriver> {
     );
   }
 }
-

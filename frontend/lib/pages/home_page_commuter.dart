@@ -63,7 +63,7 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
           ),
         ],
       ),
-      
+
       body: widgetOptions.elementAt(_selectedIndex),
 
       bottomNavigationBar: BottomNavigationBar(

@@ -36,6 +36,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: Column(
