@@ -38,6 +38,7 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
     });
 
     return Scaffold(
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: Column(

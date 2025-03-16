@@ -47,10 +47,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
           .eq('location_name', locationName)
           .single();
 
-      if (response != null) {
         return response['location_id'];
-      }
-      return null;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching location ID: $e')),
@@ -59,7 +56,6 @@ class _ScheduleNavState extends State<ScheduleNav> {
     }
   }
 
-// submitForm function to store the response
   Future<void> _submitForm() async {
     final pickupPoint = _selectedPickup;
     final destination = _selectedDestination;
@@ -90,11 +86,9 @@ class _ScheduleNavState extends State<ScheduleNav> {
       return;
     }
 
-    // Fetch the IDs for the selected pickup and destination
     final pickupId = await _getLocationIdByName(pickupPoint);
     final destinationId = await _getLocationIdByName(destination);
 
-    // Check if the IDs are found
     if (pickupId == null || destinationId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error fetching location IDs.")),
@@ -102,28 +96,67 @@ class _ScheduleNavState extends State<ScheduleNav> {
       return;
     }
 
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User not authenticated. Please log in.")),
+      );
+      return;
+    }
+
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User not authenticated. Please log in.")),
-        );
-        return;
+      // Fetch all schedules for this driver on the selected date
+      final existingSchedules = await Supabase.instance.client
+          .from('schedules')
+          .select('time')
+          .eq('driver_id', userId)
+          .eq('date', date);
+
+      // Convert selected time to DateTime for comparison
+      final selectedTime = DateTime.parse("$date $time");
+
+      for (var schedule in existingSchedules) {
+        final existingTime = DateTime.parse("$date ${schedule['time']}");
+
+        // Check if the time difference is less than 5 hours
+        if ((selectedTime.difference(existingTime).inHours).abs() < 5) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("You must have at least 5 hours between trips.")),
+          );
+          return;
+        }
       }
 
-      final response = await Supabase.instance.client.from('schedules').insert({
-        'pickup': pickupId, // Store the location ID for pickup
-        'destination': destinationId, // Store the location ID for destination
+      // Insert new schedule if no clash found
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        print("HEre Authenticated user ID: ${user.id}");
+      } else {
+        print("Here No authenticated user found.");
+      }
+
+      print({
+        'pickup': pickupId,
+        'destination': destinationId,
         'date': date,
         'time': time,
         'driver_id': userId,
-      }).select();
+      });
+
+
+      await Supabase.instance.client.from('schedules').insert({
+        'pickup': pickupId,
+        'destination': destinationId,
+        'date': date,
+        'time': time,
+        'driver_id': userId,
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Journey added successfully!")),
       );
 
-      // Clear all fields after successful submission
+      // Clear fields after submission
       _dateController.clear();
       _timeController.clear();
       setState(() {
@@ -152,9 +185,8 @@ class _ScheduleNavState extends State<ScheduleNav> {
               const Text(
                 "Add Journey",
                 style: TextStyle(
-                  color: Colors.black,
                   fontSize: 25,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 30),
@@ -227,7 +259,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 child: TextField(
                   controller: _dateController,
                   decoration: InputDecoration(
-                    labelText: "Date",
+                    labelText: "Date(YYYY-MM-DD)",
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
@@ -245,7 +277,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 child: TextField(
                   controller: _timeController,
                   decoration: InputDecoration(
-                    labelText: "Time",
+                    labelText: "Time(HH:MM)",
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
@@ -260,8 +292,11 @@ class _ScheduleNavState extends State<ScheduleNav> {
               // Submit Button
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text("Add Journey"),
+                child: const Text("Add Journey",
+                  style: TextStyle(
+                  color: Colors.white,)),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF000066),
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
