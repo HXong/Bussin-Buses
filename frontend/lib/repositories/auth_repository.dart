@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:bussin_buses/services/SupabaseClientService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthService{
-  final SupabaseClient _supabase = Supabase.instance.client;
+class AuthRepository{
+  final SupabaseClient _supabase = SupabaseClientService.client;
 
   Future<AuthResponse> signIn(String email, String password) async {
     return await _supabase.auth.signInWithPassword(
@@ -21,7 +21,6 @@ class AuthService{
     await _supabase.auth.updateUser(UserAttributes(
       data: {'display_name': username}, // Updates the display name
     ));
-    final id = getCurrentUser();
     await _supabase.from('profiles').update({'username': username, 'user_type': userType}).eq('id', uid);
 
     return response;
@@ -35,9 +34,22 @@ class AuthService{
     return await _supabase.auth.resetPasswordForEmail(email);
   }
 
-  String? getCurrentUser() {
+  User? getCurrentUser() {
     final session = _supabase.auth.currentSession;
-    final user = session?.user;
-    return user?.id;
+    return session?.user;
+  }
+
+  Future<String?> getUserType(String userId) async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', userId)
+          .single();
+      return response['user_type'] as String?;
+    } catch (e) {
+      print('Error getting user type: $e');
+      return null;
+    }
   }
 }

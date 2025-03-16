@@ -1,4 +1,3 @@
-import 'package:bussin_buses/auth/auth_service.dart';
 import 'package:bussin_buses/component/button_component.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +10,6 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
 
-  final authService = AuthService();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();

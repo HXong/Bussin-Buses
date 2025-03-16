@@ -1,7 +1,8 @@
-import 'package:bussin_buses/auth/auth_service.dart';
 import 'package:bussin_buses/component/button_component.dart';
 import 'package:bussin_buses/component/inputText_component.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ForgetpasswordPage extends StatefulWidget {
   const ForgetpasswordPage({super.key});
@@ -11,30 +12,31 @@ class ForgetpasswordPage extends StatefulWidget {
 }
 
 class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
-  final authService = AuthService();
 
   final emailController = TextEditingController();
 
-  Future<void> forgetPassword() async {
-    final email = emailController.text;
-
-    try {
-      // ForgetPassword Function from auth_service
-      await authService.forgetPassword(email);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Forget Password")));
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // show success snackbar
+      if (authViewModel.successMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.successMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+
+      // show error snackbar
+      if (authViewModel.errorMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.errorMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
@@ -93,7 +95,9 @@ class _ForgetpasswordPageState extends State<ForgetpasswordPage> {
             ButtonComponent(
               buttonText: "Send LInk",
               onTap: () {
-                forgetPassword();
+                if (!authViewModel.isLoading) {
+                  authViewModel.forgetPassword(emailController.text);
+                }
               },
             ),
           ],
