@@ -7,6 +7,7 @@ class DriverService {
   List<Map<String, dynamic>> passengerDetails = [];
   List<Map<String, dynamic>> upcomingTrips = [];
 
+  //Function to fetch passenger details for corresponding schedule
   Future<List<Map<String, dynamic>>> fetchPassengerDetails(String scheduleId) async {
     final bookingResponse = await _supabase
         .from('bookings')
@@ -37,6 +38,7 @@ class DriverService {
     return passengerDetails;
   }
 
+  //Function to delete a schedule
   Future<void> deleteTrip(Map<String, dynamic> trip) async {
     await _supabase
         .from('schedules')
@@ -126,13 +128,12 @@ class DriverService {
     return response['location_name'] ?? 'Unknown Location';
   }
 
-// Helper function to format date
   String formatDate(String dateStr) {
     DateTime date = DateTime.parse(dateStr);
     return DateFormat('dd MMM').format(date).toUpperCase();
   }
 
-  // Fetch past trips for the current driver from Supabase
+  //Function to fetch past trips for the current driver from Supabase
   Future<List<Map<String,dynamic>>> fetchPastTrips(DateTime targetDate) async {
     final driverId = _supabase.auth.currentUser!.id;
 
@@ -176,7 +177,6 @@ class DriverService {
       }
     ]).select();
 
-    // // Check if the response contains any data
     if (response.isEmpty) {
       throw Exception("No data returned, journey not added");
     }
@@ -192,7 +192,6 @@ class DriverService {
     DateTime dateTime = DateTime.parse(driverProfile['created_at']);
     String date = DateFormat('dd MMM yyyy').format(dateTime);
 
-    // Return a map with the necessary details
     return {
       'username': driverProfile['username'] ?? 'unknown',
       'user_type': driverProfile['user_type'] ?? 'unknown',
