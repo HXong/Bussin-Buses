@@ -1,0 +1,91 @@
+import 'package:bussin_buses/pages/CommuterNav//account_nav.dart';
+import 'package:bussin_buses/pages/CommuterNav/booking_nav.dart';
+import 'package:bussin_buses/pages/CommuterNav/home_nav.dart';
+import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
+import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+
+class HomePageCommuter extends StatefulWidget {
+  const HomePageCommuter({super.key});
+
+  @override
+  State<HomePageCommuter> createState() => _HomePageCommuterState();
+}
+
+class _HomePageCommuterState extends State<HomePageCommuter> {
+  int _selectedIndex = 0;
+
+  final List<Widget> widgetOptions = <Widget>[
+    const HomeNav(),
+    //BookingNav(date: '', pickup: '', departure: '', destination: '', arrival: '', seat: '', passengers: 1,),
+    BookingNav(),
+    TicketNav(),
+    const AccountNav(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // show error snackbar
+      if (authViewModel.errorMsg != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authViewModel.errorMsg!)),
+        );
+        authViewModel.clearMsg();
+      }
+    });
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Welcome Commuter"),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              authViewModel.signOut();
+            },
+            child: Container(
+              margin: EdgeInsets.all(10),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white70,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SvgPicture.asset(
+                'assets/icons/logout.svg',
+                height: 30,
+                width: 30,
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      body: widgetOptions.elementAt(_selectedIndex),
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        onTap: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.directions_bus_filled), label: "Booking"),
+          BottomNavigationBarItem(icon: Icon(Icons.airplane_ticket), label: "Ticket"),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Account"),
+        ],
+      ),
+
+    );
+  }
+}
