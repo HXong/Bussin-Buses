@@ -64,11 +64,13 @@ class _RideNavState extends State<RideNav> {
               children: [
                 Text("Pick Up: ${driverViewModel.currentTripDetails["pickup"]}"),
                 Text("Destination: ${driverViewModel.currentTripDetails["destination"]}"),
+                if (!driverViewModel.isStartJourney)
                 ElevatedButton(onPressed: () {
                   int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
                   driverViewModel.startJourney(authViewModel.user!.id, scheduleId.toString());
 
                   }, child: Text("Start Journey")),
+                if (driverViewModel.isStartJourney)
                 ElevatedButton(onPressed: () {
                   int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
                   driverViewModel.stopJourney(authViewModel.user!.id, scheduleId.toString());
