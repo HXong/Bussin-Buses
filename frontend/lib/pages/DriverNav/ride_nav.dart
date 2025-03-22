@@ -18,8 +18,7 @@ class _RideNavState extends State<RideNav> {
   final mapController = MapController();
   final options = MapOptions(
     initialCenter: LatLng(1.3521, 103.8198),
-    initialZoom: 16.0
-
+    initialZoom: 16.0,
   );
   LocationPermission? _permission;
 
@@ -44,44 +43,110 @@ class _RideNavState extends State<RideNav> {
     final driverViewModel = Provider.of<DriverViewModel>(context);
 
     return Scaffold(
-      body: driverViewModel.currentTripDetails.isEmpty ? Center(child: Text("No journey started"),) : FlutterMap(
-          mapController: mapController,
-          options: options,
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.app',
-              maxZoom: 19,
-            ),
-            CurrentLocationLayer(
-              alignPositionOnUpdate: AlignOnUpdate.always,
-            ),
-            driverViewModel.polylineCoordinates.isNotEmpty ?
-            PolylineLayer(polylines: [
-              Polyline(points: driverViewModel.polylineCoordinates, color: Colors.blue, strokeWidth: 6.0)
-            ]) : const SizedBox(),
-            Column(
-              children: [
-                Text("Pick Up: ${driverViewModel.currentTripDetails["pickup"]}"),
-                Text("Destination: ${driverViewModel.currentTripDetails["destination"]}"),
-                if (!driverViewModel.isStartJourney)
-                ElevatedButton(onPressed: () {
-                  int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
-                  driverViewModel.startJourney(authViewModel.user!.id, scheduleId.toString());
+      body:
+          driverViewModel.currentTripDetails.isEmpty
+              ? Center(child: Text("No journey started"))
+              : FlutterMap(
+                mapController: mapController,
+                options: options,
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.app',
+                    maxZoom: 19,
+                  ),
+                  CurrentLocationLayer(
+                    alignPositionOnUpdate: AlignOnUpdate.always,
+                  ),
+                  driverViewModel.polylineCoordinates.isNotEmpty
+                      ? PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: driverViewModel.polylineCoordinates,
+                            color: Colors.blue,
+                            strokeWidth: 6.0,
+                          ),
+                        ],
+                      )
+                      : const SizedBox(),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      color: Colors.white.withValues(alpha: 0.8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Pick Up: ${driverViewModel.currentTripDetails["pickup"]}",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              Text(
+                                "Destination: ${driverViewModel.currentTripDetails["destination"]}",
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!driverViewModel.isStartJourney)
+                            ElevatedButton(
+                              onPressed: () {
+                                int scheduleId =
+                                    driverViewModel
+                                        .currentTripDetails["schedule_id"];
+                                driverViewModel.startJourney(
+                                  authViewModel.user!.id,
+                                  scheduleId.toString(),
+                                );
+                              },
+                              child: const Text("Start Journey"),
+                            ),
+                          if (driverViewModel.isStartJourney)
+                            ElevatedButton(
+                              onPressed: () {
+                                int scheduleId =
+                                    driverViewModel
+                                        .currentTripDetails["schedule_id"];
+                                driverViewModel.stopJourney(
+                                  authViewModel.user!.id,
+                                  scheduleId.toString(),
+                                );
+                              },
+                              child: const Text("Stop Journey"),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                  }, child: Text("Start Journey")),
-                if (driverViewModel.isStartJourney)
-                ElevatedButton(onPressed: () {
-                  int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
-                  driverViewModel.stopJourney(authViewModel.user!.id, scheduleId.toString());
-                }, child: Text("Stop Journey")),
-
-              ],
-            )
-
-          ]),
-
-
+                  // Column(
+                  //   children: [
+                  //     Text("Pick Up: ${driverViewModel.currentTripDetails["pickup"]}"),
+                  //     Text("Destination: ${driverViewModel.currentTripDetails["destination"]}"),
+                  //     if (!driverViewModel.isStartJourney)
+                  //     ElevatedButton(onPressed: () {
+                  //       int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
+                  //       driverViewModel.startJourney(authViewModel.user!.id, scheduleId.toString());
+                  //
+                  //       }, child: Text("Start Journey")),
+                  //     if (driverViewModel.isStartJourney)
+                  //     ElevatedButton(onPressed: () {
+                  //       int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
+                  //       driverViewModel.stopJourney(authViewModel.user!.id, scheduleId.toString());
+                  //     }, child: Text("Stop Journey")),
+                  //
+                  //   ],
+                  // )
+                ],
+              ),
     );
   }
 }

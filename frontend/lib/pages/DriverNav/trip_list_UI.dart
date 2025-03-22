@@ -11,90 +11,188 @@ class TripList extends StatelessWidget {
     required this.trips,
     required this.noTripsMessage,
     this.onTap,
-    this.onLoadJourney
+    this.onLoadJourney,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return trips.isEmpty
         ? Center(
-      child: Text(
-        noTripsMessage,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-      ),
-    )
-        : ListView.builder(
-      itemCount: trips.length,
-      itemBuilder: (context, index) {
-        final trip = trips[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          elevation: 5,
-          color: Colors.grey.shade300,
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(15),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(trip['date'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text(trip['status'], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: trip['status'] == 'CANCELLED' ? Colors.red : Colors.blue)),
-                  ],
-                ),
-
-                // Time Range and Duration
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(trip['start_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    const Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5),
-                        child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
-                      ),
-                    ),
-                    Text(trip['duration'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    const Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5),
-                        child: Text('-----', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
-                      ),
-                    ),
-                    Text(trip['end_time'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-
-                // Pickup & Destination
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(trip['pickup'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                    Text(trip['destination'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  children: [
-                    Text('Driver Name: ${trip['driver_name']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                  ],
-                ),
-                ElevatedButton(onPressed: () => onLoadJourney!(trip), child: Text("Load Journey"))
-              ],
-            ),
-            trailing: onTap != null
-                ? IconButton(
-              icon: const Icon(Icons.chevron_right, size: 30),
-              onPressed: () => onTap!(trip),
-            )
-                : null,
+          child: Text(
+            noTripsMessage,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
+        )
+        : ListView.builder(
+          itemCount: trips.length,
+          itemBuilder: (context, index) {
+            final trip = trips[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              elevation: 5,
+              color: Colors.grey.shade300,
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(15),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          trip['date'],
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          trip['status'],
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color:
+                                trip['status'] == 'CANCELLED'
+                                    ? Colors.red
+                                    : Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Time Range and Duration
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          trip['start_time'],
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            child: Text(
+                              '-----',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          trip['duration'],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            child: Text(
+                              '-----',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          trip['end_time'],
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Pickup & Destination
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          trip['pickup'],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          trip['destination'],
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Driver Name: ${trip['driver_name']}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (onLoadJourney != null)
+                          ElevatedButton(
+                            onPressed: () => onLoadJourney!(trip),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF1E90FF),
+                              elevation: 1,
+                              // shape: RoundedRectangleBorder(
+                              //   borderRadius: BorderRadius.circular(10),
+                              // ),
+                              foregroundColor: Colors.white,
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.location_on, color: Colors.white),
+                                Text("Navigate")
+                                // Text("Load Journey"),
+                              ],
+                            ),
+                          ),
+                        // IconButton(icon: const Icon(Icons.location_on, size: 30), onPressed: () => onLoadJourney!(trip))
+                        // Expanded(child: IconButton(icon: const Icon(Icons.location_on), onPressed: () => onLoadJourney!(trip)))
+                      ],
+                    ),
+                    // if (onLoadJourney != null)
+                    //   IconButton(icon: const Icon(Icons.location_on), onPressed: () => onLoadJourney!(trip))
+                    // ElevatedButton(onPressed: () => onLoadJourney!(trip), child: Text("Load Journey"))
+                  ],
+                ),
+                trailing:
+                    onTap != null
+                        ? IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 30),
+                          onPressed: () => onTap!(trip),
+                        )
+                        : null,
+              ),
+            );
+          },
         );
-      },
-    );
   }
 }
