@@ -39,7 +39,6 @@ class _HomeNavState extends State<HomeNav> {
           },
           onLoadJourney: (trip) {
             driverViewModel.currentTripDetails = trip;
-            print(trip);
             driverViewModel.setPageIndex(2);
           },
         ),
