@@ -27,7 +27,7 @@ class _HomeNavState extends State<HomeNav> {
         child: driverViewModel.isLoading
             ? const Center(child: CircularProgressIndicator())
             : TripList(
-          trips: driverViewModel.upcomingTrips,
+          trips: driverViewModel.upcomingConfirmedTrips,
           noTripsMessage: 'No upcoming trips available.',
           onTap: (trip) {
             Navigator.push(

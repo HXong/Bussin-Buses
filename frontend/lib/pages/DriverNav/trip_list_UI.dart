@@ -39,7 +39,7 @@ class TripList extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(trip['date'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text(trip['status'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.red)),
+                    Text(trip['status'], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: trip['status'] == 'CANCELLED' ? Colors.red : Colors.blue)),
                   ],
                 ),
 
@@ -72,6 +72,13 @@ class TripList extends StatelessWidget {
                   children: [
                     Text(trip['pickup'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                     Text(trip['destination'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Text('Driver Name: ${trip['driver_name']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ],
