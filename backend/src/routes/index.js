@@ -151,39 +151,23 @@ app.get('/api/scheduled-routes/:driverId', async (req, res) => {
   }
 });
 
-//forming of polyline and coordinates for defined routes
-app.get('/api/get-route', async(req, res) => {
+//API to call for new route after recieving congestion notification
+app.get('/api/get-reroute', async(req, res) => {
 
   try{
-    const { origin, destination } = req.query;
+    const { driverId } = req.query;
 
-    if (!origin || !destination) {
-        return res.status(400).json({ error: "Missing parameters: origin, destination required." });
+    if (!driverId) {
+        return res.status(400).json({ error: "Missing parameters: driver id required." });
     }
 
-    const { data: originData, error: originError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', origin)
-        .single();
+    const activeDrivers = loadActiveDrivers();
+    const driver = activeDrivers.find(d => d.driver_id === driverId);
+    const [driverLatitude, driverLongitude] = driver.currentLocation;
 
-    if (originError || !originData) {
-        return res.status(404).json({ error: "Origin location not found" });
-    }
 
-    // Fetch coordinates for destination
-    const { data: destinationData, error: destinationError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', destination)
-        .single();
-
-    if (destinationError || !destinationData) {
-        return res.status(404).json({ error: "Destination location not found" });
-    }
-
-    const originCoords = `${originData.latitude},${originData.longitude}`;
-    const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
+    const originCoords = `${driverLatitude},${driverLongitude}`;
+    const destinationCoords = driver.destinationCoords;
 
     console.log(`Resolved Coordinates: Origin(${originCoords}) → Destination(${destinationCoords})`);
 
@@ -191,6 +175,9 @@ app.get('/api/get-route', async(req, res) => {
     if (!polyline) {
         return res.status(404).json({ error: "No route found." });
     }
+
+    driver.polyline = polyline;
+    saveActiveDrivers(driver);
 
     const decodedRoute = decodeRoute(polyline);
 
@@ -274,7 +261,7 @@ app.post('/api/start-journey', async (req, res) => {
 
       let activeDrivers = loadActiveDrivers();
       activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id);
-      activeDrivers.push({ driver_id, schedule_id, polyline, currentLocation });
+      activeDrivers.push({ driver_id, schedule_id, polyline, currentLocation, destination: destinationCoords });
       saveActiveDrivers(activeDrivers);
 
       const decodedRoute = decodeRoute(polyline);
@@ -346,6 +333,31 @@ app.post('/api/stop-journey', async (req, res) => {
       console.error("Internal Server Error:", error.message);
       res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
+});
+
+app.post('/api/update-driver-location', (req, res) => {
+    try {
+        const { driver_id, latitude, longitude } = req.body;
+
+        if (!driver_id || latitude === undefined || longitude === undefined) {
+            return res.status(400).json({ error: "Missing driver_id, latitude, or longitude" });
+        }
+
+        let activeDrivers = loadActiveDrivers();
+        let driver = activeDrivers.find(d => d.driver_id === driver_id);
+        if (!driver) {
+            return res.status(404).json({ error: "Driver not found in active sessions" });
+        }
+
+        driver.currentLocation = [latitude, longitude];
+
+        saveActiveDrivers(activeDrivers);
+
+        res.json({ message: "Driver location updated" });
+    } catch (error) {
+        console.error("Error updating driver location:", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 
@@ -426,42 +438,6 @@ app.post('/api/notify-driver', async (req, res) => {
   
 });
 
-// API to Fetch Notifications for a Driver (For Frontend)
-app.get('/api/get-notifications/:driverId', async (req, res) => {
-  /*
-  const driverId = req.params.driverId;
-  const notifications = driverNotifications[driverId] || [];
-
-  if (notifications.length > 0) {
-    res.json({ notifications });  
-  } else {
-    res.json({ notifications: [] });
-  }
-  */
-
-  
-  try{
-      const driverId = req.params.driverId;
-      const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('driverId', driverId)
-          .eq('seen', false)
-          .order('timestamp', { ascending: false });
-
-      if (error) {
-          console.error("Error fetching notifications:", error.message);
-          return res.status(500).json({ error: "Error fetching notifications", details: error.message });
-      }
-
-      res.json({ notifications: data });
-
-  } catch (error) {
-      console.error("Internal Server Error:", error.message);
-      res.status(500).json({ error: "Internal Server Error", details: error.message });
-  }  
-  
-});
 
 app.listen(port, () => {
   console.log(`Bussin Buses Web Server listening at http://localhost:${port}`);
