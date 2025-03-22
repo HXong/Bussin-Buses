@@ -69,10 +69,10 @@ class DriverViewModel extends ChangeNotifier {
 
   Future<void> fetchPassengerDetails(String scheduleId) async {
     isLoading = true;
-    notifyListeners(); // Notify UI to show loading indicator
+    notifyListeners();
     passengers = await _driverService.fetchPassengerDetails(scheduleId);
     isLoading = false;
-    notifyListeners(); // Notify UI to refresh passenger list
+    notifyListeners();
   }
 
   Future<void> deleteTrip(Map<String, dynamic> trip) async {
@@ -91,7 +91,6 @@ class DriverViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Update the selected destination
   void updateSelectedDestination(String? newDestination) {
     selectedDestination = newDestination;
     notifyListeners();
@@ -144,10 +143,8 @@ class DriverViewModel extends ChangeNotifier {
       }
     }
 
-    // Call addJourney to add journey to the Supabase
     await _driverService.addJourney(pickupId: pickupId, destinationId: destinationId, date: date, time: time, driverId: driverId,);
 
-    // Fetch upcoming trips again after the journey is added
     dateController.clear();
     timeController.clear();
     selectedPickup = null;
