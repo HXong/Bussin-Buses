@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
-import '../../viewmodels/driver_viewmodel.dart';
-import 'trip_list_UI.dart';
+import 'personal_information.dart';
+import 'past_trips.dart';
+import 'upcoming_trips.dart';
+import 'feedback.dart';
 
 class AccountNav extends StatefulWidget {
   const AccountNav({super.key});
@@ -13,7 +12,6 @@ class AccountNav extends StatefulWidget {
 }
 
 class _AccountNavState extends State<AccountNav> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,386 +25,39 @@ class _AccountNavState extends State<AccountNav> {
         child: Column(
           children: [
             const SizedBox(height: 90),
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PersonalInformation(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text(
-                  "Personal Information",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-            ),
+            _buildButton(context, "Personal Information", const PersonalInformation()),
             const SizedBox(height: 30),
-
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/forget');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text(
-                  "Change Password",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-            ),
+            _buildButton(context, "Change Password", null, route: '/forget'),
             const SizedBox(height: 30),
-
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PastTrips(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text(
-                  "Past Trips",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-            ),
+            _buildButton(context, "Past Trips", const PastTrips()),
             const SizedBox(height: 30),
-
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const UpcomingTrips(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text(
-                  "Upcoming Trips",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-            ),
+            _buildButton(context, "All Upcoming Trips", const UpcomingTrips()),
             const SizedBox(height: 30),
-
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Feedback(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                child: const Text(
-                  "Feedback",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-            ),
+            _buildButton(context, "Feedback", const FeedbackScreen()),
             const SizedBox(height: 90),
-
-            // SizedBox(
-            //   width: 300,
-            //   child: ElevatedButton(
-            //     onPressed: () {
-            //       Navigator.pushNamed(context, '/login');
-            //     },
-            //     style: ElevatedButton.styleFrom(
-            //       backgroundColor: Colors.grey[300],
-            //       padding: const EdgeInsets.symmetric(vertical: 15),
-            //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            //     ),
-            //     child: const Text(
-            //       "Log Out",
-            //       style: TextStyle(color: Colors.black, fontSize: 20),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
     );
   }
-}
 
-class PersonalInformation extends StatefulWidget {
-  const PersonalInformation({super.key});
-
-  @override
-  _PersonalInformationState createState() => _PersonalInformationState();
-}
-
-class _PersonalInformationState extends State<PersonalInformation> {
-  String name = "Driver Name";
-  String role = "Driver";
-  String vehiclePlate = "Unknown";
-  String date = "Unknown";
-  String profilePicUrl = 'https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/7937373/bus-driver-clipart-md.png';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPersonalInformation();
-  }
-
-  Future<void> fetchPersonalInformation() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
-
-    if (userId == null) return;
-
-    try {
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('username, user_type, created_at')
-          .eq('id', userId)
-          .single();
-
-      final busResponse = await Supabase.instance.client
-          .from('buses')
-          .select('bus_number')
-          .eq('driver_id', userId)
-          .single();
-
-      if (mounted) {
-        setState(() {
-          name = response['username'] ?? name;
-          role = response['role'] ?? role;
-          vehiclePlate = busResponse['bus_number'] ?? vehiclePlate;
-          DateTime dateTime = DateTime.parse(response['created_at']);
-          date = DateFormat('dd MMM yyyy').format(dateTime);
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Personal Information')),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 70),
-            CircleAvatar(
-              radius: 120,
-              backgroundImage: NetworkImage(profilePicUrl),
-            ),
-            const SizedBox(height: 40),
-
-            Text(name,
-                style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
-
-            Text("Role: $role",
-                style: const TextStyle(fontSize: 23)),
-            const SizedBox(height: 30),
-
-            Text("Bus Plate: $vehiclePlate",
-                style: const TextStyle(fontSize: 23)),
-            const SizedBox(height: 30),
-
-            Text("Date Joined: $date",
-                style: const TextStyle(fontSize: 23)),
-          ],
+  Widget _buildButton(BuildContext context, String text, Widget? page, {String? route}) {
+    return SizedBox(
+      width: 300,
+      child: ElevatedButton(
+        onPressed: () {
+          if (route != null) {
+            Navigator.pushNamed(context, route);
+          } else if (page != null) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[300],
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
-      ),
-    );
-  }
-}
-
-class PastTrips extends StatefulWidget {
-  const PastTrips({super.key});
-
-  @override
-  _PastTripsState createState() => _PastTripsState();
-}
-
-class _PastTripsState extends State<PastTrips> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final driverViewModel = Provider.of<DriverViewModel>(context);
-      driverViewModel.fetchPastTrips(DateTime.now());
-    });
-  }
-  @override
-  Widget build(BuildContext context) {
-    final driverViewModel = Provider.of<DriverViewModel>(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Past Trips',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SafeArea(
-        child: driverViewModel.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : TripList(
-          trips: driverViewModel.pastTrips,
-          noTripsMessage: 'No past trips.',
-        ),
-      ),
-    );
-  }
-}
-
-class UpcomingTrips extends StatefulWidget {
-  const UpcomingTrips({super.key});
-
-  @override
-  _UpcomingTripsState createState() => _UpcomingTripsState();
-}
-
-class _UpcomingTripsState extends State<UpcomingTrips> {
-  @override
-  Widget build(BuildContext context) {
-    final driverViewModel = Provider.of<DriverViewModel>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Upcoming Trips',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SafeArea(
-        child: driverViewModel.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : TripList(
-          trips: driverViewModel.upcomingTrips,
-          noTripsMessage: 'No upcoming trips available.',
-        ),
-      ),
-    );
-  }
-}
-
-class Feedback extends StatefulWidget {
-  const Feedback({super.key});
-
-  @override
-  _FeedbackState createState() => _FeedbackState();
-}
-
-class _FeedbackState extends State<Feedback> {
-  final TextEditingController _feedbackController = TextEditingController();
-  @override
-  void initState() {
-    super.initState();
-    _getFeedback();
-  }
-
-  final userId = Supabase.instance.client.auth.currentUser?.id;
-
-  Future<void> _getFeedback() async {
-    final feedback = _feedbackController.text;
-    if (feedback.isEmpty){
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please fill in all fields.")));
-      return;
-    }
-
-    await Supabase.instance.client.from('feedback').insert({
-      'feedback': feedback,
-      'user_id':userId,
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Feedback submitted successfully!")),
-    );
-
-    _feedbackController.clear();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 50),
-              const Icon(Icons.directions_bus_filled, size: 150),
-              const SizedBox(height: 10),
-              const Text(
-                "Feedback",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 60),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: TextField(
-                  controller: _feedbackController,
-                  decoration: InputDecoration(
-                    labelText: "Feedback",
-                    filled: true,
-                    fillColor: Colors.grey[400],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 170),
-              ElevatedButton(
-                onPressed: _getFeedback,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF000066),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: const Text("Submit Feedback", style: TextStyle(color: Colors.white,)),
-              ),
-            ],
-          ),
-        ),
+        child: Text(text, style: const TextStyle(color: Colors.black, fontSize: 20)),
       ),
     );
   }
