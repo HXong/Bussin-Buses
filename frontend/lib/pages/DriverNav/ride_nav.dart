@@ -1,13 +1,10 @@
-import 'dart:convert';
-
-import 'package:bussin_buses/models/RouteResponse.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class RideNav extends StatefulWidget {
@@ -35,43 +32,19 @@ class _RideNavState extends State<RideNav> {
     }
   }
 
-  void startJourney(String driverId) async {
-    var url = Uri.http("10.0.2.2:3000","api/get-route", {
-      "origin": "1",
-      "destination": "3"
-    });
-    print(driverId);
-    print(url.toString());
-    var response = await http.get(url);
-    var jsonResponse = jsonDecode(response.body);
-    RouteResponse parsedResponse = RouteResponse.fromJson(jsonResponse);
-    print(parsedResponse.decodedRoute);
-    setState(() {
-      coordinates.clear();
-      for (List<double> coords in parsedResponse.decodedRoute) {
-        double lat = coords[0];
-        double lng = coords[1];
-        LatLng latLng = LatLng(lat, lng);
-        coordinates.add(latLng);
-      }
-    });
-
-
-  }
   @override
   void initState() {
     super.initState();
     _checkPermission();
   }
 
-  var coordinates = [LatLng(1.3721, 103.9474), LatLng(1.3555, 103.9520), LatLng(1.3496, 103.9568)];
-
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
+    final driverViewModel = Provider.of<DriverViewModel>(context);
 
     return Scaffold(
-      body: FlutterMap(
+      body: driverViewModel.currentTripDetails.isEmpty ? Center(child: Text("No journey started"),) : FlutterMap(
           mapController: mapController,
           options: options,
           children: [
@@ -83,10 +56,26 @@ class _RideNavState extends State<RideNav> {
             CurrentLocationLayer(
               alignPositionOnUpdate: AlignOnUpdate.always,
             ),
+            driverViewModel.polylineCoordinates.isNotEmpty ?
             PolylineLayer(polylines: [
-              Polyline(points: coordinates, color: Colors.blue, strokeWidth: 6.0)
-            ]),
-            ElevatedButton(onPressed: () {startJourney(authViewModel.user!.id);}, child: Text("Start Journey"))
+              Polyline(points: driverViewModel.polylineCoordinates, color: Colors.blue, strokeWidth: 6.0)
+            ]) : const SizedBox(),
+            Column(
+              children: [
+                Text("Pick Up: ${driverViewModel.currentTripDetails["pickup"]}"),
+                Text("Destination: ${driverViewModel.currentTripDetails["destination"]}"),
+                ElevatedButton(onPressed: () {
+                  int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
+                  driverViewModel.startJourney(authViewModel.user!.id, scheduleId.toString());
+
+                  }, child: Text("Start Journey")),
+                ElevatedButton(onPressed: () {
+                  int scheduleId = driverViewModel.currentTripDetails["schedule_id"];
+                  driverViewModel.stopJourney(authViewModel.user!.id, scheduleId.toString());
+                }, child: Text("Stop Journey")),
+
+              ],
+            )
 
           ]),
 

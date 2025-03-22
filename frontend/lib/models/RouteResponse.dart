@@ -1,6 +1,8 @@
+import 'package:latlong2/latlong.dart';
+
 class RouteResponse {
   final String polyline;
-  final List<List<double>> decodedRoute;
+  final List<LatLng> decodedRoute;
 
   RouteResponse({
     required this.polyline,
@@ -9,10 +11,11 @@ class RouteResponse {
 
   /// Factory constructor to create an instance from a JSON map
   factory RouteResponse.fromJson(Map<String, dynamic> json) {
+    print(json["decodedRoute"]);
     return RouteResponse(
       polyline: json['polyline'],
       decodedRoute: (json['decodedRoute'] as List)
-          .map((coords) => (coords as List).map((e) => (e as num).toDouble()).toList())
+          .map((coords) => LatLng(coords[0] as double, coords[1] as double))
           .toList(),
     );
   }
@@ -21,7 +24,9 @@ class RouteResponse {
   Map<String, dynamic> toJson() {
     return {
       'polyline': polyline,
-      'decodedRoute': decodedRoute.map((coords) => coords.map((e) => e).toList()).toList(),
+      'decodedRoute': decodedRoute
+          .map((coords) => [coords.latitude, coords.longitude])
+          .toList(),
     };
   }
 }

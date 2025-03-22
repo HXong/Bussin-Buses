@@ -1,4 +1,5 @@
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -14,8 +15,6 @@ class HomePageDriver extends StatefulWidget {
 }
 
 class _HomePageDriverState extends State<HomePageDriver> {
-  int _selectedIndex = 0;
-
   final List<Widget> widgetOptions = const <Widget>[
     HomeNav(),
     ScheduleNav(),
@@ -26,6 +25,7 @@ class _HomePageDriverState extends State<HomePageDriver> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
+    final driverViewModel = Provider.of<DriverViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // show error snackbar
@@ -61,19 +61,17 @@ class _HomePageDriverState extends State<HomePageDriver> {
         ],
       ),
 
-      body: widgetOptions.elementAt(_selectedIndex),
+      body: widgetOptions.elementAt(driverViewModel.selectedIndex),
 
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+        currentIndex: driverViewModel.selectedIndex,
         showSelectedLabels: true,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         onTap: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          driverViewModel.setPageIndex(index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),

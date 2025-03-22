@@ -1,20 +1,25 @@
+import 'package:bussin_buses/models/RouteResponse.dart';
+import 'package:bussin_buses/services/route_service.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import '../services/driver_service.dart';
 import '../services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 class DriverViewModel extends ChangeNotifier {
   final DriverService _driverService;
+  final RouteService _routeService;
   final SupabaseClient _supabase = SupabaseClientService.client;
 
   List<Map<String, dynamic>> passengers = [];
   List<Map<String, dynamic>> upcomingConfirmedTrips = [];
   List<Map<String, dynamic>> upcomingAllTrips = [];
   List<Map<String, dynamic>> pastTrips = [];
+  List<LatLng> polylineCoordinates = [];
   Map<String, dynamic> driverProfile = {};
   bool isLoading = false;
+  int selectedIndex = 0;
+  Map<String, dynamic> currentTripDetails = {};
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
@@ -24,7 +29,7 @@ class DriverViewModel extends ChangeNotifier {
   String? selectedPickup;
   String? selectedDestination;
 
-  DriverViewModel(this._driverService) {
+  DriverViewModel(this._driverService, this._routeService) {
     fetchUpcomingConfirmedTrips(DateTime.now());
     fetchAllUpcomingTrips(DateTime.now());
     fetchPastTrips(DateTime.now());
@@ -181,5 +186,31 @@ class DriverViewModel extends ChangeNotifier {
       await _driverService.storeFeedback(feedback, driverId);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feedback submitted successfully!")));
       feedbackController.clear();
+  }
+
+  void setPageIndex(int newIndex) {
+    selectedIndex = newIndex;
+    notifyListeners();
+  }
+
+  Future<void> startJourney(String driverId, String scheduleId) async {
+    polylineCoordinates.clear();
+    RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
+    polylineCoordinates = routeResponse.decodedRoute;
+    notifyListeners();
+  }
+
+  Future<void> stopJourney(String driverId, String scheduleId) async {
+    int responseCode = await _routeService.stopJourney(driverId, scheduleId);
+    if (responseCode == 0) {
+      // stopped successfully
+      polylineCoordinates.clear();
+      // TODO: do something to end trip?
+      fetchUpcomingConfirmedTrips(DateTime.now());
+      currentTripDetails.clear();
+    }
+    else {
+      // something went wrong
+    }
   }
 }

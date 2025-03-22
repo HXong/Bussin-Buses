@@ -4,12 +4,14 @@ class TripList extends StatelessWidget {
   final List<dynamic> trips;
   final String noTripsMessage;
   final void Function(Map<String, dynamic>)? onTap;
+  final void Function(Map<String, dynamic>)? onLoadJourney;
 
   const TripList({
     Key? key,
     required this.trips,
     required this.noTripsMessage,
     this.onTap,
+    this.onLoadJourney
   }) : super(key: key);
 
   @override
@@ -81,6 +83,7 @@ class TripList extends StatelessWidget {
                     Text('Driver Name: ${trip['driver_name']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   ],
                 ),
+                ElevatedButton(onPressed: () => onLoadJourney!(trip), child: Text("Load Journey"))
               ],
             ),
             trailing: onTap != null

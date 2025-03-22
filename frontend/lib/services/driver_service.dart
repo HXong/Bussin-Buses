@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DriverService {
   final SupabaseClient _supabase = SupabaseClientService.client;
   List<Map<String, dynamic>> passengerDetails = [];
-  List<Map<String, dynamic>> upcomingTrips = [];
 
   //Function to fetch passenger details for corresponding schedule
   Future<List<Map<String, dynamic>>> fetchPassengerDetails(String scheduleId) async {

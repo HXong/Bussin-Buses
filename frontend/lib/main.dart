@@ -7,6 +7,7 @@ import 'package:bussin_buses/pages/DriverNav/home_page_driver.dart';
 import 'package:bussin_buses/services/auth_service.dart';
 import 'package:bussin_buses/services/commuter_service.dart';
 import 'package:bussin_buses/services/driver_service.dart';
+import 'package:bussin_buses/services/route_service.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
@@ -26,7 +27,7 @@ void main() async{
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
-      ChangeNotifierProvider(create: (_) => DriverViewModel(DriverService())),
+      ChangeNotifierProvider(create: (_) => DriverViewModel(DriverService(), RouteService())),
       ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService()))
     ],
     child: const MyApp(),),
