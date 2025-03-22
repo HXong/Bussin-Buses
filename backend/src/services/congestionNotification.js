@@ -4,6 +4,7 @@ const axios = require('axios');
 const { decode } = require('@here/flexpolyline');
 
 const { getRoutesNearCamera, getNearestRoutePoint } = require('./routeHandler');
+const { timeStamp, time } = require('console');
 
 const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 
@@ -56,6 +57,7 @@ function sendNotification(affectedDrivers, cameraId) {
             driver_id: driverId,
             message: `High congestion detected ahead on your route (Camera ${cameraId})!`,
             cameraId: cameraId,
+            timeStamp: now,
             seen: false
         })
     });
@@ -69,10 +71,16 @@ function getSGTime(){
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false,
+        hour12: true,
+        timeZone: 'Asia/Singapore'
       };
 
-    return new Date().toLocaleString('en-SG', options);
+    let sgTime = new Date().toLocaleString('en-SG', options);
+
+    let [date, time] = sgTime.split(", ");
+    let [month, day, year] = date.split("/");
+
+    return `${day}/${month}/${year} ${time}`;
 }
 
 module.exports = { getAffectedDrivers, sendNotification };

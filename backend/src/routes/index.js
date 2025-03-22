@@ -57,107 +57,6 @@ async function getNextScheduleID() {
   return nextID; 
 }
 
-/*
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  const driver = activeDrivers.find(d => d.username === username && d.password === password);
-
-  if (!driver) {
-      return res.status(401).json({ error: "Invalid username or password" });
-  }
-
-  active_sessions[driver.driver_id] = driver; // Store active session
-  res.json({ 
-      driver_id: driver.driver_id, 
-      username: driver.username, 
-      currentLocation: driver.currentLocation 
-  });
-});
-
-app.post('/api/logout', (req, res) => {
-  const { driver_id } = req.body;
-  
-  if (active_sessions[driver_id]) {
-      delete active_sessions[driver_id];
-      return res.json({ message: "Logout successful" });
-  }
-
-  res.status(400).json({ error: "Driver not logged in" });
-});
-
-app.post('/api/update-driver', (req, res) => {
-  const { driver_id, route_id, currentLocation, polyline } = req.body;
-
-  let driver = activeDrivers.find(d => d.driver_id === driver_id);
-
-  if (!driver) {
-      return res.status(404).json({ error: "Driver not found" });
-  }
-
-  let route = driver.scheduled_route.find(r => r.route_id === route_id);
-
-  if (!route) {
-      return res.status(404).json({ error: "Route not found for this driver" });
-  }
-
-  route.polyline = polyline || route.polyline;
-  route.origin = route.origin || currentLocation;
-  driver.currentLocation = currentLocation; 
-  saveActiveDrivers();
-
-  res.json({ message: "Driver location updated", driver });
-});
-*/
-
-/*
-app.get('/api/get-next-route-id', (req, res) => {
-  const driverId = req.query.driver_id;
-  const driver = activeDrivers.find(d => d.driver_id === driverId);
-
-  if (!driver) {
-      return res.status(404).json({ error: "Driver not found" });
-  }
-
-  const existingRoutes = driver.scheduled_route.map(r => parseInt(r.route_id.substring(1))); 
-  let nextId = 1;
-
-  while (existingRoutes.includes(nextId) && nextId < 1000) {
-      nextId++;
-  }
-
-  if (nextId >= 1000) {
-      return res.status(400).json({ error: "No available route ID found." });
-  }
-
-  res.json({ next_route_id: `R${nextId.toString().padStart(3, '0')}` });
-});
-*/
-
-/*
-app.post('/api/confirm-route', (req, res) => {
-  const { driver_id, origin, destination } = req.body;
-  const driver = activeDrivers.find(d => d.driver_id === driver_id);
-
-  if (!driver) {
-      return res.status(404).json({ error: "Driver not found" });
-  }
-
-  const routeId = getNextRouteID(driver_id);
-
-  const newRoute = {
-    route_id: routeId,
-    origin: origin,
-    destination: destination,
-    journey_started: false
-  };
-
-  driver.scheduled_route.push(newRoute);
-  saveActiveDrivers();
-
-  res.json({ message: "Route added successfully", newRoute });
-});
-*/
-
 app.post('/api/confirm-route', async (req, res) => {
   try {
       const { driver_id, pickup, destination, date, time } = req.body;
@@ -199,21 +98,6 @@ app.post('/api/confirm-route', async (req, res) => {
       res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
-
-/*
-app.get('/api/scheduled-routes/:driverId', (req, res) => {
-  const driverId = req.params.driverId;
-  const driver = activeDrivers.find(d => d.driver_id === driverId);
-
-  if (!driver) {
-    return res.status(401).json({ error: "Invalid username or password" });
-  }
-
-  res.json({
-    scheduled_route: driver.scheduled_route || []
-  });
-});
-*/
 
 app.get('/api/scheduled-routes/:driverId', async (req, res) => {
   try {
@@ -267,39 +151,23 @@ app.get('/api/scheduled-routes/:driverId', async (req, res) => {
   }
 });
 
-//forming of polyline and coordinates for defined routes
-app.get('/api/get-route', async(req, res) => {
+//API to call for new route after recieving congestion notification
+app.get('/api/get-reroute', async(req, res) => {
 
   try{
-    const { origin, destination } = req.query;
+    const { driverId } = req.query;
 
-    if (!origin || !destination) {
-        return res.status(400).json({ error: "Missing parameters: origin, destination required." });
+    if (!driverId) {
+        return res.status(400).json({ error: "Missing parameters: driver id required." });
     }
 
-    const { data: originData, error: originError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', origin)
-        .single();
+    const activeDrivers = loadActiveDrivers();
+    const driver = activeDrivers.find(d => d.driver_id === driverId);
+    const [driverLatitude, driverLongitude] = driver.currentLocation;
 
-    if (originError || !originData) {
-        return res.status(404).json({ error: "Origin location not found" });
-    }
 
-    // Fetch coordinates for destination
-    const { data: destinationData, error: destinationError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', destination)
-        .single();
-
-    if (destinationError || !destinationData) {
-        return res.status(404).json({ error: "Destination location not found" });
-    }
-
-    const originCoords = `${originData.latitude},${originData.longitude}`;
-    const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
+    const originCoords = `${driverLatitude},${driverLongitude}`;
+    const destinationCoords = driver.destinationCoords;
 
     console.log(`Resolved Coordinates: Origin(${originCoords}) → Destination(${destinationCoords})`);
 
@@ -307,6 +175,9 @@ app.get('/api/get-route', async(req, res) => {
     if (!polyline) {
         return res.status(404).json({ error: "No route found." });
     }
+
+    driver.polyline = polyline;
+    saveActiveDrivers(driver);
 
     const decodedRoute = decodeRoute(polyline);
 
@@ -320,48 +191,35 @@ app.get('/api/get-route', async(req, res) => {
   }
 });
 
-/*
-app.post('/api/start-journey', async (req, res) => {
-
-  const { driver_id, route_id } = req.body;
-  let driver = activeDrivers.find(d => d.driver_id === driver_id);
-  if (!driver) return res.status(404).json({ error: "Driver not found" });
-
-  let route = driver.scheduled_route.find(r => r.route_id === route_id);
-  if (!route) return res.status(404).json({ error: "Route not found" });
-
-  route.journey_started = true;
-  saveActiveDrivers();
-  
-  const polyline = await getOptimisedRoute(route.origin, route.destination);
-  if (!polyline) {
-      return res.status(404).json({ error: "No route found." });
-  }
-
-  const decodedRoute = decodeRoute(polyline);
-
-  res.json({
-      polyline: polyline,
-      decodedRoute: decodedRoute
-  });
-
-});
-*/
-
 app.post('/api/start-journey', async (req, res) => {
   try {
       const { driver_id, schedule_id } = req.body;
+      const currentLocation = [1.335128, 103.937533];
 
       const { data: driver, error: driverError } = await supabase
           .from('schedules')
           .select('*')
           .eq('driver_id', driver_id)
           .eq('schedule_id', schedule_id)
+          .eq('delete_schedule', false)
           .single();
 
       if (driverError || !driver) {
           return res.status(404).json({ error: "Driver or route not found" });
       }
+
+      const { data: journeyStart, error } = await supabase
+            .from('journey')
+            .select('journey_started')
+            .eq('schedule_id', schedule_id)
+        
+        if (error) {
+            return res.status(500).json({ error: "Database error", details: error.message });
+        }
+    
+        if (journeyStart?.length > 0 && journeyStart[0].journey_started === true) {
+            return res.status(404).json({ error: "Journey has already started" });
+        }
 
       const { error: journeyError } = await supabase
           .from('journey')
@@ -373,14 +231,38 @@ app.post('/api/start-journey', async (req, res) => {
           return res.status(500).json({ error: "Failed to update journey status", details: journeyError.message });
       }
 
-      const polyline = await getOptimisedRoute(driver.pickup, driver.destination);
+      const { data: originData, error: originError } = await supabase
+        .from('location')
+        .select('latitude, longitude')
+        .eq('location_id', driver.pickup)
+        .single();
+
+    if (originError || !originData) {
+        return res.status(404).json({ error: "Origin location not found" });
+    }
+
+      const { data: destinationData, error: destinationError } = await supabase
+        .from('location')
+        .select('latitude, longitude')
+        .eq('location_id', driver.destination)
+        .single();
+
+    if (destinationError || !destinationData) {
+        return res.status(404).json({ error: "Destination location not found" });
+    }
+
+    const originCoords = `${originData.latitude},${originData.longitude}`;
+    const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
+
+      const polyline = await getOptimisedRoute(originCoords, destinationCoords);
       if (!polyline) {
           return res.status(404).json({ error: "No optimized route found." });
       }
 
       let activeDrivers = loadActiveDrivers();
       activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id);
-      activeDrivers.push({ driver_id, schedule_id, polyline });
+      activeDrivers.push({ driver_id, schedule_id, polyline, currentLocation, destination: destinationCoords });
+      saveActiveDrivers(activeDrivers);
 
       const decodedRoute = decodeRoute(polyline);
 
@@ -395,20 +277,6 @@ app.post('/api/start-journey', async (req, res) => {
   }
 });
 
-/*
-app.post('/api/stop-journey', (req, res) => {
-
-  const { driver_id, route_id } = req.body;
-  let driver = activeDrivers.find(d => d.driver_id === driver_id);
-  if (!driver) return res.status(404).json({ error: "Driver not found" });
-
-  driver.scheduled_route = driver.scheduled_route.filter(route => route.route_id !== route_id);
-  driverNotifications[driver_id] = [];
-  saveActiveDrivers();
-  res.json({ message: "Journey stopped" });
-
-});
-*/
 
 app.post('/api/stop-journey', async (req, res) => {
   try {
@@ -437,12 +305,12 @@ app.post('/api/stop-journey', async (req, res) => {
 
       const { error: deleteScheduleError } = await supabase
           .from('schedules')
-          .delete()
+          .update({ delete_schedule: true })
           .eq('schedule_id', schedule_id);
 
       if (deleteScheduleError) {
-          console.error("Error deleting schedule:", deleteScheduleError.message);
-          return res.status(500).json({ error: "Failed to delete schedule", details: deleteScheduleError.message });
+          console.error("Error updating delete schedule:", deleteScheduleError.message);
+          return res.status(500).json({ error: "Failed to update delete schedule", details: deleteScheduleError.message });
       }
 
       const { error: deleteNotificationError } = await supabase
@@ -465,6 +333,31 @@ app.post('/api/stop-journey', async (req, res) => {
       console.error("Internal Server Error:", error.message);
       res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
+});
+
+app.post('/api/update-driver-location', (req, res) => {
+    try {
+        const { driver_id, latitude, longitude } = req.body;
+
+        if (!driver_id || latitude === undefined || longitude === undefined) {
+            return res.status(400).json({ error: "Missing driver_id, latitude, or longitude" });
+        }
+
+        let activeDrivers = loadActiveDrivers();
+        let driver = activeDrivers.find(d => d.driver_id === driver_id);
+        if (!driver) {
+            return res.status(404).json({ error: "Driver not found in active sessions" });
+        }
+
+        driver.currentLocation = [latitude, longitude];
+
+        saveActiveDrivers(activeDrivers);
+
+        res.json({ message: "Driver location updated" });
+    } catch (error) {
+        console.error("Error updating driver location:", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 
@@ -501,7 +394,7 @@ app.get('/api/check-journey/:schedule_id', async (req, res) => {
 
 // API to Receive Notifications and Store them
 app.post('/api/notify-driver', async (req, res) => {
-  const { driver_id, message, cameraId, seen } = req.body;
+  const { driver_id, message, cameraId, timeStamp, seen } = req.body;
 
   if (!driver_id || !message || !cameraId) {
       return res.status(400).json({ error: "Missing notification parameters (driver_id, message, cameraId required)." });
@@ -513,8 +406,8 @@ app.post('/api/notify-driver', async (req, res) => {
   const { data: existingNotification, error: checkError } = await supabase
           .from('notifications')
           .select('*')
-          .eq('driverId', driver_id)
-          .eq('cameraId', cameraId)
+          .eq('driver_id', driver_id)
+          .eq('camera_id', cameraId)
           .single();
   
   if (checkError && checkError.code !== 'PGRST116') {
@@ -529,10 +422,10 @@ app.post('/api/notify-driver', async (req, res) => {
   const { error: insertError } = await supabase
       .from('notifications')
       .insert([{ 
-          driverId: driver_id,
-          cameraId: cameraId,
+          driver_id: driver_id,
+          camera_id: cameraId,
           message: message,
-          timestamp: new Date().toISOString(),
+          timestamp: timeStamp,
           seen: seen
       }]);
 
@@ -543,57 +436,8 @@ app.post('/api/notify-driver', async (req, res) => {
 
   res.json({ success: true, message: "Notification added" });
   
-  /*
-  if (!driverNotifications[driver_id]) {
-      driverNotifications[driver_id] = [];
-  }
-
-  const existingNotification = driverNotifications[driver_id].find(n => n.cameraId === cameraId);
-  if (!existingNotification) {
-      driverNotifications[driver_id].push({ message, cameraId, timestamp: new Date().toISOString() });
-      res.json({ success: true, message: "Notification added" });
-  } else {
-      res.json({ success: false, message: "Notification already exists for this camera" });
-  }
-  */
 });
 
-// API to Fetch Notifications for a Driver (For Frontend)
-app.get('/api/get-notifications/:driverId', async (req, res) => {
-  /*
-  const driverId = req.params.driverId;
-  const notifications = driverNotifications[driverId] || [];
-
-  if (notifications.length > 0) {
-    res.json({ notifications });  
-  } else {
-    res.json({ notifications: [] });
-  }
-  */
-
-  
-  try{
-      const driverId = req.params.driverId;
-      const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('driverId', driverId)
-          .eq('seen', false)
-          .order('timestamp', { ascending: false });
-
-      if (error) {
-          console.error("Error fetching notifications:", error.message);
-          return res.status(500).json({ error: "Error fetching notifications", details: error.message });
-      }
-
-      res.json({ notifications: data });
-
-  } catch (error) {
-      console.error("Internal Server Error:", error.message);
-      res.status(500).json({ error: "Internal Server Error", details: error.message });
-  }  
-  
-});
 
 app.listen(port, () => {
   console.log(`Bussin Buses Web Server listening at http://localhost:${port}`);
