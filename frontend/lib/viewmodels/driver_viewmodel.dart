@@ -78,6 +78,7 @@ class DriverViewModel extends ChangeNotifier {
   Future<void> deleteTrip(Map<String, dynamic> trip) async {
     await _driverService.deleteTrip(trip);
     upcomingConfirmedTrips.removeWhere((t) => t['schedule_id'] == trip['schedule_id']);
+    await fetchAllUpcomingTrips(DateTime.now());
     notifyListeners();
   }
 
