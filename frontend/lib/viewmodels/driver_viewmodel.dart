@@ -22,10 +22,10 @@ class DriverViewModel extends ChangeNotifier {
   Map<String, dynamic> currentTripDetails = {};
 
   final TextEditingController dateController = TextEditingController();
-  final TextEditingController timeController = TextEditingController();
   final TextEditingController feedbackController = TextEditingController();
 
   List<String> locations = [];
+  String? pickedTime;
   String? selectedPickup;
   String? selectedDestination;
 
@@ -104,9 +104,9 @@ class DriverViewModel extends ChangeNotifier {
 
   Future<void> submitJourney(BuildContext context) async {
     final date = dateController.text;
-    final time = timeController.text;
+    final time = pickedTime;
 
-    if (selectedPickup == null || selectedDestination == null || date.isEmpty || time.isEmpty) {
+    if (selectedPickup == null || selectedDestination == null || date.isEmpty || time == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill in all fields.")));
       return;
     }
@@ -118,11 +118,6 @@ class DriverViewModel extends ChangeNotifier {
 
     if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid date format. Use yyyy-MM-dd.")));
-      return;
-    }
-
-    if (!RegExp(r'^\d{2}:\d{2}$').hasMatch(time)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid time format. Use HH:mm.")));
       return;
     }
 
@@ -152,13 +147,14 @@ class DriverViewModel extends ChangeNotifier {
     await _driverService.addJourney(pickupId: pickupId, destinationId: destinationId, date: date, time: time, driverId: driverId,);
 
     dateController.clear();
-    timeController.clear();
+    pickedTime = null;
     selectedPickup = null;
     selectedDestination = null;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
 
     await fetchUpcomingConfirmedTrips(DateTime.now());
     await fetchAllUpcomingTrips(DateTime.now());
+
     notifyListeners();
   }
 

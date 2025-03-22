@@ -112,26 +112,34 @@ class _ScheduleNavState extends State<ScheduleNav> {
                   keyboardType: TextInputType.datetime,
                 ),
               ),
-
               const SizedBox(height: 20),
 
-              // Time Field
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: TextField(
-                  controller: driverViewModel.timeController,
+                child: DropdownButtonFormField<String>(
+                  value: driverViewModel.pickedTime, // The selected value
                   decoration: InputDecoration(
-                    labelText: 'Time (hh:mm)',
+                    labelText: 'Time',
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  keyboardType: TextInputType.datetime,
+                  items: List.generate(25, (index) {
+                    int hour = 9 + (index ~/ 2);
+                    int minute = (index % 2) * 30;
+                    String time = '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+                    return DropdownMenuItem(
+                      value: time,
+                      child: Text(time),
+                    );
+                  }),
+                  onChanged: (String? newValue) {
+                    driverViewModel.pickedTime = newValue;
+                  },
                 ),
               ),
-
               const SizedBox(height: 30),
 
               // Submit Button

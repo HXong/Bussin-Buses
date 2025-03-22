@@ -83,7 +83,20 @@ class TripList extends StatelessWidget {
                     Text('Driver Name: ${trip['driver_name']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   ],
                 ),
-                ElevatedButton(onPressed: () => onLoadJourney!(trip), child: Text("Load Journey"))
+                const SizedBox(height: 5),
+
+                Column(
+                  children: [
+                    if (onLoadJourney != null)
+                      ElevatedButton(
+                        onPressed: () => onLoadJourney!(trip),
+                        child: Text("Load Journey", style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF000066),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
             trailing: onTap != null
