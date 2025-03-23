@@ -195,7 +195,8 @@ app.post('/api/start-journey', async (req, res) => {
   try {
       const { driver_id, schedule_id } = req.body;
       const currentLocation = [1.335128, 103.937533];
-
+    
+      //getStartJourneyDriver
       const { data: driver, error: driverError } = await supabase
           .from('schedules')
           .select('*')
