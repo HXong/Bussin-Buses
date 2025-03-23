@@ -1,4 +1,5 @@
 import 'package:bussin_buses/services/supabase_client_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -63,14 +64,12 @@ class DriverService {
     for (var trip in response) {
       String pickupName = await getLocationName(trip['pickup']);
       String destinationName = await getLocationName(trip['destination']);
-
       String dateStr = trip['date']; // YYYY-MM-DD
       String timeStr = trip['time']; // HH:MM:SS
       DateTime startTime = DateTime.parse('$dateStr $timeStr');
       DateTime endTime = startTime.add(const Duration(minutes: 75));
       String formattedDate = formatDate(dateStr);
       String endTimeFormatted = DateFormat('HH:mm').format(endTime);
-      DateTime tripDate = DateTime.parse(dateStr);
 
       String driverName = '';
       if (trip['driver_id'] != null) {
@@ -86,10 +85,10 @@ class DriverService {
       // Determine if we should include the trip based on the boolean condition
       bool includeTrip = false;
       String status = "CONFIRMED";
-      if (fetchBefore && tripDate.isBefore(targetDate)) {
+      if (fetchBefore && startTime.isBefore(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "COMPLETED";
-      } else if (!fetchBefore && tripDate.isAfter(targetDate)) {
+      } else if (!fetchBefore && startTime.isAfter(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "CONFIRMED";
       }
@@ -112,7 +111,6 @@ class DriverService {
         });
       }
     }
-
     return tripsWithLocations;
   }
 

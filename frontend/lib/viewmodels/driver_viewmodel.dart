@@ -26,14 +26,15 @@ class DriverViewModel extends ChangeNotifier {
   final TextEditingController feedbackController = TextEditingController();
 
   List<String> locations = [];
+  final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
   String? pickedTime;
   String? selectedPickup;
   String? selectedDestination;
 
   DriverViewModel(this._driverService, this._routeService) {
-    fetchUpcomingConfirmedTrips(DateTime.now());
-    fetchAllUpcomingTrips(DateTime.now());
-    fetchPastTrips(DateTime.now());
+    fetchUpcomingConfirmedTrips(timeNow);
+    fetchAllUpcomingTrips(timeNow);
+    fetchPastTrips(timeNow);
     fetchPersonalInformation();
   }
 
@@ -84,7 +85,7 @@ class DriverViewModel extends ChangeNotifier {
   Future<void> deleteTrip(Map<String, dynamic> trip) async {
     await _driverService.deleteTrip(trip);
     upcomingConfirmedTrips.removeWhere((t) => t['schedule_id'] == trip['schedule_id']);
-    await fetchAllUpcomingTrips(DateTime.now());
+    await fetchAllUpcomingTrips(timeNow);
     notifyListeners();
   }
 
@@ -125,14 +126,14 @@ class DriverViewModel extends ChangeNotifier {
     final driverId = _supabase.auth.currentUser!.id;
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
-    final selectedTime = DateTime.parse("$date $time");
+    final selectedTime = DateTime.parse("$date $time"); // Convert to Singapore Time
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
     final theDaySchedules = existingTrips
         .where((trip) => trip['date'] == date) //include only those on the selected date
         .map((trip) => trip['start_time'].toString())
         .toList();
 
-    if (selectedTime.isBefore(DateTime.now())) {
+    if (selectedTime.isBefore(timeNow)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
       return;
     }
@@ -153,9 +154,9 @@ class DriverViewModel extends ChangeNotifier {
     selectedDestination = null;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
 
-    await fetchUpcomingConfirmedTrips(DateTime.now());
-    await fetchAllUpcomingTrips(DateTime.now());
-
+    debugPrint("TImeNOw: $timeNow");
+    await fetchUpcomingConfirmedTrips(timeNow);
+    await fetchAllUpcomingTrips(timeNow);
     notifyListeners();
   }
 
@@ -205,7 +206,7 @@ class DriverViewModel extends ChangeNotifier {
       isStartJourney = false;
       polylineCoordinates.clear();
       // TODO: do something to end trip?
-      fetchUpcomingConfirmedTrips(DateTime.now());
+      fetchUpcomingConfirmedTrips(timeNow);
       currentTripDetails.clear();
     }
     else {

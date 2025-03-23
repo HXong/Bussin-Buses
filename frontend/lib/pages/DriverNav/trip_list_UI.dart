@@ -140,47 +140,70 @@ class TripList extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     Text(
+                    //       'Driver Name: ${trip['driver_name']}',
+                    //       style: const TextStyle(
+                    //         fontSize: 14,
+                    //         fontWeight: FontWeight.w500,
+                    //       ),
+                    //     ),
+                    //     if (onLoadJourney != null)
+                    //       ElevatedButton(
+                    //         onPressed: () => onLoadJourney!(trip),
+                    //         style: ElevatedButton.styleFrom(
+                    //           backgroundColor: Color(0xFF1E90FF),
+                    //           elevation: 1,
+                    //           // shape: RoundedRectangleBorder(
+                    //           //   borderRadius: BorderRadius.circular(10),
+                    //           // ),
+                    //           foregroundColor: Colors.white,
+                    //           textStyle: const TextStyle(
+                    //             fontSize: 13,
+                    //             fontWeight: FontWeight.w900,
+                    //           ),
+                    //         ),
+                    //         child: Row(
+                    //           mainAxisSize: MainAxisSize.min,
+                    //           children: [
+                    //             Icon(Icons.location_on, color: Colors.white),
+                    //             Text("Navigate")
+                    //             // Text("Load Journey"),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     // IconButton(icon: const Icon(Icons.location_on, size: 30), onPressed: () => onLoadJourney!(trip))
+                    //     // Expanded(child: IconButton(icon: const Icon(Icons.location_on), onPressed: () => onLoadJourney!(trip)))
+                    //   ],
+                    // ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Driver Name: ${trip['driver_name']}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (onLoadJourney != null)
-                          ElevatedButton(
-                            onPressed: () => onLoadJourney!(trip),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF1E90FF),
-                              elevation: 1,
-                              // shape: RoundedRectangleBorder(
-                              //   borderRadius: BorderRadius.circular(10),
-                              // ),
-                              foregroundColor: Colors.white,
-                              textStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.location_on, color: Colors.white),
-                                Text("Navigate")
-                                // Text("Load Journey"),
-                              ],
-                            ),
-                          ),
-                        // IconButton(icon: const Icon(Icons.location_on, size: 30), onPressed: () => onLoadJourney!(trip))
-                        // Expanded(child: IconButton(icon: const Icon(Icons.location_on), onPressed: () => onLoadJourney!(trip)))
+                        Text('Driver Name: ${trip['driver_name']}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                       ],
                     ),
-                    // if (onLoadJourney != null)
-                    //   IconButton(icon: const Icon(Icons.location_on), onPressed: () => onLoadJourney!(trip))
-                    // ElevatedButton(onPressed: () => onLoadJourney!(trip), child: Text("Load Journey"))
+                    const SizedBox(height: 5),
+
+                    Row(
+                      children: [
+                        if (onLoadJourney != null)
+                        ElevatedButton(
+                          onPressed: () => onLoadJourney!(trip),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF000066),
+                            elevation: 1,
+                            foregroundColor: Colors.white,
+                          ),
+                          child:Row(
+                            children:[
+                              Icon(Icons.location_on, color: Colors.white),
+                              Text("Navigate", style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 trailing:
