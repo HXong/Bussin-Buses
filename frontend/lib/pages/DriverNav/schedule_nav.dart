@@ -93,23 +93,35 @@ class _ScheduleNavState extends State<ScheduleNav> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
 
-              // Date Field
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: TextField(
+                child: TextFormField(
                   controller: driverViewModel.dateController,
                   decoration: InputDecoration(
-                    labelText: 'Date (yyyy-mm-dd)',
+                    labelText: 'Date',
                     filled: true,
                     fillColor: Colors.grey[400],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
+                    suffixIcon: Icon(Icons.arrow_drop_down),
                   ),
-                  keyboardType: TextInputType.datetime,
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+
+                    if (pickedDate != null) {
+                      driverViewModel.dateController.text =
+                      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                    }
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -117,7 +129,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
-                  value: driverViewModel.pickedTime, // The selected value
+                  value: driverViewModel.pickedTime,
                   decoration: InputDecoration(
                     labelText: 'Time',
                     filled: true,
@@ -135,9 +147,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                       child: Text(time),
                     );
                   }),
-                  onChanged: (String? newValue) {
-                    driverViewModel.pickedTime = newValue;
-                  },
+                  onChanged: driverViewModel.updateSelectedTime,
                 ),
               ),
               const SizedBox(height: 30),

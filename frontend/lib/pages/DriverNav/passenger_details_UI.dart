@@ -34,14 +34,26 @@ class PassengerList extends StatelessWidget {
           children: passengers.map((passenger) {
             final commuterName = passenger['commuter_name'] ?? 'Unknown';
             final seatNumber = passenger['seat_number'] ?? 'N/A';
+            final isCheckedIn = passenger['is_checked_in'] ?? false;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    commuterName.toString(),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: isCheckedIn ? Colors.orange[700] : Colors.grey[600],
+                        size: 25,
+                      ),
+                      const SizedBox(width: 10),
+                      // Commuter name
+                      Text(
+                        commuterName.toString(),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
                   Text(
                     'Seat $seatNumber',

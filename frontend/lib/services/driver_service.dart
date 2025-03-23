@@ -1,6 +1,7 @@
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DriverService {
@@ -9,9 +10,10 @@ class DriverService {
 
   //Function to fetch passenger details for corresponding schedule
   Future<List<Map<String, dynamic>>> fetchPassengerDetails(String scheduleId) async {
+    passengerDetails.clear();
     final bookingResponse = await _supabase
         .from('bookings')
-        .select('seat_id, commuter_id')
+        .select('seat_id, commuter_id, is_checked_in')
         .eq('schedule_id', scheduleId);
 
     for (var booking in bookingResponse) {
@@ -29,13 +31,27 @@ class DriverService {
           .eq('id', commuterId)
           .single();
 
+      final checkInStatus = booking['is_checked_in'];
       passengerDetails.add({
         'commuter_name': commuterResponse['username'].toString(),
         'seat_number': seatResponse['seat_number'].toString(),
+        'is_checked_in' : checkInStatus,
       });
     }
     passengerDetails.sort((a, b) => int.parse(a['seat_number']).compareTo(int.parse(b['seat_number'])));
     return passengerDetails;
+  }
+
+  Future<bool> checkJourneyStarted(int scheduleId) async {
+    final journeyStartedResponse = await _supabase
+      .from('journey')
+      .select('journey_started')
+      .eq('schedule_id', scheduleId)
+      .maybeSingle();
+    if (journeyStartedResponse == null) {
+      return false;
+    }
+    return journeyStartedResponse['journey_started'] as bool;
   }
 
   //Function to delete a schedule
@@ -66,10 +82,10 @@ class DriverService {
       String destinationName = await getLocationName(trip['destination']);
       String dateStr = trip['date']; // YYYY-MM-DD
       String timeStr = trip['time']; // HH:MM:SS
-      DateTime startTime = DateTime.parse('$dateStr $timeStr');
-      DateTime endTime = startTime.add(const Duration(minutes: 75));
+      DateTime startDateTime = DateTime.parse('$dateStr $timeStr');
+      DateTime endStartTime = startDateTime.add(const Duration(minutes: 75));
       String formattedDate = formatDate(dateStr);
-      String endTimeFormatted = DateFormat('HH:mm').format(endTime);
+      String formattedEndTime = DateFormat('HH:mm').format(endStartTime);
 
       String driverName = '';
       if (trip['driver_id'] != null) {
@@ -84,15 +100,19 @@ class DriverService {
 
       // Determine if we should include the trip based on the boolean condition
       bool includeTrip = false;
+      bool isJourneyStarted = await checkJourneyStarted(trip['schedule_id']);
+      //final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
       String status = "CONFIRMED";
-      if (fetchBefore && startTime.isBefore(targetDate)) {
+      if (fetchBefore && startDateTime.isBefore(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "COMPLETED";
-      } else if (!fetchBefore && startTime.isAfter(targetDate)) {
+      } else if (!fetchBefore && startDateTime.isAfter(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "CONFIRMED";
       }
-
+      if(isJourneyStarted == true) { //(DateUtils.isSameDay(timeNow, startDateTime))
+        status = "IN PROGRESS";
+      }
       if (onlyConfirmed && trip['delete_schedule'] == true) {
         includeTrip = false;
       }
@@ -103,11 +123,12 @@ class DriverService {
           'driver_name': driverName,
           'date': formattedDate,
           'start_time': timeStr.substring(0, 5),
-          'end_time': endTimeFormatted,
+          'end_time': formattedEndTime,
           'duration': '1h 15min',
           'pickup': pickupName,
           'destination': destinationName,
           'status' : status,
+          'is_journey_started': isJourneyStarted,
         });
       }
     }

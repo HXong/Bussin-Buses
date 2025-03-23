@@ -104,6 +104,11 @@ class DriverViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateSelectedTime (String? newTime){
+    pickedTime = newTime;
+    notifyListeners();
+  }
+
   Future<void> submitJourney(BuildContext context) async {
     final date = dateController.text;
     final time = pickedTime;
@@ -145,16 +150,13 @@ class DriverViewModel extends ChangeNotifier {
         return;
       }
     }
-
     await _driverService.addJourney(pickupId: pickupId, destinationId: destinationId, date: date, time: time, driverId: driverId,);
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
 
     dateController.clear();
     pickedTime = null;
     selectedPickup = null;
     selectedDestination = null;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
-
-    debugPrint("TImeNOw: $timeNow");
     await fetchUpcomingConfirmedTrips(timeNow);
     await fetchAllUpcomingTrips(timeNow);
     notifyListeners();

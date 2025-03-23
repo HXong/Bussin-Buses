@@ -51,7 +51,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
 
                   const Center(
                     child: Text(
