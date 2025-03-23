@@ -1,3 +1,4 @@
 node_modules
 images
 sample_frontend
+.env
