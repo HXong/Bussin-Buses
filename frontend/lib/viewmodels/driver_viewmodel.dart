@@ -20,6 +20,7 @@ class DriverViewModel extends ChangeNotifier {
   bool isLoading = false;
   int selectedIndex = 0;
   Map<String, dynamic> currentTripDetails = {};
+  bool isStartJourney = false;
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController feedbackController = TextEditingController();
@@ -193,6 +194,7 @@ class DriverViewModel extends ChangeNotifier {
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
+    isStartJourney = true;
     notifyListeners();
   }
 
@@ -200,6 +202,7 @@ class DriverViewModel extends ChangeNotifier {
     int responseCode = await _routeService.stopJourney(driverId, scheduleId);
     if (responseCode == 0) {
       // stopped successfully
+      isStartJourney = false;
       polylineCoordinates.clear();
       // TODO: do something to end trip?
       fetchUpcomingConfirmedTrips(DateTime.now());
