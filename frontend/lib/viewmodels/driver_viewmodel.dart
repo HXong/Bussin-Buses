@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:bussin_buses/models/RouteResponse.dart';
 import 'package:bussin_buses/services/route_service.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/driver_service.dart';
 import '../services/supabase_client_service.dart';
@@ -30,6 +33,8 @@ class DriverViewModel extends ChangeNotifier {
   String? pickedTime;
   String? selectedPickup;
   String? selectedDestination;
+
+  Timer? _locationUpdateTimer;
 
   DriverViewModel(this._driverService, this._routeService) {
     fetchUpcomingConfirmedTrips(timeNow);
@@ -194,6 +199,7 @@ class DriverViewModel extends ChangeNotifier {
   }
 
   Future<void> startJourney(String driverId, String scheduleId) async {
+    _startLocationUpdates();
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
@@ -202,6 +208,7 @@ class DriverViewModel extends ChangeNotifier {
   }
 
   Future<void> stopJourney(String driverId, String scheduleId) async {
+    _stopLocationUpdates();
     int responseCode = await _routeService.stopJourney(driverId, scheduleId);
     if (responseCode == 0) {
       // stopped successfully
@@ -213,6 +220,33 @@ class DriverViewModel extends ChangeNotifier {
     }
     else {
       // something went wrong
+    }
+  }
+
+  void _startLocationUpdates() {
+    _updateLocation();
+    _locationUpdateTimer = Timer.periodic(Duration(minutes: 1), (_) async {
+      await _updateLocation();
+    });
+  }
+
+  void _stopLocationUpdates() {
+    _locationUpdateTimer?.cancel();
+  }
+
+  Future<void> _updateLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+
+      await _driverService.updateDriverLocation(
+        _supabase.auth.currentUser!.id,
+        position.latitude,
+        position.longitude,
+      );
+
+      print("Location updated");
+    } catch (e) {
+      print("Failed to update location: $e");
     }
   }
 }

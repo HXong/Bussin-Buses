@@ -1,5 +1,4 @@
 import 'package:bussin_buses/services/supabase_client_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -234,5 +233,18 @@ class DriverService {
       throw Exception("Error submitting feedback: $e");
     }
   }
+
+  Future<void> updateDriverLocation(String driverId, double lat, double lng) async {
+    final res = await _supabase.from("driver_location")
+        .upsert({
+      "driver_id": _supabase.auth.currentUser!.id,
+      "latitude": lat,
+      "longitude": lng,
+      "last_update": DateTime.now().toUtc().toIso8601String()
+    }, onConflict: "driver_id");
+
+  }
+
+
 }
 
