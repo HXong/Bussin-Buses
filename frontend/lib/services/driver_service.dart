@@ -253,8 +253,10 @@ class DriverService {
     if (_notificationChannel != null) return;
 
     _notificationChannel = _supabase
-    .channel('public:notifications')
-    .onPostgresChanges(event: PostgresChangeEvent.insert, callback: (payload) {
+    .channel('notifications')
+    .onPostgresChanges(event: PostgresChangeEvent.insert, schema: "public", table: "notifications",callback: (payload) {
+      print("NEW PAYLOAD");
+      print(payload.toString());
       final newRecord = payload.newRecord;
       if (newRecord["driver_id"] == _supabase.auth.currentUser!.id) {
         _notificationController.add(newRecord);

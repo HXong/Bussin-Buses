@@ -33,11 +33,13 @@ class RouteService {
 
     Map<String, dynamic> res = jsonDecode(response.body);
     String message = res["message"];
+    print(res);
+    print(message);
+
     if (message == "Journey stopped successfully") {
       return 0;
     }
     else {
-      print(message);
       return -1;
     }
   }

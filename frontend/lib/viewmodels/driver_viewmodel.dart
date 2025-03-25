@@ -201,21 +201,20 @@ class DriverViewModel extends ChangeNotifier {
   }
 
   Future<void> startJourney(String driverId, String scheduleId) async {
-    _driverService.subscribeToNotifications();
-    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
-      print("Stream error: $e");
-    });
     _startLocationUpdates();
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
     isStartJourney = true;
+    _driverService.subscribeToNotifications();
+    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
+      print("Stream error: $e");
+    });
     notifyListeners();
   }
 
   Future<void> stopJourney(String driverId, String scheduleId) async {
-    _driverService.unsubscribeToNotifications();
-    _subscription = null;
+
     _stopLocationUpdates();
     int responseCode = await _routeService.stopJourney(driverId, scheduleId);
     if (responseCode == 0) {
@@ -225,6 +224,8 @@ class DriverViewModel extends ChangeNotifier {
       // TODO: do something to end trip?
       fetchUpcomingConfirmedTrips(timeNow);
       currentTripDetails.clear();
+      _driverService.unsubscribeToNotifications();
+      _subscription = null;
       notifyListeners();
     }
     else {
