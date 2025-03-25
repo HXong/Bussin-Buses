@@ -24,6 +24,7 @@ class DriverViewModel extends ChangeNotifier {
   int selectedIndex = 0;
   Map<String, dynamic> currentTripDetails = {};
   bool isStartJourney = false;
+  String message = "";
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController feedbackController = TextEditingController();
@@ -262,8 +263,13 @@ class DriverViewModel extends ChangeNotifier {
     final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
     polylineCoordinates.clear();
     polylineCoordinates.addAll(rerouteData.decodedRoute);
+    message = data["message"];
     notifyListeners();
+  }
 
+  void clearMsg() {
+    message = "";
+    notifyListeners();
   }
 
   @override
