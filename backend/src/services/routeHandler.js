@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const turf = require('@turf/turf');
+const { decode } = require('@here/flexpolyline');
 require('dotenv').config();
 
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
@@ -101,9 +102,20 @@ function getNearestRoutePoint(routeCoordinates, driverLocation) {
     return nearestIndex;
 }
 
+function decodeRoute(encodedPolyline){
+  try {
+    const decoded = decode(encodedPolyline).polyline; 
+    return decoded;
+  } catch (error) {
+      console.error("Error decoding route:", error.message);
+      return null;
+  }
+}
+
 
 module.exports = {
     getOptimisedRoute,
     getRoutesNearCamera,
     getNearestRoutePoint,
+    decodeRoute,
 };

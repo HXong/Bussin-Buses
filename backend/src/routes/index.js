@@ -3,12 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { decode } = require('@here/flexpolyline');
-const { supabase } = require('../config/supabaseClient');
-const { getOptimisedRoute } = require('../services/routeHandler');
+const { getOptimisedRoute, decodeRoute } = require('../services/routeHandler');
+const { 
+    getStartJourneyDriver, hasJourneyStarted, updateJourneyStarted, 
+    getLocationCoordinates, deleteJourney, deleteSchedule, 
+    deleteNotifcation, checkExistingNotification, insertNotification
+} = require('../services/supabaseService');
 
 const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -23,81 +25,6 @@ function loadActiveDrivers() {
 function saveActiveDrivers(activeDrivers) {
   fs.writeFileSync(ACTIVE_DRIVERS_FILE, JSON.stringify(activeDrivers, null, 2));
 }
-
-function decodeRoute(encodedPolyline){
-  try {
-    const decoded = decode(encodedPolyline).polyline; 
-    return decoded;
-  } catch (error) {
-      console.error("Error decoding route:", error.message);
-      return null;
-  }
-}
-
-async function getNextScheduleID() {
-  const { data: schedules, error } = await supabase
-      .from('schedules')
-      .select('schedule_id')
-      .order('schedule_id', { ascending: true });
-
-  if (error) {
-      console.error("Error fetching schedules:", error.message);
-      return null;
-  }
-
-  if (!schedules || schedules.length === 0) return 1;
-
-  let nextID = 1;
-  for (const row of schedules) {
-      if (row.schedule_id !== nextID) {
-          return nextID; 
-      }
-      nextID++;
-  }
-  return nextID; 
-}
-
-app.post('/api/confirm-route', async (req, res) => {
-  try {
-      const { driver_id, pickup, destination, date, time } = req.body;
-
-      if (!driver_id || !pickup || !destination) {
-          return res.status(400).json({ error: "Missing required fields: driver_id, origin, destination" });
-      }
-
-      const schedule_id = await getNextScheduleID();
-
-      const { error: scheduleError } = await supabase
-          .from('schedules')
-          .insert([
-              {
-                  schedule_id,
-                  driver_id,
-                  pickup,
-                  destination,
-                  date,
-                  time
-              }
-          ]);
-
-      if (scheduleError) throw scheduleError;
-
-      const { error: journeyError } = await supabase
-          .from('journey')
-          .insert([{ schedule_id, journey_started: false }]);
-
-      if (journeyError) throw journeyError;
-
-      res.json({
-          message: "Route added successfully",
-          newRoute: { schedule_id, driver_id, pickup, destination, journey_started: false }
-      });
-
-  } catch (error) {
-      console.error("Error confirming route:", error.message);
-      res.status(500).json({ error: "Internal Server Error", details: error.message });
-  }
-});
 
 app.get('/api/scheduled-routes/:driverId', async (req, res) => {
   try {
@@ -151,7 +78,14 @@ app.get('/api/scheduled-routes/:driverId', async (req, res) => {
   }
 });
 
-//API to call for new route after recieving congestion notification
+/**
+ * API to get the rerouted path for a driver
+ * Call this API once the frontend recieves a notification
+ * that there is congestion ahead on the driver's route
+ * from the notification table (flutter subscribe to this table)
+ * @param {string} driverId - The driver's unique identifier
+ * @returns {object} - The rerouted path (polyline) and decoded route (array of coordinates)
+ */
 app.get('/api/get-reroute', async(req, res) => {
 
   try{
@@ -191,69 +125,55 @@ app.get('/api/get-reroute', async(req, res) => {
   }
 });
 
+/**
+ * API to start the journey for a driver
+ * Gets the driver's pickup and destination locations from schedule table
+ * Updates the Journey table to mark the journey as started
+ * @param {string} driver_id - The driver's unique identifier
+ * @param {string} schedule_id - The schedule's unique identifier
+ * @returns {object} - The polyline and decoded route (array of coordinates) for the driver's journey
+ */
 app.post('/api/start-journey', async (req, res) => {
   try {
       const { driver_id, schedule_id } = req.body;
       const currentLocation = [1.335128, 103.937533];
     
-      //getStartJourneyDriver
-      const { data: driver, error: driverError } = await supabase
-          .from('schedules')
-          .select('*')
-          .eq('driver_id', driver_id)
-          .eq('schedule_id', schedule_id)
-          .eq('delete_schedule', false)
-          .single();
+      const {driver, driverError} = await getStartJourneyDriver(driver_id, schedule_id);
 
-      if (driverError || !driver) {
+      if (!driver || driverError) {
           return res.status(404).json({ error: "Driver or route not found" });
       }
 
-      const { data: journeyStart, error } = await supabase
-            .from('journey')
-            .select('journey_started')
-            .eq('schedule_id', schedule_id)
-        
-        if (error) {
-            return res.status(500).json({ error: "Database error", details: error.message });
-        }
-    
-        if (journeyStart?.length > 0 && journeyStart[0].journey_started === true) {
-            return res.status(404).json({ error: "Journey has already started" });
-        }
+      const {journeyStart, error} = await hasJourneyStarted(schedule_id);
+      
+      if (!journeyStart || error) {
+        console.error("Error checking journey status:", error.message);
+        return res.status(500).json({ error: "Database error", details: error.message });
+      }
+      
+      if (journeyStart?.length > 0 && journeyStart[0].journey_started === true) {
+        return res.status(404).json({ error: "Journey has already started" });
+      }
 
-      const { error: journeyError } = await supabase
-          .from('journey')
-          .update({ journey_started: true })
-          .eq('schedule_id', schedule_id);
+      const journeyError = await updateJourneyStarted(schedule_id);
 
       if (journeyError) {
           console.error("Error updating journey status:", journeyError.message);
           return res.status(500).json({ error: "Failed to update journey status", details: journeyError.message });
       }
 
-      const { data: originData, error: originError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', driver.pickup)
-        .single();
-
-    if (originError || !originData) {
+      const {originData, originError} = await getLocationCoordinates(driver.pickup);
+      if (originError) {
         return res.status(404).json({ error: "Origin location not found" });
-    }
+      }
 
-      const { data: destinationData, error: destinationError } = await supabase
-        .from('location')
-        .select('latitude, longitude')
-        .eq('location_id', driver.destination)
-        .single();
-
-    if (destinationError || !destinationData) {
+      const {destinationData, destinationError} = await getLocationCoordinates(driver.destination);
+      if (destinationError) {
         return res.status(404).json({ error: "Destination location not found" });
-    }
-
-    const originCoords = `${originData.latitude},${originData.longitude}`;
-    const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
+      }
+      
+      const originCoords = `${originData.latitude},${originData.longitude}`;
+      const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
 
       const polyline = await getOptimisedRoute(originCoords, destinationCoords);
       if (!polyline) {
@@ -278,46 +198,40 @@ app.post('/api/start-journey', async (req, res) => {
   }
 });
 
-
+/**
+ * API to stop the journey for a driver
+ * Deletes the journey from the database
+ * Updates the schedule to mark it as deleted (delete_schedule = true)
+ * Deletes all notifications for the driver
+ * @param {string} driver_id - The driver's unique identifier
+ * @param {string} schedule_id - The schedule's unique identifier
+ * @returns {object} - Success message if the journey was stopped successfully
+ */
 app.post('/api/stop-journey', async (req, res) => {
   try {
       const { driver_id, schedule_id } = req.body;
 
-      const { data: schedule, error: scheduleError } = await supabase
-          .from('schedules')
-          .select('*')
-          .eq('driver_id', driver_id)
-          .eq('schedule_id', schedule_id)
-          .single();
+      const schedule = await getStartJourneyDriver(driver_id, schedule_id);
 
-      if (scheduleError || !schedule) {
-          return res.status(404).json({ error: "Schedule not found for this driver" });
+      if (!schedule) {
+          return res.status(404).json({ error: "Driver or route not found" });
       }
 
-      const { error: deleteJourneyError } = await supabase
-          .from('journey')
-          .delete()
-          .eq('schedule_id', schedule_id);
+      const deleteJourneyError = await deleteJourney(schedule_id);
 
       if (deleteJourneyError) {
           console.error("Error deleting journey:", deleteJourneyError.message);
           return res.status(500).json({ error: "Failed to delete journey", details: deleteJourneyError.message });
       }
 
-      const { error: deleteScheduleError } = await supabase
-          .from('schedules')
-          .update({ delete_schedule: true })
-          .eq('schedule_id', schedule_id);
+      const deleteScheduleError = await deleteSchedule(schedule_id);
 
       if (deleteScheduleError) {
           console.error("Error updating delete schedule:", deleteScheduleError.message);
           return res.status(500).json({ error: "Failed to update delete schedule", details: deleteScheduleError.message });
       }
 
-      const { error: deleteNotificationError } = await supabase
-          .from('notifications')
-          .delete()
-          .eq('driver_id', driver_id);
+      const deleteNotificationError = await deleteNotifcation(driver_id);
 
       if (deleteNotificationError) {
           console.error("Error deleting notifications:", deleteNotificationError.message);
@@ -336,6 +250,14 @@ app.post('/api/stop-journey', async (req, res) => {
   }
 });
 
+/**
+ * API call for frontend to send the driver's current location after starting the journey
+ * @todo Gets driver's current location from the supabase instead of the frontend (Need table name)
+ * @param {string} driver_id - The driver's unique identifier
+ * @param {number} latitude - The driver's current latitude
+ * @param {number} longitude - The driver's current longitude
+ * @returns {object} - Success message if the driver's location was updated successfully
+*/
 app.post('/api/update-driver-location', (req, res) => {
     try {
         const { driver_id, latitude, longitude } = req.body;
@@ -362,38 +284,17 @@ app.post('/api/update-driver-location', (req, res) => {
 });
 
 
-app.get('/api/check-journey/:schedule_id', async (req, res) => {
-
-  try{
-    const { schedule_id } = req.params;
-
-    const { data: journeyData, error } = await supabase
-        .from('journey')
-        .select('journey_started')
-        .eq('schedule_id', schedule_id)
-        .single();
-
-    if (error) {
-        console.error("Error fetching journey status:", error.message);
-        return res.status(500).json({ error: "Internal Server Error", details: error.message });
-    }
-
-    if (!journeyData) {
-        return res.json({ journey_started: false });
-    }
-
-    res.json({ journey_started: journeyData.journey_started });
-
-  } catch (error) {
-
-    console.error("Error checking journey:", error.message);
-    res.status(500).json({ error: "Internal Server Error", details: error.message });
-
-  }
-
-});
-
-// API to Receive Notifications and Store them
+/**
+ * API to notify the driver of high congestion ahead on their route
+ * checks existing notification in the table to see whether the notification already exists
+ * inserts the notification into the table if it does not exist
+ * @param {string} driver_id - The driver's unique identifier
+ * @param {string} message - The notification message
+ * @param {string} cameraId - The camera's unique identifier
+ * @param {string} timeStamp - The timestamp of the notification
+ * @param {boolean} seen - The status of the notification (seen or unseen)
+ * @returns {object} - Success message if the notification was added successfully
+ */
 app.post('/api/notify-driver', async (req, res) => {
   const { driver_id, message, cameraId, timeStamp, seen } = req.body;
 
@@ -404,31 +305,18 @@ app.post('/api/notify-driver', async (req, res) => {
   console.log(`Notification received for Driver ${driver_id}: ${message}`);
 
   
-  const { data: existingNotification, error: checkError } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('driver_id', driver_id)
-          .eq('camera_id', cameraId)
-          .single();
-  
+  const { existingNotification, checkError } = await checkExistingNotification(driver_id, cameraId);
+
   if (checkError && checkError.code !== 'PGRST116') {
-      console.error("Error checking existing notification:", checkError.message);
-      return res.status(500).json({ error: "Error checking existing notification", details: checkError.message });
+    console.error("Error checking existing notification:", checkError.message);
+    return res.status(500).json({ error: "Error checking existing notification", details: checkError.message });
   }
 
   if (existingNotification) {
-      return res.json({ success: false, message: "Notification already exists for this camera" });
+    return res.json({ success: false, message: "Notification already exists for this camera"});
   }
 
-  const { error: insertError } = await supabase
-      .from('notifications')
-      .insert([{ 
-          driver_id: driver_id,
-          camera_id: cameraId,
-          message: message,
-          timestamp: timeStamp,
-          seen: seen
-      }]);
+  const insertError = await insertNotification(driver_id, cameraId, message, timeStamp, seen);
 
   if (insertError) {
       console.error("Error inserting notification:", insertError.message);
