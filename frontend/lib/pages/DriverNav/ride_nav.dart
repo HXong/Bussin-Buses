@@ -42,6 +42,15 @@ class _RideNavState extends State<RideNav> {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final driverViewModel = Provider.of<DriverViewModel>(context);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (driverViewModel.message != "") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(driverViewModel.message)),
+        );
+        driverViewModel.clearMsg();
+      }
+    });
+
     return Scaffold(
       body:
           driverViewModel.currentTripDetails.isEmpty

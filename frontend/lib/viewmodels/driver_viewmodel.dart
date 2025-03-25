@@ -24,6 +24,7 @@ class DriverViewModel extends ChangeNotifier {
   int selectedIndex = 0;
   Map<String, dynamic> currentTripDetails = {};
   bool isStartJourney = false;
+  String message = "";
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController feedbackController = TextEditingController();
@@ -35,6 +36,7 @@ class DriverViewModel extends ChangeNotifier {
   String? selectedDestination;
 
   Timer? _locationUpdateTimer;
+  StreamSubscription<Map<String,dynamic>>? _subscription;
 
   DriverViewModel(this._driverService, this._routeService) {
     fetchUpcomingConfirmedTrips(timeNow);
@@ -204,10 +206,15 @@ class DriverViewModel extends ChangeNotifier {
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
     isStartJourney = true;
+    _driverService.subscribeToNotifications();
+    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
+      print("Stream error: $e");
+    });
     notifyListeners();
   }
 
   Future<void> stopJourney(String driverId, String scheduleId) async {
+
     _stopLocationUpdates();
     int responseCode = await _routeService.stopJourney(driverId, scheduleId);
     if (responseCode == 0) {
@@ -217,6 +224,9 @@ class DriverViewModel extends ChangeNotifier {
       // TODO: do something to end trip?
       fetchUpcomingConfirmedTrips(timeNow);
       currentTripDetails.clear();
+      _driverService.unsubscribeToNotifications();
+      _subscription = null;
+      notifyListeners();
     }
     else {
       // something went wrong
@@ -248,5 +258,24 @@ class DriverViewModel extends ChangeNotifier {
     } catch (e) {
       print("Failed to update location: $e");
     }
+  }
+
+  void _handleNotification(data) async {
+    final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
+    polylineCoordinates.clear();
+    polylineCoordinates.addAll(rerouteData.decodedRoute);
+    message = data["message"];
+    notifyListeners();
+  }
+
+  void clearMsg() {
+    message = "";
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _driverService.dispose();
+    super.dispose();
   }
 }
