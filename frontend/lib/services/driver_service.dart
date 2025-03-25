@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DriverService {
   final SupabaseClient _supabase = SupabaseClientService.client;
   List<Map<String, dynamic>> passengerDetails = [];
+  final _notificationController = StreamController<Map<String, dynamic>>();
+  RealtimeChannel? _notificationChannel;
+  Stream<Map<String, dynamic>> get updates => _notificationController.stream;
 
   //Function to fetch passenger details for corresponding schedule
   Future<List<Map<String, dynamic>>> fetchPassengerDetails(String scheduleId) async {
@@ -243,6 +247,33 @@ class DriverService {
       "last_update": DateTime.now().toUtc().toIso8601String()
     }, onConflict: "driver_id");
 
+  }
+
+  void subscribeToNotifications() {
+    if (_notificationChannel != null) return;
+
+    _notificationChannel = _supabase
+    .channel('public:notifications')
+    .onPostgresChanges(event: PostgresChangeEvent.insert, callback: (payload) {
+      final newRecord = payload.newRecord;
+      if (newRecord["driver_id"] == _supabase.auth.currentUser!.id) {
+        _notificationController.add(newRecord);
+      }
+    });
+
+    _notificationChannel?.subscribe();
+  }
+
+  void unsubscribeToNotifications() {
+    if (_notificationChannel != null) {
+      _supabase.removeChannel(_notificationChannel!);
+      _notificationChannel = null;
+    }
+  }
+
+  void dispose() {
+    _notificationController.close();
+    _supabase.removeAllChannels();
   }
 
 

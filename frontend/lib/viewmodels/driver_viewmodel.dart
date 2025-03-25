@@ -35,6 +35,7 @@ class DriverViewModel extends ChangeNotifier {
   String? selectedDestination;
 
   Timer? _locationUpdateTimer;
+  StreamSubscription<Map<String,dynamic>>? _subscription;
 
   DriverViewModel(this._driverService, this._routeService) {
     fetchUpcomingConfirmedTrips(timeNow);
@@ -199,6 +200,10 @@ class DriverViewModel extends ChangeNotifier {
   }
 
   Future<void> startJourney(String driverId, String scheduleId) async {
+    _driverService.subscribeToNotifications();
+    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
+      print("Stream error: $e");
+    });
     _startLocationUpdates();
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
@@ -208,6 +213,8 @@ class DriverViewModel extends ChangeNotifier {
   }
 
   Future<void> stopJourney(String driverId, String scheduleId) async {
+    _driverService.unsubscribeToNotifications();
+    _subscription = null;
     _stopLocationUpdates();
     int responseCode = await _routeService.stopJourney(driverId, scheduleId);
     if (responseCode == 0) {
@@ -217,6 +224,7 @@ class DriverViewModel extends ChangeNotifier {
       // TODO: do something to end trip?
       fetchUpcomingConfirmedTrips(timeNow);
       currentTripDetails.clear();
+      notifyListeners();
     }
     else {
       // something went wrong
@@ -248,5 +256,19 @@ class DriverViewModel extends ChangeNotifier {
     } catch (e) {
       print("Failed to update location: $e");
     }
+  }
+
+  void _handleNotification(data) async {
+    final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
+    polylineCoordinates.clear();
+    polylineCoordinates.addAll(rerouteData.decodedRoute);
+    notifyListeners();
+
+  }
+
+  @override
+  void dispose() {
+    _driverService.dispose();
+    super.dispose();
   }
 }
