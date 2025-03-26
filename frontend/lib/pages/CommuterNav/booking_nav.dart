@@ -1,151 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'seat_manager.dart';  // Import the SeatManager class
-
 
 class BookingNav extends StatefulWidget {
-  const BookingNav({super.key});
+  final int scheduleId;
+  const BookingNav({super.key, required this.scheduleId});
 
   @override
   State<BookingNav> createState() => _BookingNavState();
 }
 
 class _BookingNavState extends State<BookingNav> {
-  List<String> bookedSeats = seatManager.bookedSeats;
-
+  @override
+  void initState() {
+    super.initState();
+    final commuterVM = Provider.of<CommuterViewModel>(context, listen: false);
+    commuterVM.loadSchedule(widget.scheduleId);
+    commuterVM.loadBookedSeats(widget.scheduleId);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final commuterVM = Provider.of<CommuterViewModel>(context);
+    final schedule = commuterVM.scheduleData;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "NTU - Tampines",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          schedule != null ? "${schedule.pickup} - ${schedule.destination}" : "Loading...",
+          style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 10,
       ),
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          SizedBox(height: 8),
-          Text(
-            "Tue 20 Jan 2025 | 17:00",
-            style: TextStyle(fontSize: 14, color: Colors.black54),
-          ),
-          SizedBox(height: 16),
-          Text(
-            "Choose Your Seat",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16),
-
-          // Seat Selection Box
-          Expanded(
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.all(16),
-                width: 250,
-                height: 400,
-                decoration: BoxDecoration(
-                  color: Colors.blue[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    // First Row (5 Seats)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(
-                        5,
-                            (index) => seatIcon("A${index + 1}"),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Remaining Rows (5 rows excluding the first row)
-                    Expanded(
-                      child: ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: 5,
-                        itemBuilder: (context, rowIndex) {
-                          String rowLetter = String.fromCharCode(66 + rowIndex); // Generates B, C, D, E, F
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                seatIcon("$rowLetter${1}"),
-                                seatIcon("$rowLetter${2}"),
-                                SizedBox(width: 40),
-                                seatIcon("$rowLetter${3}"),
-                                seatIcon("$rowLetter${4}"),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            if (schedule != null)
+              Text(
+                "${schedule.date} | ${schedule.time}",
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+            const SizedBox(height: 20),
+            const Text("Choose Your Seat", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.blue[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(5, (index) => seatIcon((index + 1).toString())),
+                  ),
+                  const SizedBox(height: 10),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 5,
+                    itemBuilder: (context, rowIndex) {
+                      int base = 5 + (rowIndex * 4) + 1;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            seatIcon((base).toString()),
+                            seatIcon((base + 1).toString()),
+                            const SizedBox(width: 30),
+                            seatIcon((base + 2).toString()),
+                            seatIcon((base + 3).toString()),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  /// Generates a seat icon with label and checks if it's booked
-  Widget seatIcon(String seatLabel) {
-    bool isBooked = bookedSeats.contains(seatLabel); // Check if seat is already booked
+  Widget seatIcon(String seatNumber) {
+    final commuterVM = Provider.of<CommuterViewModel>(context);
+    final isBooked = commuterVM.bookedSeats.contains(seatNumber);
 
     return Column(
       children: [
         GestureDetector(
           onTap: isBooked
-              ? null // Disable click if seat is booked
+              ? null
               : () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => BookingDetailScreen(
-                  booking: {
-                    'seat': seatLabel,
-                    'departure': '17:00',
-                    'arrival': '18:15',
-                    'pickup': 'NTU',
-                    'destination': 'Tampines',
-                    'date': '20 Jan, 2025',
-                  },
-                  bookedSeats: bookedSeats, // Pass the list of booked seats
+                builder: (context) => ConfirmDetailScreen(
+                  scheduleId: widget.scheduleId,
+                  seatNumber: seatNumber,
                 ),
               ),
             ).then((value) {
               if (value == true) {
-                setState(() {}); // Refresh UI after booking
+                setState(() {});
               }
             });
           },
           child: Icon(
             Icons.event_seat,
             size: 25,
-            color: isBooked ? Colors.red : Colors.black54, // Highlight booked seats in red
+            color: isBooked ? Colors.red : Colors.black54,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
-          seatLabel,
+          seatNumber,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: isBooked ? Colors.red : Colors.black, // Change text color for booked seats
+            color: isBooked ? Colors.red : Colors.black,
           ),
         ),
       ],
@@ -153,92 +138,76 @@ class _BookingNavState extends State<BookingNav> {
   }
 }
 
-class BookingDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> booking;
-  final List<String> bookedSeats; // Pass booked seats from BookingNav
+class ConfirmDetailScreen extends StatefulWidget {
+  final int scheduleId;
+  final String seatNumber;
 
-  BookingDetailScreen({required this.booking, required this.bookedSeats});
+  const ConfirmDetailScreen({required this.scheduleId, required this.seatNumber, super.key});
 
   @override
-  _BookingDetailScreenState createState() => _BookingDetailScreenState();
+  State<ConfirmDetailScreen> createState() => _ConfirmDetailScreen();
 }
 
-class _BookingDetailScreenState extends State<BookingDetailScreen> {
+class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
   bool isConfirm = false;
 
-  /// Confirms the booking and updates the local booked seats list
-  void confirmBooking() {
-    // Check if the seat is already booked before adding
-    if (widget.bookedSeats.contains(widget.booking['seat'])) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Seat already booked!')),
-      );
+  void confirmBooking() async {
+    final commuterId = Supabase.instance.client.auth.currentUser?.id;
+    if (commuterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Not signed in")));
       return;
     }
-    if (!seatManager.bookedSeats.contains(widget.booking['seat'])) {
-      seatManager.bookedSeats.add(widget.booking['seat']); // Add seat to global list
+
+    final commuterVM = Provider.of<CommuterViewModel>(context, listen: false);
+    final error = await commuterVM.confirmBooking(widget.scheduleId, int.parse(widget.seatNumber), commuterId);
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    } else {
+      setState(() => isConfirm = true);
     }
-
-    setState(() {
-      isConfirm = true; // Show "Booking Confirmed" overlay
-    });
-
-    // Add seat to the booked seats list
-    widget.bookedSeats.add(widget.booking['seat']);
   }
 
-  /// Exits the screen and sends `true` back to refresh the list
-  void exitScreen() {
-    Navigator.pop(context, true); // Sends "true" to refresh booked seats in BookingNav
-  }
+  void exitScreen() => Navigator.pop(context, true);
 
   @override
   Widget build(BuildContext context) {
+    final commuterVM = Provider.of<CommuterViewModel>(context);
+    final schedule = commuterVM.scheduleData;
+
     return GestureDetector(
-      onTap: isConfirm ? exitScreen : null, // Tap anywhere to exit after confirmation
+      onTap: isConfirm ? exitScreen : null,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            "Booking Detail",
-            style: TextStyle(color: isConfirm ? Colors.black38 : Colors.black),
-          ),
+          title: Text("Booking Detail", style: TextStyle(color: isConfirm ? Colors.black38 : Colors.black)),
           backgroundColor: Colors.white,
           elevation: 0,
         ),
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            // Booking Details Card
             Opacity(
-              opacity: isConfirm ? 0.3 : 1, // Dim background when confirmed
+              opacity: isConfirm ? 0.3 : 1,
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Booking Confirmation",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: isConfirm ? Colors.black26 : Colors.black,
-                      ),
-                    ),
+                    Text("Booking Confirmation", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: isConfirm ? Colors.black26 : Colors.black)),
                     SizedBox(height: 20),
-
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
+                      child: schedule == null
+                          ? Text("Loading schedule...")
+                          : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("${widget.booking['date']}",
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(schedule.date, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           SizedBox(height: 20),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -246,16 +215,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Pickup", style: TextStyle(fontSize: 14, color: Colors.black54)),
-                                  Text("${widget.booking['pickup']}",
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text(schedule.pickup, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text("Departure", style: TextStyle(fontSize: 14, color: Colors.black54)),
-                                  Text("${widget.booking['departure']}",
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text(schedule.time, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],
@@ -268,22 +235,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Destination", style: TextStyle(fontSize: 14, color: Colors.black54)),
-                                  Text("${widget.booking['destination']}",
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text(schedule.destination, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text("Arrival", style: TextStyle(fontSize: 14, color: Colors.black54)),
-                                  Text("~${widget.booking['arrival']}",
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text("~TBD", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],
                           ),
                           SizedBox(height: 30),
-
                           Row(
                             children: [
                               Icon(Icons.person, size: 20),
@@ -292,13 +256,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               SizedBox(width: 10),
                               Icon(Icons.event_seat, size: 20),
                               SizedBox(width: 4),
-                              Text("${widget.booking['seat']}",
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(widget.seatNumber, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           SizedBox(height: 40),
-
-
                           ElevatedButton(
                             onPressed: isConfirm ? null : confirmBooking,
                             style: ElevatedButton.styleFrom(
@@ -314,8 +275,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 ),
               ),
             ),
-
-            // Booking Confirm Overlay
             if (isConfirm)
               Container(
                 color: Colors.black.withOpacity(0.2),
