@@ -1,11 +1,10 @@
-import 'package:bussin_buses/pages/CommuterNav//account_nav.dart';
+import 'package:bussin_buses/services/auth_service.dart';
+import 'package:bussin_buses/pages/CommuterNav/account_nav.dart';
 import 'package:bussin_buses/pages/CommuterNav/booking_nav.dart';
 import 'package:bussin_buses/pages/CommuterNav/home_nav.dart';
 import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
-import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 class HomePageCommuter extends StatefulWidget {
   const HomePageCommuter({super.key});
@@ -15,38 +14,44 @@ class HomePageCommuter extends StatefulWidget {
 }
 
 class _HomePageCommuterState extends State<HomePageCommuter> {
+  final authService = AuthService();
   int _selectedIndex = 0;
+  int? selectedScheduleId;
 
-  final List<Widget> widgetOptions = <Widget>[
-    const HomeNav(),
-    //BookingNav(date: '', pickup: '', departure: '', destination: '', arrival: '', seat: '', passengers: 1,),
-    BookingNav(),
-    TicketNav(),
-    const AccountNav(),
-  ];
+  void _onScheduleSelected(int id) {
+    setState(() {
+      selectedScheduleId = id;
+      _selectedIndex = 1; // switch to Booking tab
+    });
+  }
+
+  Future<void> logout() async {
+    try {
+      await authService.signOut();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // show error snackbar
-      if (authViewModel.errorMsg != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authViewModel.errorMsg!)),
-        );
-        authViewModel.clearMsg();
-      }
-    });
+    final List<Widget> widgetOptions = <Widget>[
+      HomeNav(onScheduleSelected: _onScheduleSelected),
+      selectedScheduleId != null
+          ? BookingNav(scheduleId: selectedScheduleId!)
+          : Center(child: Text("No schedule selected")),
+      TicketNav(),
+      const AccountNav(),
+    ];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Welcome Commuter"),
         actions: [
           GestureDetector(
-            onTap: () {
-              authViewModel.signOut();
-            },
+            onTap: logout,
             child: Container(
               margin: EdgeInsets.all(10),
               alignment: Alignment.center,
@@ -63,9 +68,7 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
           ),
         ],
       ),
-
       body: widgetOptions.elementAt(_selectedIndex),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         showSelectedLabels: true,
@@ -85,7 +88,6 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
           BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Account"),
         ],
       ),
-
     );
   }
 }
