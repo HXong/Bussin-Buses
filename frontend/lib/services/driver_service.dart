@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'package:bussin_buses/models/Passengers.dart';
+import 'package:bussin_buses/models/Trips.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,8 +13,9 @@ class DriverService {
   Stream<Map<String, dynamic>> get updates => _notificationController.stream;
 
   //Function to fetch passenger details for corresponding schedule
-  Future<List<Map<String, dynamic>>> fetchPassengerDetails(String scheduleId) async {
-    passengerDetails.clear();
+  Future<List<Passenger>> fetchPassengerDetails(String scheduleId) async {
+    List<Passenger> passengers = [];
+
     final bookingResponse = await _supabase
         .from('bookings')
         .select('seat_id, commuter_id, is_checked_in')
@@ -35,14 +37,23 @@ class DriverService {
           .single();
 
       final checkInStatus = booking['is_checked_in'];
-      passengerDetails.add({
-        'commuter_name': commuterResponse['username'].toString(),
-        'seat_number': seatResponse['seat_number'].toString(),
-        'is_checked_in' : checkInStatus,
-      });
+
+      passengers.add(
+        Passenger(
+          id: commuterId,
+          name: commuterResponse['username'].toString(),
+          email: "",  // If email is available, fetch it
+          phone: "",  // If phone is available, fetch it
+          seatNumber: seatResponse['seat_number'].toString(),
+          isCheckedIn: checkInStatus,
+        ),
+      );
     }
-    passengerDetails.sort((a, b) => int.parse(a['seat_number']).compareTo(int.parse(b['seat_number'])));
-    return passengerDetails;
+
+    // Sort by seat number
+    passengers.sort((a, b) => int.parse(a.seatNumber).compareTo(int.parse(b.seatNumber)));
+
+    return passengers;
   }
 
   Future<bool> checkJourneyStarted(int scheduleId) async {
@@ -58,27 +69,25 @@ class DriverService {
   }
 
   //Function to delete a schedule
-  Future<void> deleteTrip(Map<String, dynamic> trip) async {
+  Future<void> deleteTrip(Trip trip) async {
     await _supabase
         .from('schedules')
         .update({'delete_schedule': true})
-        .eq('schedule_id', trip['schedule_id']);
+        .eq('schedule_id', trip.scheduleId);
   }
 
   // Function to fetch trips based on the boolean condition (before or after today)
-  Future<List<Map<String, dynamic>>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
-    var baseQuery = _supabase
-        .from('schedules')
-        .select();
+  Future<List<Trip>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
+    var baseQuery = _supabase.from('schedules').select();
 
     if (driverId.isNotEmpty) {
-      var driverQuery = baseQuery.eq('driver_id', driverId);
-      baseQuery = driverQuery;
+      baseQuery = baseQuery.eq('driver_id', driverId);
     }
+
     var orderedQuery = baseQuery.order('date', ascending: true);
     final response = await orderedQuery;
 
-    List<Map<String, dynamic>> tripsWithLocations = [];
+    List<Trip> tripsWithLocations = [];
 
     for (var trip in response) {
       String pickupName = await getLocationName(trip['pickup']);
@@ -104,8 +113,8 @@ class DriverService {
       // Determine if we should include the trip based on the boolean condition
       bool includeTrip = false;
       bool isJourneyStarted = await checkJourneyStarted(trip['schedule_id']);
-      //final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
       String status = "CONFIRMED";
+
       if (fetchBefore && startDateTime.isBefore(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "COMPLETED";
@@ -113,7 +122,7 @@ class DriverService {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "CONFIRMED";
       }
-      if(isJourneyStarted == true) { //(DateUtils.isSameDay(timeNow, startDateTime))
+      if (isJourneyStarted) {
         status = "IN PROGRESS";
       }
       if (onlyConfirmed && trip['delete_schedule'] == true) {
@@ -121,20 +130,21 @@ class DriverService {
       }
 
       if (includeTrip) {
-        tripsWithLocations.add({
-          'schedule_id': trip['schedule_id'],
-          'driver_name': driverName,
-          'date': formattedDate,
-          'start_time': timeStr.substring(0, 5),
-          'end_time': formattedEndTime,
-          'duration': '1h 15min',
-          'pickup': pickupName,
-          'destination': destinationName,
-          'status' : status,
-          'is_journey_started': isJourneyStarted,
-        });
+        tripsWithLocations.add(Trip(
+          scheduleId: trip['schedule_id'].toString(),
+          driverName: driverName,
+          date: formattedDate,
+          startTime: timeStr.substring(0, 5),
+          endTime: formattedEndTime,
+          duration: '1h 15min',
+          pickup: pickupName,
+          destination: destinationName,
+          status: status,
+          isJourneyStarted: isJourneyStarted,
+        ));
       }
     }
+
     return tripsWithLocations;
   }
 
@@ -152,14 +162,6 @@ class DriverService {
   String formatDate(String dateStr) {
     DateTime date = DateTime.parse(dateStr);
     return DateFormat('dd MMM').format(date).toUpperCase();
-  }
-
-  //Function to fetch past trips for the current driver from Supabase
-  Future<List<Map<String,dynamic>>> fetchPastTrips(DateTime targetDate) async {
-    final driverId = _supabase.auth.currentUser!.id;
-
-    // Use the imported function to fetch past trips
-    return await fetchTrips(driverId, targetDate, true, false);
   }
 
   Future<List<String>> fetchLocations() async {
@@ -203,31 +205,34 @@ class DriverService {
     }
   }
 
-  Future<Map<String, String>> fetchDriverProfile(String driverId) async {
-    final driverProfile = await _supabase
-        .from('profiles')
-        .select('username, user_type, created_at')
-        .eq('id', driverId)
-        .single();
+  Future<Map<String, dynamic>> fetchDriverProfile(String driverId) async {
+    try {
+      final driverProfile = await _supabase
+          .from('profiles')
+          .select('username, user_type, created_at')
+          .eq('id', driverId)
+          .single();
+      return driverProfile;
 
-    DateTime dateTime = DateTime.parse(driverProfile['created_at']);
-    String date = DateFormat('dd MMM yyyy').format(dateTime);
-
-    return {
-      'username': driverProfile['username'] ?? 'unknown',
-      'user_type': driverProfile['user_type'] ?? 'unknown',
-      'created_at': date ?? 'unknown',
-    };
+    } catch (e) {
+      print('Error fetching driver profile: $e');
+      return {};
+    }
   }
 
   Future<String> fetchBusPlate(String driverId) async {
-    final busPlate = await _supabase
-        .from('buses')
-        .select('bus_number')
-        .eq('driver_id', driverId)
-        .single();
+    try {
+      final busPlate = await _supabase
+          .from('buses')
+          .select('bus_number')
+          .eq('driver_id', driverId)
+          .single();
+      return busPlate['bus_number'] ?? 'unknown';
 
-    return busPlate['bus_number'] ?? 'unknown';
+    } catch (e) {
+      print('Error fetching bus plate: $e');
+      return 'unknown';
+    }
   }
 
   Future<void> storeFeedback(String feedback, String userId) async {

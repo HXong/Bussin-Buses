@@ -1,6 +1,8 @@
 import 'dart:async';
-
+import 'package:bussin_buses/models/Passengers.dart';
+import 'package:bussin_buses/models/Trips.dart';
 import 'package:bussin_buses/models/RouteResponse.dart';
+import 'package:bussin_buses/models/DriverProfile.dart';
 import 'package:bussin_buses/services/route_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,15 +16,15 @@ class DriverViewModel extends ChangeNotifier {
   final RouteService _routeService;
   final SupabaseClient _supabase = SupabaseClientService.client;
 
-  List<Map<String, dynamic>> passengers = [];
-  List<Map<String, dynamic>> upcomingConfirmedTrips = [];
-  List<Map<String, dynamic>> upcomingAllTrips = [];
-  List<Map<String, dynamic>> pastTrips = [];
+  List<Passenger> passengers = [];
+  List<Trip> upcomingConfirmedTrips = [];
+  List<Trip> upcomingAllTrips = [];
+  List<Trip> pastTrips = [];
   List<LatLng> polylineCoordinates = [];
-  Map<String, dynamic> driverProfile = {};
+  DriverProfile? driverProfile;
+  Map<String, dynamic> currentTripDetails = {};
   bool isLoading = false;
   int selectedIndex = 0;
-  Map<String, dynamic> currentTripDetails = {};
   bool isStartJourney = false;
   String message = "";
 
@@ -55,8 +57,7 @@ class DriverViewModel extends ChangeNotifier {
       return;
     }
 
-    List<Map<String, dynamic>> tripsWithLocations = await _driverService.fetchTrips(driverId, targetDate, false, true);
-    upcomingConfirmedTrips = tripsWithLocations;
+    upcomingConfirmedTrips = await _driverService.fetchTrips(driverId, targetDate, false, true);
     isLoading = false;
     notifyListeners();
   }
@@ -65,8 +66,7 @@ class DriverViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    List<Map<String, dynamic>> tripsWithLocations = await _driverService.fetchTrips("", targetDate, false, false);
-    upcomingAllTrips = tripsWithLocations;
+    upcomingAllTrips = await _driverService.fetchTrips("", targetDate, false, false);
     isLoading = false;
     notifyListeners();
   }
@@ -75,8 +75,7 @@ class DriverViewModel extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     final driverId = _supabase.auth.currentUser!.id;
-    List<Map<String, dynamic>> tripsWithLocations = await _driverService.fetchTrips(driverId, targetDate, true, false);
-    pastTrips = tripsWithLocations;
+    pastTrips = await _driverService.fetchTrips(driverId, targetDate, true, false);
     isLoading = false;
     notifyListeners();
   }
@@ -89,12 +88,16 @@ class DriverViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteTrip(Map<String, dynamic> trip) async {
+  Future<void> deleteTrip(Trip trip) async {
     await _driverService.deleteTrip(trip);
-    upcomingConfirmedTrips.removeWhere((t) => t['schedule_id'] == trip['schedule_id']);
+
+    // Remove the trip using the Trip object's scheduleId
+    upcomingConfirmedTrips.removeWhere((t) => t.scheduleId == trip.scheduleId);
+
     await fetchAllUpcomingTrips(timeNow);
     notifyListeners();
   }
+
 
   Future<void> loadLocations() async {
     locations = await _driverService.fetchLocations();
@@ -121,44 +124,53 @@ class DriverViewModel extends ChangeNotifier {
     final time = pickedTime;
 
     if (selectedPickup == null || selectedDestination == null || date.isEmpty || time == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill in all fields.")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Please fill in all fields.")));
       return;
     }
 
     if (selectedPickup == selectedDestination) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pickup and destination points have to be different.")));
-      return;
-    }
-
-    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(date)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid date format. Use yyyy-MM-dd.")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Pickup and destination points have to be different.")));
       return;
     }
 
     final driverId = _supabase.auth.currentUser!.id;
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
-    final selectedTime = DateTime.parse("$date $time"); // Convert to Singapore Time
+    final selectedDateTime = DateTime.parse("$date $time");
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
+
     final theDaySchedules = existingTrips
-        .where((trip) => trip['date'] == date) //include only those on the selected date
-        .map((trip) => trip['start_time'].toString())
+        .where((trip) => trip.date == date)
+        .map((trip) => trip.startTime)
         .toList();
 
-    if (selectedTime.isBefore(timeNow)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
+    if (selectedDateTime.isBefore(timeNow)) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
       return;
     }
 
     for (var scheduleTime in theDaySchedules) {
       final existingTime = DateTime.parse("$date $scheduleTime");
-      if ((selectedTime.difference(existingTime).inHours).abs() < 5) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must have at least 5 hours between trips.")));
+      if ((selectedDateTime.difference(existingTime).inHours).abs() < 5) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("You must have at least 5 hours between trips.")));
         return;
       }
     }
-    await _driverService.addJourney(pickupId: pickupId, destinationId: destinationId, date: date, time: time, driverId: driverId,);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
+
+    await _driverService.addJourney(
+      pickupId: pickupId,
+      destinationId: destinationId,
+      date: date,
+      time: time,
+      driverId: driverId,
+    );
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
 
     dateController.clear();
     pickedTime = null;
@@ -171,16 +183,22 @@ class DriverViewModel extends ChangeNotifier {
 
   Future<void> fetchPersonalInformation() async {
     final driverId = _supabase.auth.currentUser?.id;
+
     if (driverId == null) {
+      print('Driver ID is null');
       return;
     }
+    try {
+      final profileData = await _driverService.fetchDriverProfile(driverId);
+      final busPlate = await _driverService.fetchBusPlate(driverId);
+      driverProfile = DriverProfile.fromMap(profileData, busPlate);
+      notifyListeners();
 
-    final profile = await _driverService.fetchDriverProfile(driverId);
-    final busPlate = await _driverService.fetchBusPlate(driverId);
-    driverProfile = {...profile, 'bus_plate': busPlate};
-
-    notifyListeners();
+    } catch (e) {
+      print('Error fetching personal information: $e');
+    }
   }
+
 
   Future<void> submitFeedback(BuildContext context) async{
       final feedback = feedbackController.text;

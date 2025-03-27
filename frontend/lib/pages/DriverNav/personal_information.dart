@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
+import 'package:bussin_buses/models/DriverProfile.dart';
 
 class PersonalInformation extends StatefulWidget {
   const PersonalInformation({super.key});
@@ -33,13 +34,14 @@ class _PersonalInformationState extends State<PersonalInformation> {
       );
     }
 
-    if (driverViewModel.driverProfile.isEmpty) {
+    // If the profile data is null, display an error message
+    if (driverViewModel.driverProfile == null) {
       return Scaffold(
         body: Center(child: Text('No profile information available.')),
       );
     }
 
-    final driverProfile = driverViewModel.driverProfile;
+    final driverProfile = driverViewModel.driverProfile!;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Personal Information')),
@@ -53,19 +55,19 @@ class _PersonalInformationState extends State<PersonalInformation> {
             ),
             const SizedBox(height: 40),
 
-            Text("${driverProfile['username']}",
+            Text("${driverProfile.username}",
                 style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
             const SizedBox(height: 40),
 
-            Text("Role: ${driverProfile['user_type'][0].toUpperCase()}${driverProfile['user_type'].substring(1)}",
+            Text("Role: ${driverProfile.userType[0].toUpperCase()}${driverProfile.userType.substring(1)}",
                 style: const TextStyle(fontSize: 23)),
             const SizedBox(height: 20),
 
-            Text("Bus Plate: ${driverProfile['bus_plate']}",
+            Text("Bus Plate: ${driverProfile.busPlate}",
                 style: const TextStyle(fontSize: 23)),
             const SizedBox(height: 20),
 
-            Text("Date Joined: ${driverProfile['created_at']}",
+            Text("Date Joined: ${driverProfile.createdAt}",
                 style: const TextStyle(fontSize: 20)),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'trip_list_UI.dart';
+import 'package:bussin_buses/models/Trips.dart';
 
 class HomeNav extends StatefulWidget {
   const HomeNav({super.key});
@@ -36,9 +37,10 @@ class _HomeNavState extends State<HomeNav> {
                 builder: (context) => TripDetailsScreen(trip: trip),
               ),
             );
+
           },
           onLoadJourney: (trip) {
-            driverViewModel.currentTripDetails = trip;
+            driverViewModel.currentTripDetails = trip.toMap();
             driverViewModel.setPageIndex(2);
           },
         ),

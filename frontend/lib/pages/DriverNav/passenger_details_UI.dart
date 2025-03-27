@@ -1,7 +1,8 @@
+import 'package:bussin_buses/models/Passengers.dart';
 import 'package:flutter/material.dart';
 
 class PassengerList extends StatelessWidget {
-  final List<dynamic> passengers;
+  final List<Passenger> passengers;
   final String noPassengerMessage;
 
   const PassengerList({
@@ -32,9 +33,9 @@ class PassengerList extends StatelessWidget {
         ),
         child: Column(
           children: passengers.map((passenger) {
-            final commuterName = passenger['commuter_name'] ?? 'Unknown';
-            final seatNumber = passenger['seat_number'] ?? 'N/A';
-            final isCheckedIn = passenger['is_checked_in'] ?? false;
+            final commuterName = passenger.name;
+            final seatNumber = passenger.seatNumber;
+            final isCheckedIn = passenger.isCheckedIn;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: Row(

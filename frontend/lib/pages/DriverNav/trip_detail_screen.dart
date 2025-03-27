@@ -1,12 +1,11 @@
 import 'package:bussin_buses/pages/DriverNav/passenger_details_UI.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:bussin_buses/models/Trips.dart';
 import '../../viewmodels/driver_viewmodel.dart';
 
 class TripDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> trip;
-
+  final Trip trip;
   const TripDetailsScreen({super.key, required this.trip});
 
   @override
@@ -19,10 +18,11 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final driverViewModel = Provider.of<DriverViewModel>(context, listen: false);
-      final scheduleId = widget.trip['schedule_id'].toString();
-      driverViewModel.fetchPassengerDetails(scheduleId);
+      final scheduleId = widget.trip.scheduleId.toString(); // Accessing scheduleId from the Trip model
+      driverViewModel.fetchPassengerDetails(scheduleId); // Fetch passengers for the trip
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
@@ -37,17 +37,16 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Center(
                     child: Text(
-                      '${widget.trip['pickup']} - ${widget.trip['destination']}',
+                      '${widget.trip.pickup} - ${widget.trip.destination}',
                       style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(height: 5),
                   Center(
                     child: Text(
-                      '${widget.trip['date']} | ${widget.trip['start_time']}',
+                      '${widget.trip.date} | ${widget.trip.startTime}', // Use the properties of Trip model
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -64,7 +63,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   driverViewModel.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : PassengerList(
-                    passengers: driverViewModel.passengers,
+                    passengers: driverViewModel.passengers, // Displaying passengers
                     noPassengerMessage: 'No passengers found.',
                   ),
                 ],
@@ -113,7 +112,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () async {
-                await viewModel.deleteTrip(widget.trip);
+                await viewModel.deleteTrip(widget.trip); // Pass the Trip object for deletion
 
                 if (mounted) {
                   Navigator.of(context).pop();
