@@ -1,63 +1,36 @@
 import 'package:bussin_buses/services/commuter_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../pages/CommuterNav/seat_manager.dart';
-
-class ScheduleDisplayData {
-  final String pickup;
-  final String destination;
-  final String date;
-  final String time;
-
-  ScheduleDisplayData({
-    required this.pickup,
-    required this.destination,
-    required this.date,
-    required this.time,
-  });
-}
-
-class BookingDetails {
-  final String pickup;
-  final String destination;
-  final String departureTime;
-  final String arrivalTime;
-  final String seatNumber;
-  final String scheduleDate;
-
-  BookingDetails({
-    required this.pickup,
-    required this.destination,
-    required this.departureTime,
-    required this.arrivalTime,
-    required this.seatNumber,
-    required this.scheduleDate,
-  });
-}
-
+import '../models/Booking.dart';
+import '../models/Schedule.dart';
 
 class CommuterViewModel extends ChangeNotifier {
-  final CommuterService _commuterService;
-  final Set<dynamic> _canceledBookings = {};
-  final Set<dynamic> _checkedInBookings = {};
-
-  bool isCanceled(dynamic bookingId) => _canceledBookings.contains(bookingId);
-  bool isCheckIn(dynamic bookingId) => _checkedInBookings.contains(bookingId);
-
-
   CommuterViewModel(this._commuterService);
-
-  List<Map<String, dynamic>> bookings = [];
+  final CommuterService _commuterService;
+  final Set<int> _canceledBookings = {};
+  final Set<int> _checkedInBookings = {};
+  List<Booking> bookings = [];
   List<String> bookedSeats = [];
-  ScheduleDisplayData? scheduleData;
+  Schedule? selectedSchedule;
   bool isLoading = false;
+  bool isCanceled(int bookingId) => _canceledBookings.contains(bookingId);
+  bool isCheckIn(int bookingId) => _checkedInBookings.contains(bookingId);
 
-  Future<void> fetchBookings() async {
+
+
+  Future<void> obtainId() async {
+    final id = _commuterService.getCommuterId();
+    if (id != null) {
+      await fetchBookings(id);
+    }
+  }
+
+  Future<void> fetchBookings(String commuterId) async {
     isLoading = true;
     notifyListeners();
 
     try {
-      bookings = await _commuterService.fetchUpcomingBookings();
+      bookings = await _commuterService.fetchUpcomingBookings(commuterId);
     } catch (e) {
       print('Error in ViewModel fetchBookings: $e');
     } finally {
@@ -66,126 +39,58 @@ class CommuterViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> handleCancelWithTimeCheck(Map<String, dynamic> booking) async {
-    final departureTimeRaw = booking['schedule_id']?['time']?.toString();
-    final scheduleDateRaw = booking['schedule_id']?['date'];
 
-    if (departureTimeRaw == null || scheduleDateRaw == null) {
-      return false;
-    }
+  Future<bool> handleCancelWithTimeCheck(Booking booking) async {
+    final schedule = booking.schedule;
+    if (schedule == null) return false;
 
     try {
-      final parts = departureTimeRaw.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
-
-      final scheduleDateTime = DateTime.parse(scheduleDateRaw)
-          .add(Duration(hours: hour, minutes: minute));
-
+      final scheduleDateTime = DateTime.parse(schedule.date).add(
+        Duration(
+          hours: int.parse(schedule.time.split(':')[0]),
+          minutes: int.parse(schedule.time.split(':')[1]),
+        ),
+      );
       final now = DateTime.now();
-
-      if (scheduleDateTime.difference(now) < Duration(minutes: 30)) {
-        return false;
-      } else {
-        return true;
-      }
+      return scheduleDateTime.difference(now) >= Duration(minutes: 30);
     } catch (_) {
       return false;
     }
   }
 
-  Future<String?> cancelBooking(Map<String, dynamic> booking) async {
-    final rawBookingId = booking['booking_id'];
-    final bookingId = int.tryParse(rawBookingId.toString());
-    if (bookingId == null) return "Invalid booking ID";
-
+  Future<String?> cancelBooking(Booking booking) async {
+    final bookingId = booking.id;
     try {
       await _commuterService.cancelBooking(bookingId);
       await seatManager.loadBookedSeats();
       _canceledBookings.add(bookingId);
       notifyListeners();
       return null;
-    } catch (e) {
+    } catch (_) {
       return "Cancellation failed. Try again.";
     }
   }
 
-  Future<String?> checkIn(Map<String, dynamic> booking) async {
-    final bookingId = booking['booking_id'];
-    if (bookingId == null) return "Check-in failed: Missing booking ID.";
-
+  Future<String?> checkIn(Booking booking) async {
     try {
-      await _commuterService.checkInBooking(bookingId);
-      _checkedInBookings.add(bookingId);
+      await _commuterService.checkInBooking(booking.id);
+      _checkedInBookings.add(booking.id);
       notifyListeners();
       return null;
-    } catch (e) {
+    } catch (_) {
       return "Check IN failed. Try again.";
     }
   }
 
-  BookingDetails getDisplayDetails(Map<String, dynamic> booking) {
-    final pickup = booking['schedule_id']?['pickup']?['location_name'] ?? 'N/A';
-    final destination = booking['schedule_id']?['destination']?['location_name'] ?? 'N/A';
-    final departureTimeRaw = booking['schedule_id']?['time']?.toString();
-    final departureTime = (departureTimeRaw != null && departureTimeRaw.contains(':'))
-        ? departureTimeRaw.substring(0, 5)
-        : 'N/A';
-    final arrivalTime = 'TBA';
-    final seatNumber = booking['seat_id']?['seat_number']?.toString() ?? 'N/A';
-
-    String scheduleDate = 'Date Unknown';
-    final rawDate = booking['schedule_id']?['date'];
-    if (rawDate != null) {
-      try {
-        final parsed = DateTime.parse(rawDate);
-        scheduleDate = DateFormat('dd MMM, yyyy').format(parsed).toUpperCase();
-      } catch (_) {}
-    }
-
-    return BookingDetails(
-      pickup: pickup,
-      destination: destination,
-      departureTime: departureTime,
-      arrivalTime: arrivalTime,
-      seatNumber: seatNumber,
-      scheduleDate: scheduleDate,
-    );
+  Map<String, String> getDisplayDetails(Booking booking) {
+    return booking.displayDetails;
   }
 
   Future<void> loadSchedule(int scheduleId) async {
     final data = await _commuterService.fetchScheduleDetails(scheduleId);
     if (data == null) return;
 
-    final pickup = data['pickup']?['location_name'] ?? 'N/A';
-    final destination = data['destination']?['location_name'] ?? 'N/A';
-    final rawDate = data['date'];
-    final rawTime = data['time']?.toString();
-
-    String dateFormatted = 'Unknown Date';
-    String timeFormatted = 'Unknown Time';
-
-    if (rawDate != null) {
-      final parsed = DateTime.tryParse(rawDate);
-      if (parsed != null) {
-        dateFormatted = DateFormat('EEE, dd MMM yyyy').format(parsed);
-      }
-    }
-
-    if (rawTime != null && rawTime.contains(':')) {
-      final parts = rawTime.split(':');
-      final hour = int.tryParse(parts[0]) ?? 0;
-      final minute = int.tryParse(parts[1]) ?? 0;
-      final parsed = DateTime(2025, 1, 1, hour, minute);
-      timeFormatted = DateFormat('HH:mm').format(parsed);
-    }
-
-    scheduleData = ScheduleDisplayData(
-      pickup: pickup,
-      destination: destination,
-      date: dateFormatted,
-      time: timeFormatted,
-    );
+    selectedSchedule = Schedule.fromMap(data);
     notifyListeners();
   }
 
