@@ -23,7 +23,7 @@ class _BookingNavState extends State<BookingNav> {
   @override
   Widget build(BuildContext context) {
     final commuterVM = Provider.of<CommuterViewModel>(context);
-    final schedule = commuterVM.scheduleData;
+    final schedule = commuterVM.selectedSchedule;
 
     return Scaffold(
       appBar: AppBar(
@@ -173,7 +173,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final commuterVM = Provider.of<CommuterViewModel>(context);
-    final schedule = commuterVM.scheduleData;
+    final schedule = commuterVM.selectedSchedule;
 
     return GestureDetector(
       onTap: isConfirm ? exitScreen : null,
