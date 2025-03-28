@@ -7,8 +7,8 @@ const axios = require('axios');
 
 
 async function fetchTrafficCameras() {
-    console.log("📡 Fetching traffic camera data...");
-    const API_URL = "https://api.data.gov.sg/v1/transport/traffic-images";
+    console.log("Fetching traffic camera data...");
+    const API_URL = "https://api.data.gov.sg/v1/transport/traffic-images/?date_time=2025-03-26T18:00:00";
 
     try {
         const response = await axios.get(API_URL);

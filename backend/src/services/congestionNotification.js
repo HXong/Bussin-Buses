@@ -4,7 +4,6 @@ const axios = require('axios');
 const { decode } = require('@here/flexpolyline');
 
 const { getRoutesNearCamera, getNearestRoutePoint } = require('./routeHandler');
-const { timeStamp, time } = require('console');
 
 const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 
@@ -20,25 +19,37 @@ function getActiveDrivers() {
     }
 }
 
-function getAffectedDrivers(cameraData) {
+async function getDriverLocation(driverId) {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/get-driver-location/${driverId}`);
+        return response.data.currentLocation;
+    } catch (error) {
+        console.error(`Failed to fetch location for driver ${driverId}:`, error.message);
+        return null;
+    }
+}
+
+async function getAffectedDrivers(cameraData) {
     const activeDrivers = getActiveDrivers();
     let affectedDrivers = [];
 
-    activeDrivers.forEach(driver => {
+    for (const driver of activeDrivers) {
 
         let polyline = driver.polyline;
-
         const decodedRoute = decode(polyline).polyline;
-        console.log("Checking route against camera:", cameraData);
 
         if (getRoutesNearCamera(decodedRoute, cameraData)) {
+            const currentLocation = await getDriverLocation(driver.driver_id);
+            if (!currentLocation) continue;
+            driver.currentLocation = [currentLocation.latitude, currentLocation.longitude];
+
             const driverNearestIndex = getNearestRoutePoint(decodedRoute, driver.currentLocation);
             const congestionNearestIndex = getNearestRoutePoint(decodedRoute, [cameraData.lat, cameraData.lng]);
             if (driverNearestIndex < congestionNearestIndex) {
                 affectedDrivers.push(driver);
             }
         }
-    });
+    }
     return affectedDrivers;
 }
 
@@ -55,7 +66,7 @@ function sendNotification(affectedDrivers, cameraId) {
 
         axios.post('http://localhost:3000/api/notify-driver', {
             driver_id: driverId,
-            message: `High congestion detected ahead on your route (Camera ${cameraId})!`,
+            message: `Rerouting due to congestion at camera ${cameraId}`,
             cameraId: cameraId,
             timeStamp: now,
             seen: false

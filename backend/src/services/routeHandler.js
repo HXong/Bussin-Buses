@@ -23,14 +23,17 @@ async function getOptimisedRoute(origin, destination, avoidCongestion = true){
     console.log(origin);
     console.log(destination);
 
-    const url = `https://router.hereapi.com/v8/routes?&origin=${origin}${avoidAreasQuery}&destination=${destination}&transportMode=car&return=polyline&apikey=${HERE_API}`;
+    const url = `https://router.hereapi.com/v8/routes?&origin=${origin}${avoidAreasQuery}&destination=${destination}&transportMode=car&return=summary,polyline&apikey=${HERE_API}`;
 
     try{
         const response = await axios.get(url);
 
         if(response.data.routes && response.data.routes.length > 0){
             const route = response.data.routes[0].sections[0];
-            return route.polyline;
+            return {
+                polyline: route.polyline, 
+                duration: route.summary.duration
+            };
         } else {
             console.error("No alternative route found.");
             return null;
@@ -70,7 +73,7 @@ function getCongestionAreas() {
 
 function getRoutesNearCamera(routes, cameraData) {
     const cameraPoint = turf.point([cameraData.lng, cameraData.lat]); 
-    console.log(`🎥 Checking congestion at Camera ${cameraData.id}:`, cameraData.lat, cameraData.lng);
+    console.log(`Checking congestion at Camera ${cameraData.id}:`, cameraData.lat, cameraData.lng);
 
     const formattedRoute = routes.map(coord => [coord[1], coord[0]]); 
 

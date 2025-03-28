@@ -3,10 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const { triggerManualCongestion } = require('../services/TrafficDataProcessor');
 const { getOptimisedRoute, decodeRoute } = require('../services/routeHandler');
 const { 
     getStartJourneyDriver, hasJourneyStarted, updateJourneyStarted, 
-    getLocationCoordinates, deleteJourney, deleteSchedule, 
+    getLocationCoordinates, getDriverLocation, deleteJourney, deleteSchedule, 
     deleteNotifcation, checkExistingNotification, insertNotification
 } = require('../services/supabaseService');
 
@@ -95,18 +96,24 @@ app.get('/api/get-reroute', async(req, res) => {
         return res.status(400).json({ error: "Missing parameters: driver id required." });
     }
 
+    const { driverLocation: driverLocation, driverError: driverError } = await getDriverLocation(driverId);
+
+    if (driverError || !driverLocation) {
+      return res.status(404).json({ error: "No driver location found" });
+    }
+
     const activeDrivers = loadActiveDrivers();
     const driver = activeDrivers.find(d => d.driver_id === driverId);
-    const [driverLatitude, driverLongitude] = driver.currentLocation;
+    driver.currentLocation = [driverLocation.latitude, driverLocation.longitude];
 
 
-    const originCoords = `${driverLatitude},${driverLongitude}`;
-    const destinationCoords = driver.destinationCoords;
+    const originCoords = `${driverLocation.latitude},${driverLocation.longitude}`;
+    const destinationCoords = driver.destination;
 
     console.log(`Resolved Coordinates: Origin(${originCoords}) → Destination(${destinationCoords})`);
 
-    const polyline = await getOptimisedRoute(originCoords, destinationCoords);
-    if (!polyline) {
+    const {polyline, duration} = await getOptimisedRoute(originCoords, destinationCoords);
+    if (!polyline || !duration) {
         return res.status(404).json({ error: "No route found." });
     }
 
@@ -116,6 +123,7 @@ app.get('/api/get-reroute', async(req, res) => {
     const decodedRoute = decodeRoute(polyline);
 
     res.json({
+        duration: duration,
         polyline: polyline,
         decodedRoute: decodedRoute
     });
@@ -123,6 +131,30 @@ app.get('/api/get-reroute', async(req, res) => {
   } catch (error){
     res.status(500).json({ error: 'Error fetching route data', details: error.message });
   }
+});
+
+
+app.get('/api/get-driver-location/:driverId', async (req, res) => {
+  const { driverId } = req.params;
+
+  const { driverLocation: driverLocation, driverError: driverError } = await getDriverLocation(driverId);
+
+  if (driverError || !driverLocation) {
+      return res.status(404).json({ error: 'Driver location not found' });
+  }
+
+  let activeDrivers = loadActiveDrivers();
+  activeDrivers = activeDrivers.find(d => d.driver_id === driverId);
+  if (!activeDrivers) {
+      return res.status(404).json({ error: "Driver not found in active sessions" });
+  }
+
+  activeDrivers.currentLocation = [driverLocation.latitude, driverLocation.longitude];
+  console.log(activeDrivers.currentLocation);
+
+  saveActiveDrivers(activeDrivers);
+
+  res.json({ currentLocation: driverLocation });
 });
 
 /**
@@ -162,12 +194,12 @@ app.post('/api/start-journey', async (req, res) => {
           return res.status(500).json({ error: "Failed to update journey status", details: journeyError.message });
       }
 
-      const {originData, originError} = await getLocationCoordinates(driver.pickup);
+      const { locationData: originData, locationError: originError } = await getLocationCoordinates(driver.pickup);
       if (originError) {
         return res.status(404).json({ error: "Origin location not found" });
       }
 
-      const {destinationData, destinationError} = await getLocationCoordinates(driver.destination);
+      const { locationData: destinationData, locationError: destinationError } = await getLocationCoordinates(driver.destination);
       if (destinationError) {
         return res.status(404).json({ error: "Destination location not found" });
       }
@@ -175,8 +207,8 @@ app.post('/api/start-journey', async (req, res) => {
       const originCoords = `${originData.latitude},${originData.longitude}`;
       const destinationCoords = `${destinationData.latitude},${destinationData.longitude}`;
 
-      const polyline = await getOptimisedRoute(originCoords, destinationCoords);
-      if (!polyline) {
+      const { polyline, duration } = await getOptimisedRoute(originCoords, destinationCoords);
+      if (!polyline || !duration) {
           return res.status(404).json({ error: "No optimized route found." });
       }
 
@@ -188,6 +220,7 @@ app.post('/api/start-journey', async (req, res) => {
       const decodedRoute = decodeRoute(polyline);
 
       res.json({
+          duration: duration,
           polyline: polyline,
           decodedRoute: decodedRoute
       });
@@ -250,39 +283,6 @@ app.post('/api/stop-journey', async (req, res) => {
   }
 });
 
-/**
- * API call for frontend to send the driver's current location after starting the journey
- * @todo Gets driver's current location from the supabase instead of the frontend (Need table name)
- * @param {string} driver_id - The driver's unique identifier
- * @param {number} latitude - The driver's current latitude
- * @param {number} longitude - The driver's current longitude
- * @returns {object} - Success message if the driver's location was updated successfully
-*/
-app.post('/api/update-driver-location', (req, res) => {
-    try {
-        const { driver_id, latitude, longitude } = req.body;
-
-        if (!driver_id || latitude === undefined || longitude === undefined) {
-            return res.status(400).json({ error: "Missing driver_id, latitude, or longitude" });
-        }
-
-        let activeDrivers = loadActiveDrivers();
-        let driver = activeDrivers.find(d => d.driver_id === driver_id);
-        if (!driver) {
-            return res.status(404).json({ error: "Driver not found in active sessions" });
-        }
-
-        driver.currentLocation = [latitude, longitude];
-
-        saveActiveDrivers(activeDrivers);
-
-        res.json({ message: "Driver location updated" });
-    } catch (error) {
-        console.error("Error updating driver location:", error.message);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
-
 
 /**
  * API to notify the driver of high congestion ahead on their route
@@ -326,6 +326,13 @@ app.post('/api/notify-driver', async (req, res) => {
   res.json({ success: true, message: "Notification added" });
   
 });
+
+app.post('/api/test-congestion', (req, res) => {
+  const { cameraId } = req.body;
+  triggerManualCongestion(cameraId);
+  res.send({ status: 'Manual congestion triggered' });
+});
+
 
 
 app.listen(port, () => {

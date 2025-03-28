@@ -1,4 +1,4 @@
-const supabase = require("../config/supabaseClient");
+const { supabase } = require("../config/supabaseClient");
 
 /**
  * Fetches the driver's data from the supabase
@@ -8,12 +8,12 @@ const supabase = require("../config/supabaseClient");
  */
 async function getStartJourneyDriver(driver_id, schedule_id){
     const { data: driver, error: driverError } = await supabase
-          .from('schedules')
-          .select('*')
-          .eq('driver_id', driver_id)
-          .eq('schedule_id', schedule_id)
-          .eq('delete_schedule', false)
-          .single();
+        .from('schedules')
+        .select('*')
+        .eq('driver_id', driver_id)
+        .eq('schedule_id', schedule_id)
+        .eq('delete_schedule', false)
+        .single();
 
     return {driver, driverError};
 }
@@ -53,13 +53,31 @@ async function updateJourneyStarted(schedule_id) {
  * @returns location coordinates and error
  */
 async function getLocationCoordinates(location_id){
-    const { data: locationData, error: locationError } = await supabase
+    const { data, error } = await supabase
         .from('location')
         .select('latitude, longitude')
         .eq('location_id', location_id)
         .single();
     
-    return {locationData, locationError};
+    if (error || !data) {
+        return { locationData: null, locationError: error || new Error('Location not found') };
+    }
+
+    return { locationData: data, locationError: null };
+}
+
+async function getDriverLocation(driver_id){
+    const { data, error } = await supabase
+        .from('driver_location')
+        .select('latitude, longitude')
+        .eq('driver_id', driver_id)
+        .single();
+
+    if (error || !data) {
+        return { driverLocation: null, driverError: error || new Error('Driver not found') };
+    }
+
+    return { driverLocation: data, driverError: null };
 }
 
 /**
@@ -149,6 +167,7 @@ module.exports = {
     hasJourneyStarted,
     updateJourneyStarted,
     getLocationCoordinates,
+    getDriverLocation,
     deleteJourney,
     deleteSchedule,
     deleteNotifcation,

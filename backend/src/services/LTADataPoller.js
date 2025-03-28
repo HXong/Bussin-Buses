@@ -38,6 +38,7 @@ function saveCameraData(cameras){
     });
 
     fs.writeFileSync(CONGESTION_FILE, JSON.stringify(updatedData, null, 2));
+    console.log(Date(Date.now()).toString())
     console.log(`Traffic camera data updated with ${updatedData.length} entries.`);
 }
 
