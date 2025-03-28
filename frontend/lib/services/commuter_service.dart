@@ -1,32 +1,38 @@
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/Booking.dart';
 
 class CommuterService {
   final SupabaseClient _supabase = SupabaseClientService.client;
 
-  Future<List<Map<String, dynamic>>> fetchUpcomingBookings() async {
+  Future<List<Booking>> fetchUpcomingBookings(String commuterId) async {
     final response = await _supabase
         .from('bookings')
-        .select('booking_id, booking_date, is_checked_in, seat_id(seat_number), schedule_id(date, time, pickup(location_name), destination(location_name))');
+        .select('booking_id, booking_date, is_checked_in, seat_id(seat_number), schedule_id(date, time, pickup(location_name), destination(location_name))')
+        .eq('commuter_id', commuterId);
 
-    final List<Map<String, dynamic>> allBookings = List<Map<String, dynamic>>.from(response);
+    final List data = response as List;
     final now = DateTime.now();
 
-    return allBookings.where((booking) {
-      final scheduleDate = booking['schedule_id']?['date'];
-      final scheduleTime = booking['schedule_id']?['time']?.toString();
-      if (scheduleDate == null || scheduleTime == null || !scheduleTime.contains(':')) return false;
+    return data.where((bookingMap) {
+      final schedule = bookingMap['schedule_id'];
+      final dateStr = schedule?['date'];
+      final timeStr = schedule?['time']?.toString();
+
+      if (dateStr == null || timeStr == null || !timeStr.contains(':')) return false;
 
       try {
-        final date = DateTime.parse(scheduleDate);
-        final parts = scheduleTime.split(':');
+        final date = DateTime.parse(dateStr);
+        final parts = timeStr.split(':');
         final departure = DateTime(date.year, date.month, date.day, int.parse(parts[0]), int.parse(parts[1]));
         return departure.isAfter(now);
       } catch (_) {
         return false;
       }
-    }).toList();
+    }).map((b) => Booking.fromMap(b)).toList();
   }
+
+
 
   Future<void> cancelBooking(int bookingId) async {
     await _supabase.from('bookings').delete().eq('booking_id', bookingId);
@@ -101,4 +107,9 @@ class CommuterService {
 
     return true;
   }
+
+  String? getCommuterId() {
+    return _supabase.auth.currentUser?.id;
+  }
+
 }
