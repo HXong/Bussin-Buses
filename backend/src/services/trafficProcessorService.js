@@ -2,13 +2,11 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { getAffectedDrivers, sendNotification } = require("./congestionNotification");
+const { getAffectedDrivers, sendNotification } = require("./congestionService");
+const { loadCongestionData, saveCongestionData } = require('../utils/congestionStore');
+const { getSGTime } = require('../utils/timeUtils');
 
-//TODO: Supabase setup
-
-//Local storage
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
-
 const IMAGES_DIR = path.join(__dirname, "../../images");
 const PYTHON_PATH = "C:/Python312/python.exe"
 
@@ -43,15 +41,7 @@ async function countCars(imagePath){
                     const result = JSON.parse(output.trim());
                     console.log(`Processed ${imagePath} → Vehicles: ${result.vehicle}, Congestion: ${result.congestion_level}`);
 
-                    let congestionData = [];
-                    if (fs.existsSync(CONGESTION_FILE)) {
-                        try {
-                            congestionData = JSON.parse(fs.readFileSync(CONGESTION_FILE, "utf8"));
-                        } catch (error) {
-                            console.error("Error reading JSON file:", error.message);
-                            congestionData = [];
-                        }
-                    }
+                    let congestionData = loadCongestionData();
 
 
                     if(result.congestion_level === 'high'){
@@ -125,15 +115,7 @@ async function triggerManualCongestion(cameraId) {
     console.log("Manually triggering high congestion...");
     const result = { congestion_level: 'high' };
 
-    let congestionData = [];
-    if (fs.existsSync(CONGESTION_FILE)) {
-        try {
-            congestionData = JSON.parse(fs.readFileSync(CONGESTION_FILE, "utf8"));
-        } catch (error) {
-            console.error("Error reading JSON file:", error.message);
-            congestionData = [];
-        }
-    }
+    let congestionData = loadCongestionData();
 
     if(result.congestion_level === 'high') {
         console.log("entering congestion notification...");
@@ -171,35 +153,12 @@ function updateCongestionData(data, cameraId, congestionLevel) {
 
     console.log(`Updated Camera ${cameraId} with congestion level: ${congestionLevel}`);
 
-    try {
-        fs.writeFileSync(CONGESTION_FILE, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error("Error writing to JSON file:", error.message);
-    }
-}
-
-function getSGTime(){
-    const options = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-        timeZone: 'Asia/Singapore'
-      };
-
-    let sgTime = new Date().toLocaleString('en-SG', options);
-
-    let [date, time] = sgTime.split(", ");
-    let [month, day, year] = date.split("/");
-
-    return `${day}/${month}/${year} ${time}`;
+    saveCongestionData(data);
 }
 
 
 module.exports = { analyzeTraffic, triggerManualCongestion };
+
 if (require.main === module) {
     console.log("TrafficDataProcessor.js is running as a script.");
     analyzeTraffic();

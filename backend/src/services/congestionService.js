@@ -1,13 +1,30 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const { decode } = require('@here/flexpolyline');
 
-const { getRoutesNearCamera, getNearestRoutePoint } = require('./routeHandler');
+const { decodeRoute, getRoutesNearCamera, getNearestRoutePoint } = require('./routeService');
 
 const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
 
-//const driverNotifications = {};
+function getSGTime(){
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Singapore'
+      };
+
+    let sgTime = new Date().toLocaleString('en-SG', options);
+
+    let [date, time] = sgTime.split(", ");
+    let [month, day, year] = date.split("/");
+
+    return `${day}/${month}/${year} ${time}`;
+}
 
 function getActiveDrivers() {
     if (!fs.existsSync(ACTIVE_DRIVERS_FILE)) return [];
@@ -36,7 +53,7 @@ async function getAffectedDrivers(cameraData) {
     for (const driver of activeDrivers) {
 
         let polyline = driver.polyline;
-        const decodedRoute = decode(polyline).polyline;
+        const decodedRoute = decodeRoute(polyline);
 
         if (getRoutesNearCamera(decodedRoute, cameraData)) {
             const currentLocation = await getDriverLocation(driver.driver_id);
@@ -53,45 +70,31 @@ async function getAffectedDrivers(cameraData) {
     return affectedDrivers;
 }
 
-
-function sendNotification(affectedDrivers, cameraId) {
+async function sendNotification(affectedDrivers, cameraId) {
     const now = getSGTime();
+
     if (!Array.isArray(affectedDrivers)) {
         console.error('affectedDrivers is not an array:', affectedDrivers);
         return;
     }
 
-    affectedDrivers.forEach(driver => {
-        const driverId = driver.driver_id;
-
-        axios.post('http://localhost:3000/api/notify-driver', {
-            driver_id: driverId,
-            message: `Rerouting due to congestion at camera ${cameraId}`,
-            cameraId: cameraId,
-            timeStamp: now,
-            seen: false
-        })
-    });
+    for (const driver of affectedDrivers) {
+        try {
+            await axios.post('http://localhost:3000/api/notify-driver', {
+                driver_id: driver.driver_id,
+                message: `Rerouting due to congestion at camera ${cameraId}`,
+                cameraId,
+                timeStamp: now,
+                seen: false
+            });
+        } catch (err) {
+            console.error(`Failed to notify driver ${driver.driver_id}`, err.message);
+        }
+    }
 }
 
-function getSGTime(){
-    const options = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-        timeZone: 'Asia/Singapore'
-      };
-
-    let sgTime = new Date().toLocaleString('en-SG', options);
-
-    let [date, time] = sgTime.split(", ");
-    let [month, day, year] = date.split("/");
-
-    return `${day}/${month}/${year} ${time}`;
-}
-
-module.exports = { getAffectedDrivers, sendNotification };
+module.exports = {
+    getAffectedDrivers,
+    sendNotification,
+    getSGTime
+};
