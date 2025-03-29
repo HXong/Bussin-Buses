@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const processTrafficData = require("./LTADataPoller");
-const analyzeTraffic = require("./TrafficDataProcessor");
+const processTrafficData = require("../services/LTADataPollerService");
+const { analyzeTraffic } = require("../services/trafficProcessorService");
 
 let isRunning = false
 
@@ -9,7 +9,7 @@ async function runTrafficUpdate() {
     console.log("Running traffic update cycle...");
 
     if (isRunning) {
-        console.log(`⚠️ [${new Date().toISOString()}] Previous job is still running. Skipping this cycle.`);
+        console.log(`[${new Date().toISOString()}] Previous job is still running. Skipping this cycle.`);
         return;
     }
 

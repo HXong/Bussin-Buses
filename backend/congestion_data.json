@@ -1,1801 +1,1801 @@
 [
   {
     "id": "1001",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/c9c4701c-99af-4065-9dd0-a7cae1caab6d.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b95f6996-968d-49f1-bd41-3ba33d622c44.jpg",
     "lat": 1.29531332,
     "lng": 103.871146,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
+        "timestamp": "03/29/2025 05:36:35 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
+        "timestamp": "03/29/2025 05:45:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
-      }
-    ]
-  },
-  {
-    "id": "1002",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/0c2c562c-7eb9-43a3-89ca-a50338e927f0.jpg",
-    "lat": 1.319541067,
-    "lng": 103.8785627,
-    "timestamps": [
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
-      }
-    ]
-  },
-  {
-    "id": "1003",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/271530cb-dbca-4524-bfe7-ea96a3a708de.jpg",
-    "lat": 1.323957439,
-    "lng": 103.8728576,
-    "timestamps": [
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "timestamp": "03/29/2025 05:53:06 pm"
       }
     ]
   },
   {
     "id": "1004",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/662745c5-5392-42b0-821e-fcd296010df0.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/1991dd5e-86ee-41ce-90d9-37c0d08d15ba.jpg",
     "lat": 1.319535712,
     "lng": 103.8750668,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
+        "timestamp": "03/29/2025 05:36:35 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
+        "timestamp": "03/29/2025 05:45:51 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "timestamp": "03/29/2025 05:53:06 pm"
       }
     ]
   },
   {
     "id": "1005",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/76c99e1a-1f58-46da-aec3-702e1463c21e.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e0631a14-db3d-47f6-9921-ff81829fd0b3.jpg",
     "lat": 1.363519886,
     "lng": 103.905394,
     "timestamps": [
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:36:35 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:45:51 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:53:06 pm"
       }
     ]
   },
   {
     "id": "1006",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/5ff2b262-f2c7-4ed8-b61b-08babcabfd0e.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f1df6aaa-098e-498c-8b66-82bcbbe54835.jpg",
     "lat": 1.357098686,
     "lng": 103.902042,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
+        "timestamp": "03/29/2025 05:36:35 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
+        "timestamp": "03/29/2025 05:45:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "timestamp": "03/29/2025 05:53:06 pm"
       }
     ]
   },
   {
     "id": "1111",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/19a4d2a9-9cc1-408a-8c87-bd087a066272.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/8a0071bc-b996-46e1-b77a-c86a809b3173.jpg",
     "lat": 1.365434,
     "lng": 103.953997,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:38"
+        "timestamp": "03/29/2025 05:36:37 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:20"
+        "timestamp": "03/29/2025 05:45:52 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "timestamp": "03/29/2025 05:53:08 pm"
       }
     ]
   },
   {
     "id": "1112",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/b7baea9c-a5c3-437b-9d0d-5aba9e0962c4.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/5fe5c0cb-4960-44e3-be18-4cc38908bfeb.jpg",
     "lat": 1.3605,
     "lng": 103.961412,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:37"
+        "timestamp": "03/29/2025 05:36:37 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:19"
+        "timestamp": "03/29/2025 05:45:52 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:17"
+        "timestamp": "03/29/2025 05:53:08 pm"
       }
     ]
   },
   {
     "id": "1113",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/26ea8d73-f019-4527-a253-bac5812150cb.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/88f340b1-d2b7-47cd-861b-3e4383b5a258.jpg",
     "lat": 1.317036,
     "lng": 103.988598,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:52 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:06 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:23 pm"
       }
     ]
   },
   {
     "id": "1501",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/0684e643-f8da-4889-a090-52266c68527a.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/3d6e354b-d6da-4195-8111-a54025fc6988.jpg",
     "lat": 1.27414394350065,
     "lng": 103.851316802547,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:04 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:21 pm"
       }
     ]
   },
   {
     "id": "1502",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/61c69177-db61-48d7-9d8b-201f223b08b4.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/2c615ad6-e93e-4c07-96ce-a002531879fe.jpg",
     "lat": 1.27135090682664,
     "lng": 103.861828440597,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:04 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:21 pm"
       }
     ]
   },
   {
     "id": "1503",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/999c9e39-bc1c-40c0-90a0-f2350c11ab92.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/4b3dbad6-0b50-4343-95bc-abcefbee6c4f.jpg",
     "lat": 1.27066408655104,
     "lng": 103.856977943394,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:04 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:21 pm"
       }
     ]
   },
   {
     "id": "1504",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4091f1aa-c0e3-4208-96ee-303418ecf4ff.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/13d39162-3c36-4a75-ae14-5516ae76aad5.jpg",
     "lat": 1.29409891409364,
     "lng": 103.876056196568,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:05 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:21 pm"
       }
     ]
   },
   {
     "id": "1505",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/972a2d8f-f1f9-4e07-b8aa-d8830d81585f.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/d501b9aa-3278-41ef-9ef8-a88f43da1a85.jpg",
     "lat": 1.2752977149006,
     "lng": 103.866390381759,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:50 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:05 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:27"
+        "timestamp": "03/29/2025 05:53:21 pm"
       }
     ]
   },
   {
     "id": "1701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/714b1b88-605c-4bf7-b8cb-d2e7d0bb8f6a.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/3316d0d7-1381-46c4-9145-79f1741ffcbc.jpg",
     "lat": 1.323604823,
     "lng": 103.8587802,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:47"
+        "timestamp": "03/29/2025 05:36:54 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:29"
+        "timestamp": "03/29/2025 05:46:08 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:28"
+        "timestamp": "03/29/2025 05:53:25 pm"
       }
     ]
   },
   {
     "id": "1702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4154524a-0111-4e2f-9077-8a4c8096cc9b.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/01294050-4e6a-4dec-87f9-2a57f5f431f2.jpg",
     "lat": 1.34355015,
     "lng": 103.8601984,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:48"
+        "timestamp": "03/29/2025 05:36:54 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:30"
+        "timestamp": "03/29/2025 05:46:09 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:28"
+        "timestamp": "03/29/2025 05:53:25 pm"
       }
     ]
   },
   {
     "id": "1703",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/6c0e202c-d1fd-45fb-8508-21c2d3dba4e1.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/1339cacb-3d3e-4212-aca1-4f4d9060b5d4.jpg",
     "lat": 1.32814722194857,
     "lng": 103.862203282048,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:10 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:39"
+        "timestamp": "03/29/2025 05:46:24 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:40 pm"
       }
     ]
   },
   {
     "id": "1704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/476419a1-a26c-40cd-b33d-75ae525f25f5.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/01449d2b-73b5-4305-b3d4-8d8e948fd0a6.jpg",
     "lat": 1.28569398886979,
     "lng": 103.837524510188,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:10 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:39"
+        "timestamp": "03/29/2025 05:46:24 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:41 pm"
       }
     ]
   },
   {
     "id": "1705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/36843425-4618-4678-badc-8e90284a7542.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/3c30164e-9e9a-4c3f-9481-fa87e1c9cfc2.jpg",
     "lat": 1.375925022,
     "lng": 103.8587986,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:10 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:39"
+        "timestamp": "03/29/2025 05:46:24 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:41 pm"
       }
     ]
   },
   {
     "id": "1706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/e2d80936-e1cd-4a06-a0d4-cba0214a8fb0.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/8b5d1d03-0897-4cd6-a59a-8886f60125da.jpg",
     "lat": 1.38861,
     "lng": 103.85806,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:10 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:39"
+        "timestamp": "03/29/2025 05:46:25 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:41 pm"
       }
     ]
   },
   {
     "id": "1707",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/8d3a9bf3-9add-46a5-b8d9-7dbb36d8942f.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/9b512419-dc14-4316-9b11-060827af5550.jpg",
     "lat": 1.28036584335876,
     "lng": 103.830451146503,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:10 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:39"
+        "timestamp": "03/29/2025 05:46:25 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:41 pm"
       }
     ]
   },
   {
     "id": "1709",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d087f4b3-a350-4cf4-a028-d22c07e5ae98.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/bb68c2dc-fc5e-479c-892c-232a25e9d725.jpg",
     "lat": 1.31384231654635,
     "lng": 103.845603032574,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:12 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:40"
+        "timestamp": "03/29/2025 05:46:26 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:42 pm"
       }
     ]
   },
   {
     "id": "1711",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/5fdb04c5-1f3f-4865-a730-8898bbc95d75.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b1661667-6423-4cab-85af-af7c2e0af75d.jpg",
     "lat": 1.35296,
     "lng": 103.85719,
     "timestamps": [
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:37:13 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:40"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:46:28 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:53:44 pm"
       }
     ]
   },
   {
     "id": "2701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d6f175cf-b8af-444e-b4b8-9f441f8779c6.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/5f400c10-e92f-4e37-95f4-580c6792341a.jpg",
     "lat": 1.447023728,
     "lng": 103.7716543,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:42:58"
+        "timestamp": "03/29/2025 05:37:14 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:40"
+        "timestamp": "03/29/2025 05:46:28 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:38"
+        "timestamp": "03/29/2025 05:53:44 pm"
       }
     ]
   },
   {
     "id": "2702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/bf3f8b14-2eb2-4293-9d7b-6ddd2e6b7bb4.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e478a638-31a9-4559-a44e-601e754ceef7.jpg",
     "lat": 1.445554109,
     "lng": 103.7683397,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "timestamp": "03/29/2025 05:37:30 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "timestamp": "03/29/2025 05:46:44 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:49"
+        "timestamp": "03/29/2025 05:54:00 pm"
       }
     ]
   },
   {
     "id": "2703",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4e2a4fd5-ffc3-4da7-8420-fbb6f8e300cd.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/31e17563-ec0a-4d4f-a7b9-a20816a4e036.jpg",
     "lat": 1.35047790791386,
     "lng": 103.791033581325,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "timestamp": "03/29/2025 05:37:30 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "timestamp": "03/29/2025 05:46:44 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:49"
+        "timestamp": "03/29/2025 05:54:01 pm"
       }
     ]
   },
   {
     "id": "2704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/f6720fdd-eb56-41c7-83ca-668859be3aaa.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/05fad1a0-cf34-4d4d-9bb6-ef2edbecb873.jpg",
     "lat": 1.429588536,
     "lng": 103.769311,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "timestamp": "03/29/2025 05:37:30 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "timestamp": "03/29/2025 05:46:45 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:48"
+        "timestamp": "03/29/2025 05:54:01 pm"
       }
     ]
   },
   {
     "id": "2705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/5ccac605-2b72-4a6b-a99b-259b3eeed803.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/95cb1eb6-295c-4401-bc61-dd6dba9c38c0.jpg",
     "lat": 1.36728572,
     "lng": 103.7794698,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "timestamp": "03/29/2025 05:37:30 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "timestamp": "03/29/2025 05:46:45 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:49"
+        "timestamp": "03/29/2025 05:54:01 pm"
       }
     ]
   },
   {
     "id": "2706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/af6da72f-e232-4386-a4d5-f4b0d126d211.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/6c0c62a1-a9f9-404f-b80f-66a8c31b1498.jpg",
     "lat": 1.414142,
     "lng": 103.771168,
     "timestamps": [
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:37:30 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:46:45 pm"
       },
       {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:49"
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:54:01 pm"
       }
     ]
   },
   {
     "id": "2707",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/1c7ffa48-1744-4f48-9ec2-dc02a52f5502.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/60781879-09b9-4288-a99b-82a6f654a692.jpg",
     "lat": 1.3983,
     "lng": 103.774247,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
+        "timestamp": "03/29/2025 05:37:31 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:50"
+        "timestamp": "03/29/2025 05:46:46 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:57:49"
+        "timestamp": "03/29/2025 05:54:02 pm"
       }
     ]
   },
   {
     "id": "2708",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/a656ff39-899e-4c6a-bf05-1b3b479802c0.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e1ff5210-bc85-46dd-bad9-85953511219d.jpg",
     "lat": 1.3865,
     "lng": 103.7747,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:51"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:49"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:33 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:04 pm"
       }
     ]
   },
   {
     "id": "3702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/ce4be1ed-de9e-464a-aa43-2fd666449cd7.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/65fc1e1b-b85e-402a-930d-6bba3485cdb4.jpg",
     "lat": 1.33831,
     "lng": 103.98032,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:09"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:47:51"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:49"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:32 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:04 pm"
       }
     ]
   },
   {
     "id": "3704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/a2fd84c6-15ba-4fa3-8fcb-09aeab20d664.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/23d3407b-008f-42df-ace7-f0211fcd99c0.jpg",
     "lat": 1.2958550156561,
     "lng": 103.880314665981,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:59"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:19 pm"
       }
     ]
   },
   {
     "id": "3705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/eed23fba-0d7c-4efb-9241-c82462daa79a.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/02dc363c-b3e4-4f9d-8a56-106b16d0e413.jpg",
     "lat": 1.32743,
     "lng": 103.97383,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:59"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:20 pm"
       }
     ]
   },
   {
     "id": "3793",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/08d852f6-2de2-4a1f-9efa-b5986c2dcbcb.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/44083a46-e2b2-4333-b807-d0e7bfb49bcc.jpg",
     "lat": 1.309330837,
     "lng": 103.9350504,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:59"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:21 pm"
       }
     ]
   },
   {
     "id": "3795",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d829a168-c90d-493b-ab0a-0e258e0dfa42.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/5b761080-1820-43fe-92a6-40de49e4d5a9.jpg",
     "lat": 1.30145145166066,
     "lng": 103.910596320237,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:00"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:22 pm"
       }
     ]
   },
   {
     "id": "3796",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/ce3c8e25-9ea4-49c5-aa70-0f72383aeaab.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/578a610b-7049-4aa9-860c-e74c15b72707.jpg",
     "lat": 1.297512569,
     "lng": 103.8983019,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:59"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:22 pm"
       }
     ]
   },
   {
     "id": "3797",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4898d096-fddc-4e42-9987-010e49d3ccb1.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/c659cad8-835c-41bf-8480-4b265cb936f3.jpg",
     "lat": 1.29565733262976,
     "lng": 103.885283049309,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:01"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:57:59"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:51 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:22 pm"
       }
     ]
   },
   {
     "id": "3798",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d89510ec-4b37-425e-a203-82749aac6684.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/04c3bc88-cdff-48c3-91bd-288ae661f069.jpg",
     "lat": 1.29158484,
     "lng": 103.8615987,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:20"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:02"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:00"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:52 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:24 pm"
       }
     ]
   },
   {
     "id": "4701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/6f676ada-b21f-4ba1-9f2b-b5e5c7100b4d.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/318f333b-9afc-498a-9c19-bb68e4e079e0.jpg",
     "lat": 1.2871,
     "lng": 103.79633,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:21"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:03"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:00"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:37:52 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:24 pm"
       }
     ]
   },
   {
     "id": "4702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/33348555-3c48-4599-b651-46ad4a3c75bc.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/156a9adb-6f81-4da7-b96e-78784ccae32d.jpg",
     "lat": 1.27237,
     "lng": 103.8324,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:30"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:12"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:39 pm"
       }
     ]
   },
   {
     "id": "4703",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/36d7fd8c-f094-4e2b-bfac-b48134667a7b.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/d8a1460a-62b8-4952-b5be-80ea892c2e71.jpg",
     "lat": 1.348697862,
     "lng": 103.6350413,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:12"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:40 pm"
       }
     ]
   },
   {
     "id": "4704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/6af597f8-09e5-4e58-b82d-bd196c0e3810.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/23927dcf-2c8e-4980-9c0a-71f94092c36b.jpg",
     "lat": 1.27877,
     "lng": 103.82375,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:12"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:41 pm"
       }
     ]
   },
   {
     "id": "4705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/56f7ee93-7eff-41a9-831b-edf23b30c66b.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f63a8f33-c7a0-4961-b8e5-cb9de251bd0e.jpg",
     "lat": 1.32618,
     "lng": 103.73028,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:13"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:42 pm"
       }
     ]
   },
   {
     "id": "4706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/c2448d5a-97ac-411d-8151-32e3af65cc02.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/ee2081b0-781b-4324-99e6-1dc4ffde400e.jpg",
     "lat": 1.29792,
     "lng": 103.78205,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:13"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:42 pm"
       }
     ]
   },
   {
     "id": "4707",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/63a50791-6195-4ab0-bf78-ddb9d415f8be.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/14abec9e-5af9-4a01-b50c-0546dc010140.jpg",
     "lat": 1.33344648135658,
     "lng": 103.652700847056,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:13"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:10"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:42 pm"
       }
     ]
   },
   {
     "id": "4708",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/7aa220f2-3fb9-40da-997a-906487b2a7fd.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/c8fdcfb5-91b4-4378-8568-7daff015fdc9.jpg",
     "lat": 1.29939,
     "lng": 103.7799,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:11"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:12 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:44 pm"
       }
     ]
   },
   {
     "id": "4709",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/554cdd47-8db7-460f-be62-fa46f936d1fd.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/d2739176-bb0e-464e-b43e-5c2b616d21f7.jpg",
     "lat": 1.312019,
     "lng": 103.763002,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:31"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:11"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:12 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:44 pm"
       }
     ]
   },
   {
     "id": "4710",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/e34cd423-0df6-47ff-93cc-2ba259c1c8a5.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e7fc5fbe-cc39-4699-93ac-e51cfb0d5924.jpg",
     "lat": 1.32153,
     "lng": 103.75273,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:41"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:23"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:54:58 pm"
       }
     ]
   },
   {
     "id": "4712",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/82f34894-3bfd-41ee-9e22-b8214757382b.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/711caee4-f495-4771-83dd-bab972b92a59.jpg",
     "lat": 1.341244001,
     "lng": 103.6439134,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:41"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:23"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:00 pm"
       }
     ]
   },
   {
     "id": "4713",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/99449583-8628-48c5-9d58-90e16f076dbd.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/1d5d0d2f-f71e-42b6-97ba-bdc847d9b585.jpg",
     "lat": 1.347645829,
     "lng": 103.6366955,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:41"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:24"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:55:01 pm"
       }
     ]
   },
   {
     "id": "4714",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/a76d46a3-5720-465e-8ec5-c46a0f80e177.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/8d5c4cbc-1df0-4bf6-a947-6510c15b1461.jpg",
     "lat": 1.31023,
     "lng": 103.76438,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:41"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:24"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:02 pm"
       }
     ]
   },
   {
     "id": "4716",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4edfb2ad-c5b4-4f68-87ca-f4192fc986c7.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/2dde6233-9301-46ce-8b47-3cb612a62434.jpg",
     "lat": 1.32227,
     "lng": 103.67453,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:42"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:24"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:02 pm"
       }
     ]
   },
   {
     "id": "4798",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4bac4b19-fafc-4719-a0ca-a248486fe8ee.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/30b04600-94f0-41d1-b2b7-0061bd6bb6d8.jpg",
     "lat": 1.25999999687243,
     "lng": 103.823611110166,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:42"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:24"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:22"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:02 pm"
       }
     ]
   },
   {
     "id": "4799",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/69ce7975-0d2d-41e9-8d10-6732a536a384.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/589c6130-8184-46de-8adb-b566bde78c78.jpg",
     "lat": 1.26027777363278,
     "lng": 103.823888890049,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:42"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:23"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:31 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:04 pm"
       }
     ]
   },
   {
     "id": "5794",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/b11f8091-620f-4a0c-8418-e2b4773000d3.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/1b9394c1-4d08-4902-8fc1-7f3c6636ff30.jpg",
     "lat": 1.3309693,
     "lng": 103.9168616,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:42"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:26"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:23"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:31 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:04 pm"
       }
     ]
   },
   {
     "id": "5795",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/c3cebc94-5b52-431f-a641-f61e401f59eb.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e5a43cd9-678d-4b4c-927d-cb60a6f07be3.jpg",
     "lat": 1.326024822,
     "lng": 103.905625,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:35"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:33"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:49 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:17 pm"
       }
     ]
   },
   {
     "id": "5797",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/68ebd742-f6e6-4e3f-9f11-0039afb6659c.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/dfe1d476-ee62-4401-b5ee-7ae983dc5125.jpg",
     "lat": 1.322875288,
     "lng": 103.8910793,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
+        "timestamp": "03/29/2025 10:59:13 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:35"
+        "timestamp": "03/29/2025 11:37:49 pm"
       },
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:58:33"
+        "timestamp": "03/30/2025 12:00:16 am"
       }
     ]
   },
   {
     "id": "5798",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/8eb2a517-47de-44ed-b2cc-cb1120d0fdb5.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/d2bff395-406f-43b6-bf73-a07482f61c3d.jpg",
     "lat": 1.32036078126842,
     "lng": 103.877174116489,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:36"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:33"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:20 pm"
       }
     ]
   },
   {
     "id": "5799",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/eb839dd2-4713-4bed-aa03-09ef19b40904.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f2088cc5-3f40-4e91-be68-2a2a310a1fd4.jpg",
     "lat": 1.328171608,
     "lng": 103.8685191,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:35"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:33"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:21 pm"
       }
     ]
   },
   {
     "id": "6701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d9e6bb3f-7a9a-448a-a69d-f38ef24111e7.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/ac42fa3a-0ca5-4170-9bb4-c253f3792203.jpg",
     "lat": 1.329334,
     "lng": 103.858222,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:36"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:34"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:22 pm"
       }
     ]
   },
   {
     "id": "6703",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/6b1eaf1d-55a1-4c1a-81d7-90357ca67df8.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/23420e45-76cb-4b94-bfd1-65be2e81673e.jpg",
     "lat": 1.328899,
     "lng": 103.84121,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:52"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:36"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:34"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:22 pm"
       }
     ]
   },
   {
     "id": "6704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/0757e026-1a23-46e6-9583-7e9f8b3423e2.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/e095fa5e-116e-466b-8e84-e7f035cf163b.jpg",
     "lat": 1.32657403632366,
     "lng": 103.826857295633,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:53"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:37"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:35"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:38:51 pm"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:55:23 pm"
       }
     ]
   },
   {
     "id": "6705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/1059edbf-3a97-4783-8868-84ef22d4f658.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/a60e3ef2-63e7-46e0-bc13-8ee226a1b02d.jpg",
     "lat": 1.332124,
     "lng": 103.81768,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:43:53"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:38"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:35"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:38:51 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:23 pm"
       }
     ]
   },
   {
     "id": "6706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/9826599d-4a01-440a-ab09-06746eaade91.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b695ca5d-41ac-46d6-b90e-e44b34fe16d3.jpg",
     "lat": 1.349428893,
     "lng": 103.7952799,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:47"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:44"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:08 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:36 pm"
       }
     ]
   },
   {
     "id": "6708",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/26df1d3e-aba7-47d1-b412-a1c7b19016b5.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/719825c2-2c20-4683-bd16-40693a4da540.jpg",
     "lat": 1.345996,
     "lng": 103.69016,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:47"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:44"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:09 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:39 pm"
       }
     ]
   },
   {
     "id": "6710",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/25c0c779-bfcd-48f5-baf7-5838d9d52862.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f3c820f6-2e9d-49ae-aaa0-0fe505ed5162.jpg",
     "lat": 1.344205,
     "lng": 103.78577,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:47"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:44"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:09 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:39 pm"
       }
     ]
   },
   {
     "id": "6711",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/2614e927-2abe-4808-8268-0e31b36efe7d.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/9652fe01-ff16-4c67-83a8-8de8aca175c5.jpg",
     "lat": 1.33771,
     "lng": 103.977827,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:47"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:44"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:41 pm"
       }
     ]
   },
   {
     "id": "6712",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/87d04d73-4263-4954-9411-a2d4a20ac583.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/03ebbc4d-1d3a-4750-872c-5ab0ad7d8dd5.jpg",
     "lat": 1.332691,
     "lng": 103.770278,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:48"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:44"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:42 pm"
       }
     ]
   },
   {
     "id": "6713",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/6f623158-191b-4792-accc-144f7e4ab7eb.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b54a3581-695a-4ac7-96a1-e79616957e2e.jpg",
     "lat": 1.340298,
     "lng": 103.945652,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:48:48"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:45"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:10 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:41 pm"
       }
     ]
   },
   {
     "id": "6714",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/1d89f820-219f-47d9-be68-680c57b28f03.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/20f5a8b0-e2b1-4eb9-85b7-63979f1e63a0.jpg",
     "lat": 1.361742,
     "lng": 103.703341,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:33:16"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:03"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:46"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:11 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:42 pm"
       }
     ]
   },
   {
     "id": "6715",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d6f7afe6-fbc9-4763-b8b9-dba48e5e4db5.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/cf4fe6e8-7507-40eb-b459-ac3e91d846d6.jpg",
     "lat": 1.356299,
     "lng": 103.716071,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:27"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:04"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:46"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:11 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:43 pm"
       }
     ]
   },
   {
     "id": "6716",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/b986130f-e541-4bb9-b248-ec5b43fb6a53.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/7ef79401-a265-46dd-a9be-a88eb078073e.jpg",
     "lat": 1.322893,
     "lng": 103.6635051,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:36"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:13"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:55"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:39:27 pm"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:55:54 pm"
       }
     ]
   },
   {
     "id": "7791",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/316adea5-d455-4d6c-ae10-4db423aa4997.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/ee9311bb-ad5d-4ad7-bf3a-349de44cf186.jpg",
     "lat": 1.354245,
     "lng": 103.963782,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:36"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:55"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:29 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:58 pm"
       }
     ]
   },
   {
     "id": "7793",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d19b2387-0d7e-4bf6-8548-257f2d276eac.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b2ac24a9-c2ad-48b9-a25e-8f7a5916593a.jpg",
     "lat": 1.37704704,
     "lng": 103.92946983,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:36"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:55"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:29 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:55:59 pm"
       }
     ]
   },
   {
     "id": "7794",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/f50585df-ec7c-4632-9bb5-f1a5cb2851f9.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/b9a94040-73d1-46d2-a0d9-45011424bea7.jpg",
     "lat": 1.37988658,
     "lng": 103.92009174,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:36"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:55"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:29 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:01 pm"
       }
     ]
   },
   {
     "id": "7795",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/f79b4249-9493-47c0-9063-4ba8b7365c11.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/778c08e8-3b30-4c48-a823-f03492ccf215.jpg",
     "lat": 1.38432741,
     "lng": 103.91585701,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:37"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:56"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:01 pm"
       }
     ]
   },
   {
     "id": "7796",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/bbdd2738-d42a-434f-966f-827e321a6653.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/0c0d2412-2468-44e0-a79a-241c3c3db365.jpg",
     "lat": 1.39559294,
     "lng": 103.90515712,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:37"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:57"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:01 pm"
       }
     ]
   },
   {
     "id": "7797",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/4ebbabea-6bd3-4616-bbf1-702006e31867.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/5ac1dd73-482a-4333-b7c4-657414b11031.jpg",
     "lat": 1.40002575,
     "lng": 103.85702534,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:37"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:14"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:57"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:02 pm"
       }
     ]
   },
   {
     "id": "7798",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/a80da831-541a-4a3a-a9e0-0536a32aa936.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f1b74d04-affc-43af-a6d8-d4be65afdd47.jpg",
     "lat": 1.39748842,
     "lng": 103.85400467,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:38"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:15"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:58:58"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:30 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:02 pm"
       }
     ]
   },
   {
     "id": "8701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/e9207fd8-96b6-4198-a6e3-f0a48b954044.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/6aec4b53-2463-4bc8-aded-9cf4deaeaef2.jpg",
     "lat": 1.38647,
     "lng": 103.74143,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:47"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:47 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:12 pm"
       }
     ]
   },
   {
     "id": "8702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/38f18802-9f59-4e05-9d65-83376ef89dd9.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/28e6d476-b964-4725-a07e-44ed1c0058cb.jpg",
     "lat": 1.39059,
     "lng": 103.7717,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:47"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:48 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:17 pm"
       }
     ]
   },
   {
     "id": "8704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/d5477842-af46-45f6-a3e2-a3b6ef5b13d2.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/0676bba2-24e2-43ef-a0df-629567bba344.jpg",
     "lat": 1.3899,
     "lng": 103.74843,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:47"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:49 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:18 pm"
       }
     ]
   },
   {
     "id": "8706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/934662c4-4834-4727-af3d-28ed61df7a28.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/86944fd7-ef28-43d7-9095-2b928118d138.jpg",
     "lat": 1.3664,
     "lng": 103.70899,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:48"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:49 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:20 pm"
       }
     ]
   },
   {
     "id": "9701",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/886ddad1-2b52-411c-a9d7-162db3054e50.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/1f9ffd7e-39d6-4f66-a693-36c4b4c139e5.jpg",
     "lat": 1.39466333,
     "lng": 103.83474601,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:48"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:20 pm"
       }
     ]
   },
   {
     "id": "9702",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/2169fb1c-f272-45d0-8f41-753f9ec6b1f6.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/bc6e26bb-b795-45b3-af59-eecfd06e771f.jpg",
     "lat": 1.39474081,
     "lng": 103.81797086,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:48"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:16"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:21 pm"
       }
     ]
   },
   {
     "id": "9703",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/bf6f3c52-a821-452c-abc6-4cae4b8488e7.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/a3bf86cd-4840-4c0b-ae99-d158a00719ef.jpg",
     "lat": 1.422857,
     "lng": 103.773005,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:48"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:25"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:21 pm"
       }
     ]
   },
   {
     "id": "9704",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/46c1fc02-1433-4115-a561-030245136b07.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/a17263bd-9ae7-416d-b84d-cea49486143f.jpg",
     "lat": 1.42214311,
     "lng": 103.79542062,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:49"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:26"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:17"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:21 pm"
       }
     ]
   },
   {
     "id": "9705",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/94468985-ca77-4104-aab6-00682046e7cb.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/5ef505a2-7b27-413a-b570-a39f72612f47.jpg",
     "lat": 1.42627712,
     "lng": 103.78716637,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:54"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:31"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:24"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:58 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:27 pm"
       }
     ]
   },
   {
     "id": "9706",
-    "image": "https://images.data.gov.sg/api/traffic-images/2025/02/281204be-8938-4405-a2fb-47656d99180d.jpg",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/162f4bff-4deb-4d5b-8ba7-bdfb48b4a8ce.jpg",
     "lat": 1.41270056,
     "lng": 103.80642712,
     "timestamps": [
       {
         "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:25:54"
-      },
-      {
-        "congestion_level": "low",
-        "timestamp": "16/03/2025, 20:44:31"
-      },
-      {
-        "congestion_level": "low",
         "timestamp": "16/03/2025, 20:59:24"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:39:59 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:56:29 pm"
+      }
+    ]
+  },
+  {
+    "id": "1002",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/f87f7512-59ef-4b60-bdcf-e98e95e55b5c.jpg",
+    "lat": 1.319541067,
+    "lng": 103.8785627,
+    "timestamps": [
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:36:35 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:45:50 pm"
+      },
+      {
+        "congestion_level": "low",
+        "timestamp": "03/29/2025 05:53:06 pm"
+      }
+    ]
+  },
+  {
+    "id": "1003",
+    "image": "https://images.data.gov.sg/api/traffic-images/2025/03/aa87c690-da21-4131-ba04-6fbcb28faa1f.jpg",
+    "lat": 1.323957439,
+    "lng": 103.8728576,
+    "timestamps": [
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:36:35 pm"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:45:50 pm"
+      },
+      {
+        "congestion_level": "moderate",
+        "timestamp": "03/29/2025 05:53:06 pm"
       }
     ]
   }
