@@ -77,23 +77,6 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> forgetPassword(String email) async {
-    _isLoading = true;
-    _errorMsg = null;
-    _successMsg = null; // Reset previous success message
-    notifyListeners();
-
-    try {
-      await _authService.forgetPassword(email);
-      _successMsg = "Password reset link sent!";
-    } catch (e) {
-      _errorMsg = "Error: ${e.toString()}";
-    }
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
   void clearMsg() {
     _errorMsg = null;
     _successMsg = null;

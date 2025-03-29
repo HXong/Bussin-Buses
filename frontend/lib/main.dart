@@ -1,5 +1,4 @@
 import 'package:bussin_buses/pages/Authentication/auth_gate.dart';
-import 'package:bussin_buses/pages/Authentication/forgetPassword_page.dart';
 import 'package:bussin_buses/pages/CommuterNav/home_page_commuter.dart';
 import 'package:bussin_buses/pages/Authentication/login_page.dart';
 import 'package:bussin_buses/pages/Authentication/register_page.dart';
@@ -51,7 +50,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
-        '/forget': (context) => ForgetpasswordPage(),
         '/homeCommuter': (context) => HomePageCommuter(),
         '/homeDriver': (context) => HomePageDriver(),
       },

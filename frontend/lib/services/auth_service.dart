@@ -30,10 +30,6 @@ class AuthService{
     await _supabase.auth.signOut();
   }
 
-  Future<void> forgetPassword(String email) async {
-    return await _supabase.auth.resetPasswordForEmail(email);
-  }
-
   User? getCurrentUser() {
     final session = _supabase.auth.currentSession;
     return session?.user;

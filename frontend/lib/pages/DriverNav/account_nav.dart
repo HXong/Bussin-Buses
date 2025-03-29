@@ -27,8 +27,6 @@ class _AccountNavState extends State<AccountNav> {
             const SizedBox(height: 90),
             _buildButton(context, "Personal Information", const PersonalInformation()),
             const SizedBox(height: 30),
-            _buildButton(context, "Change Password", null, route: '/forget'),
-            const SizedBox(height: 30),
             _buildButton(context, "Past Trips", const PastTrips()),
             const SizedBox(height: 30),
             _buildButton(context, "All Upcoming Trips", const UpcomingTrips()),
