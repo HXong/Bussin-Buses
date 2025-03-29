@@ -6,6 +6,7 @@ import 'package:bussin_buses/models/DriverProfile.dart';
 import 'package:bussin_buses/services/route_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/driver_service.dart';
 import '../services/supabase_client_service.dart';
@@ -21,6 +22,7 @@ class DriverViewModel extends ChangeNotifier {
   List<Trip> upcomingAllTrips = [];
   List<Trip> pastTrips = [];
   List<LatLng> polylineCoordinates = [];
+  String estimatedArrivalTime = "";
   DriverProfile? driverProfile;
   Map<String, dynamic> currentTripDetails = {};
   bool isLoading = false;
@@ -223,6 +225,9 @@ class DriverViewModel extends ChangeNotifier {
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
+    final currentTime = DateTime.now();
+    final eta =  currentTime.add(Duration(seconds: routeResponse.duration));
+    estimatedArrivalTime = DateFormat('hh:mm a').format(eta);
     isStartJourney = true;
     _driverService.subscribeToNotifications();
     _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
