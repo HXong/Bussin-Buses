@@ -8,9 +8,14 @@ const { getSGTime } = require('../utils/timeUtils');
 
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
 const IMAGES_DIR = path.join(__dirname, "../../images");
-const PYTHON_PATH = "C:/Python312/python.exe"
+const PYTHON_PATH = "C:/Python312/python.exe";
+const HIGH_CONGESTION_DIR = path.join(__dirname, "../../congested_roads");
 
 const MAX_CONCURRENT_PROCESSES = Math.max(1, os.cpus().length / 2);
+
+if (!fs.existsSync(HIGH_CONGESTION_DIR)) {
+    fs.mkdirSync(HIGH_CONGESTION_DIR);
+}
 
 async function countCars(imagePath){ 
     return new Promise((resolve, reject) => {
@@ -59,8 +64,7 @@ async function countCars(imagePath){
                             }
                         });
                     }
-
-                    updateCongestionData(congestionData, cameraId, result.congestion_level);
+                    
                     resolve(result);
                 } catch (error) {
                     reject(new Error(`JSON Parsing Error: ${output}`));
@@ -134,6 +138,8 @@ async function triggerManualCongestion(cameraId) {
             }
         }
     }
+
+    updateCongestionData(congestionData, cameraId, result.congestion_level);
 }
 
 function updateCongestionData(data, cameraId, congestionLevel) {

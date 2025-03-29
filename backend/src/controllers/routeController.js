@@ -31,7 +31,7 @@ exports.getReroute = async (req, res) => {
         }
 
         driver.polyline = polyline;
-        saveActiveDrivers(driver);
+        saveActiveDrivers(activeDrivers);
 
         const decodedRoute = routeService.decodeRoute(polyline);
 

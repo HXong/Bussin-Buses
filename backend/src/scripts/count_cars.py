@@ -24,9 +24,6 @@ def count_cars(image_path):
 
         results = model(image_path, imgsz=[960, 1920], conf = 0.1)
 
-        print(results[0].orig_shape)  # Original image shape (H, W)
-
-
         if results is None or len(results) == 0:
             return {"error": "No objects detected"}
 
@@ -97,19 +94,25 @@ if __name__ == "__main__":
 
         congestion_level = calculate_congestion_level(vehicle_area, road_area, count)
 
-        output_path = "annotated_" + os.path.basename(image_path)
-        cv2.imwrite(output_path, final_annotated_image)
-        print(f"Annotated image saved to {output_path}")
+        output_path = None
+        if congestion_level == "high":
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))  # backend/
+            save_dir = os.path.join(project_root, "congested_roads")
+            os.makedirs(save_dir, exist_ok=True)
+
+            output_path = os.path.join(save_dir, "annotated_" + os.path.basename(image_path))
+            cv2.imwrite(output_path, final_annotated_image)
 
         result = {
             "image": image_path,
             "vehicle": count,
             "road_area": road_area,
             "vehicle_area": vehicle_area,
-            "congestion_level": congestion_level
+            "congestion_level": congestion_level,
+            "output_path": output_path
         }
 
-        print(json.dumps(result, indent=4))
+        print(json.dumps(result))
     except Exception as e:
         print(json.dumps({"error": f"Main execution failed: {str(e)}"}))
         sys.exit(1)

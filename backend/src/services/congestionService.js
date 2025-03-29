@@ -3,38 +3,8 @@ const path = require('path');
 const axios = require('axios');
 
 const { decodeRoute, getRoutesNearCamera, getNearestRoutePoint } = require('./routeService');
-
-const ACTIVE_DRIVERS_FILE = path.join(__dirname, '../../active_drivers.json');
-
-function getSGTime(){
-    const options = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-        timeZone: 'Asia/Singapore'
-      };
-
-    let sgTime = new Date().toLocaleString('en-SG', options);
-
-    let [date, time] = sgTime.split(", ");
-    let [month, day, year] = date.split("/");
-
-    return `${day}/${month}/${year} ${time}`;
-}
-
-function getActiveDrivers() {
-    if (!fs.existsSync(ACTIVE_DRIVERS_FILE)) return [];
-    try {
-        return JSON.parse(fs.readFileSync(ACTIVE_DRIVERS_FILE, "utf8"));
-    } catch (error) {
-        console.error("Error reading active drivers JSON:", error.message);
-        return [];
-    }
-}
+const { loadActiveDrivers } = require('../utils/driverStore');
+const { getSGTime } = require('../utils/timeUtils');
 
 async function getDriverLocation(driverId) {
     try {
@@ -47,7 +17,7 @@ async function getDriverLocation(driverId) {
 }
 
 async function getAffectedDrivers(cameraData) {
-    const activeDrivers = getActiveDrivers();
+    const activeDrivers = loadActiveDrivers();
     let affectedDrivers = [];
 
     for (const driver of activeDrivers) {
@@ -95,6 +65,5 @@ async function sendNotification(affectedDrivers, cameraId) {
 
 module.exports = {
     getAffectedDrivers,
-    sendNotification,
-    getSGTime
+    sendNotification
 };

@@ -7,7 +7,7 @@ const routeController = require('../controllers/routeController');
 const journeyController = require('../controllers/journeyController');
 const driverController = require('../controllers/driverController');
 
-const { triggerManualCongestion } = require('../services/TrafficDataProcessor');
+const { triggerManualCongestion } = require('../services/trafficProcessorService');
 
 /**
  * API to get the rerouted path for a driver
@@ -62,7 +62,7 @@ router.post('/notify-driver', notificationController.notifyDriver);
 /**
  * For lab testing only
  */
-app.post('/api/test-congestion', (req, res) => {
+router.post('/test-congestion', (req, res) => {
   const { cameraId } = req.body;
   triggerManualCongestion(cameraId);
   res.send({ status: 'Manual congestion triggered' });

@@ -1,4 +1,4 @@
-const { supabase } = require("../config/supabaseClient");
+const { supabase } = require("../model/supabaseClient");
 
 /**
  * Fetches the driver's data from the supabase
