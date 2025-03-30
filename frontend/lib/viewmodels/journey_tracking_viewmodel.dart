@@ -11,7 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/RouteResponse.dart';
 import '../services/driver_service.dart';
 
-class RouteViewModel extends ChangeNotifier {
+class JourneyTrackingViewModel extends ChangeNotifier {
   final SupabaseClient _supabase = SupabaseClientService.client;
   final DriverService _driverService;
   final RouteService _routeService;
@@ -27,7 +27,7 @@ class RouteViewModel extends ChangeNotifier {
   StreamSubscription<Map<String,dynamic>>? _subscription;
 
 
-  RouteViewModel(this._driverService, this._routeService);
+  JourneyTrackingViewModel(this._driverService, this._routeService);
 
   Future<void> loadLocations() async {
     locations = await _driverService.fetchLocations();

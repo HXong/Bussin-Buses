@@ -1,4 +1,4 @@
-import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/journey_tracking_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,13 +15,13 @@ class _ScheduleNavState extends State<ScheduleNav> {
   void initState() {
     super.initState();
     // Call loadLocations when the widget is initialized
-    final routeViewModel = Provider.of<RouteViewModel>(context, listen: false);
+    final routeViewModel = Provider.of<JourneyTrackingViewModel>(context, listen: false);
     routeViewModel.loadLocations();
   }
 
   @override
   Widget build(BuildContext context) {
-    final routeViewModel = Provider.of<RouteViewModel>(context);
+    final routeViewModel = Provider.of<JourneyTrackingViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
 
     return Scaffold(

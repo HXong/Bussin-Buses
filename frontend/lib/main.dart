@@ -10,7 +10,7 @@ import 'package:bussin_buses/services/route_service.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
-import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/journey_tracking_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 
 import 'package:flutter/material.dart';
@@ -30,7 +30,7 @@ void main() async{
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
       ChangeNotifierProvider(create: (_) => DriverViewModel(driverService)),
-      ChangeNotifierProvider(create: (_) => RouteViewModel(driverService, RouteService())),
+      ChangeNotifierProvider(create: (_) => JourneyTrackingViewModel(driverService, RouteService())),
       ChangeNotifierProvider(create: (_) => TripViewModel(driverService)),
       ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService())),
     ],

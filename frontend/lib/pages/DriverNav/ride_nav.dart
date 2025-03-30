@@ -1,5 +1,5 @@
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
-import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/journey_tracking_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -42,7 +42,7 @@ class _RideNavState extends State<RideNav> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
-    final routeViewModel = Provider.of<RouteViewModel>(context);
+    final routeViewModel = Provider.of<JourneyTrackingViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (routeViewModel.message != "") {
