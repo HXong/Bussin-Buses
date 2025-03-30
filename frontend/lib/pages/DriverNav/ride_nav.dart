@@ -1,5 +1,5 @@
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
-import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -41,15 +41,15 @@ class _RideNavState extends State<RideNav> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-    final driverViewModel = Provider.of<DriverViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
+    final routeViewModel = Provider.of<RouteViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (driverViewModel.message != "") {
+      if (routeViewModel.message != "") {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(driverViewModel.message)),
+          SnackBar(content: Text(routeViewModel.message)),
         );
-        driverViewModel.clearMsg();
+        routeViewModel.clearMsg();
       }
     });
 
@@ -70,11 +70,11 @@ class _RideNavState extends State<RideNav> {
                   CurrentLocationLayer(
                     alignPositionOnUpdate: AlignOnUpdate.always,
                   ),
-                  driverViewModel.polylineCoordinates.isNotEmpty
+                  routeViewModel.polylineCoordinates.isNotEmpty
                       ? PolylineLayer(
                         polylines: [
                           Polyline(
-                            points: driverViewModel.polylineCoordinates,
+                            points: routeViewModel.polylineCoordinates,
                             color: Colors.blue,
                             strokeWidth: 6.0,
                           ),
@@ -94,7 +94,7 @@ class _RideNavState extends State<RideNav> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              driverViewModel.estimatedArrivalTime != "" ? Text("Estimated Time of Arrival: ${driverViewModel.estimatedArrivalTime}") : Text(""),
+                              routeViewModel.estimatedArrivalTime != "" ? Text("Estimated Time of Arrival: ${routeViewModel.estimatedArrivalTime}") : Text(""),
                               Text(
                                 "Pick Up: ${tripViewModel.currentTripDetails?.pickup}",
                                 style: const TextStyle(fontSize: 16),
@@ -108,26 +108,26 @@ class _RideNavState extends State<RideNav> {
                               ),
                             ],
                           ),
-                          if (!driverViewModel.isStartJourney)
+                          if (!routeViewModel.isStartJourney)
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
                                     tripViewModel
                                         .currentTripDetails?.scheduleId;
-                                driverViewModel.startJourney(
+                                routeViewModel.startJourney(
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
                                 );
                               },
                               child: const Text("Start Journey"),
                             ),
-                          if (driverViewModel.isStartJourney)
+                          if (routeViewModel.isStartJourney)
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
                                     tripViewModel
                                         .currentTripDetails?.scheduleId;
-                                driverViewModel.stopJourney(
+                                routeViewModel.stopJourney(
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
                                     () {

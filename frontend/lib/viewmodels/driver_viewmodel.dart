@@ -1,44 +1,25 @@
 import 'dart:async';
-import 'package:bussin_buses/models/RouteResponse.dart';
 import 'package:bussin_buses/models/DriverProfile.dart';
-import 'package:bussin_buses/services/route_service.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import '../services/driver_service.dart';
 import '../services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DriverViewModel extends ChangeNotifier {
   final DriverService _driverService;
-  final RouteService _routeService;
   final SupabaseClient _supabase = SupabaseClientService.client;
 
-  List<LatLng> polylineCoordinates = [];
-  String estimatedArrivalTime = "";
   DriverProfile? driverProfile;
 
   int selectedIndex = 0;
-  bool isStartJourney = false;
-  String message = "";
+
   bool isLoading = false;
 
   final TextEditingController feedbackController = TextEditingController();
-
-  List<String> locations = [];
   final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
 
-  Timer? _locationUpdateTimer;
-  StreamSubscription<Map<String,dynamic>>? _subscription;
-
-  DriverViewModel(this._driverService, this._routeService) {
+  DriverViewModel(this._driverService) {
     fetchPersonalInformation();
-  }
-
-  Future<void> loadLocations() async {
-    locations = await _driverService.fetchLocations();
-    notifyListeners();
   }
 
   Future<void> fetchPersonalInformation() async {
@@ -50,6 +31,7 @@ class DriverViewModel extends ChangeNotifier {
       print('Driver ID is null');
       return;
     }
+
     try {
       final profileData = await _driverService.fetchDriverProfile(driverId);
       final busPlate = await _driverService.fetchBusPlate(driverId);
@@ -78,85 +60,6 @@ class DriverViewModel extends ChangeNotifier {
 
   void setPageIndex(int newIndex) {
     selectedIndex = newIndex;
-    notifyListeners();
-  }
-
-  Future<void> startJourney(String driverId, String scheduleId) async {
-    _startLocationUpdates();
-    polylineCoordinates.clear();
-    RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
-    polylineCoordinates = routeResponse.decodedRoute;
-    estimatedArrivalTime = getFormattedTimeAfter(routeResponse.duration);
-    isStartJourney = true;
-    _driverService.subscribeToNotifications();
-    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
-      print("Stream error: $e");
-    });
-    notifyListeners();
-  }
-
-  Future<void> stopJourney(String driverId, String scheduleId, VoidCallback? onSuccess) async {
-
-    _stopLocationUpdates();
-    int responseCode = await _routeService.stopJourney(driverId, scheduleId);
-    if (responseCode == 0) {
-      // stopped successfully
-      isStartJourney = false;
-      polylineCoordinates.clear();
-      onSuccess?.call();
-      _driverService.unsubscribeToNotifications();
-      _subscription = null;
-      notifyListeners();
-    }
-    else {
-      // something went wrong
-    }
-  }
-
-  String getFormattedTimeAfter(int duration) {
-    final currentTime = DateTime.now();
-    final eta =  currentTime.add(Duration(seconds: duration));
-    return DateFormat('hh:mm a').format(eta);
-  }
-
-  void _startLocationUpdates() {
-    _updateLocation();
-    _locationUpdateTimer = Timer.periodic(Duration(minutes: 1), (_) async {
-      await _updateLocation();
-    });
-  }
-
-  void _stopLocationUpdates() {
-    _locationUpdateTimer?.cancel();
-  }
-
-  Future<void> _updateLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition();
-
-      await _driverService.updateDriverLocation(
-        _supabase.auth.currentUser!.id,
-        position.latitude,
-        position.longitude,
-      );
-
-      print("Location updated");
-    } catch (e) {
-      print("Failed to update location: $e");
-    }
-  }
-
-  void _handleNotification(data) async {
-    final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
-    polylineCoordinates.clear();
-    polylineCoordinates.addAll(rerouteData.decodedRoute);
-    estimatedArrivalTime = getFormattedTimeAfter(rerouteData.duration);
-    message = data["message"];
-    notifyListeners();
-  }
-
-  void clearMsg() {
-    message = "";
     notifyListeners();
   }
 

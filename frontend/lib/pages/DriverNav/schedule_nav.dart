@@ -1,3 +1,4 @@
+import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,13 +16,14 @@ class _ScheduleNavState extends State<ScheduleNav> {
   void initState() {
     super.initState();
     // Call loadLocations when the widget is initialized
-    final driverViewModel = Provider.of<DriverViewModel>(context, listen: false);
-    driverViewModel.loadLocations();
+    final routeViewModel = Provider.of<RouteViewModel>(context, listen: false);
+    routeViewModel.loadLocations();
   }
 
   @override
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
+    final routeViewModel = Provider.of<RouteViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
 
     return Scaffold(
@@ -51,7 +53,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
                   value: tripViewModel.selectedPickup,
-                  items: driverViewModel.locations.map((location) {
+                  items: routeViewModel.locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
@@ -78,7 +80,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
                   value: tripViewModel.selectedDestination,
-                  items: driverViewModel.locations.map((location) {
+                  items: routeViewModel.locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
