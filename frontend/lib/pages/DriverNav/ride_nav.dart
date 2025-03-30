@@ -89,7 +89,7 @@ class _RideNavState extends State<RideNav> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                         
+                          Text("Estimated Time of Arrival: ${driverViewModel.estimatedArrivalTime}"),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
