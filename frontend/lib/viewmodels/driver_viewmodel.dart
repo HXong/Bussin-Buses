@@ -24,7 +24,7 @@ class DriverViewModel extends ChangeNotifier {
   List<LatLng> polylineCoordinates = [];
   String estimatedArrivalTime = "";
   DriverProfile? driverProfile;
-  Map<String, dynamic> currentTripDetails = {};
+  Trip? currentTripDetails;
   bool isLoading = false;
   int selectedIndex = 0;
   bool isStartJourney = false;
@@ -246,7 +246,7 @@ class DriverViewModel extends ChangeNotifier {
       polylineCoordinates.clear();
       // TODO: do something to end trip?
       fetchUpcomingConfirmedTrips(timeNow);
-      currentTripDetails.clear();
+      currentTripDetails = null;
       _driverService.unsubscribeToNotifications();
       _subscription = null;
       notifyListeners();
