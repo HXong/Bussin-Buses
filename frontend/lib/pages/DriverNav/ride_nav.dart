@@ -53,7 +53,7 @@ class _RideNavState extends State<RideNav> {
 
     return Scaffold(
       body:
-          driverViewModel.currentTripDetails.isEmpty
+          driverViewModel.currentTripDetails == null
               ? Center(child: Text("No journey started"))
               : FlutterMap(
                 mapController: mapController,
@@ -93,12 +93,13 @@ class _RideNavState extends State<RideNav> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              driverViewModel.estimatedArrivalTime != "" ? Text("Estimated Time of Arrival: ${driverViewModel.estimatedArrivalTime}") : Text(""),
                               Text(
-                                "Pick Up: ${driverViewModel.currentTripDetails["pickup"]}",
+                                "Pick Up: ${driverViewModel.currentTripDetails?.pickup}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "Destination: ${driverViewModel.currentTripDetails["destination"]}",
+                                "Destination: ${driverViewModel.currentTripDetails?.destination}",
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -109,9 +110,9 @@ class _RideNavState extends State<RideNav> {
                           if (!driverViewModel.isStartJourney)
                             ElevatedButton(
                               onPressed: () {
-                                int scheduleId =
+                                String? scheduleId =
                                     driverViewModel
-                                        .currentTripDetails["schedule_id"];
+                                        .currentTripDetails?.scheduleId;
                                 driverViewModel.startJourney(
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
@@ -122,9 +123,9 @@ class _RideNavState extends State<RideNav> {
                           if (driverViewModel.isStartJourney)
                             ElevatedButton(
                               onPressed: () {
-                                int scheduleId =
+                                String? scheduleId =
                                     driverViewModel
-                                        .currentTripDetails["schedule_id"];
+                                        .currentTripDetails?.scheduleId;
                                 driverViewModel.stopJourney(
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
