@@ -18,9 +18,9 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final driverViewModel = Provider.of<DriverViewModel>(context, listen: false);
+      final tripViewModel = Provider.of<TripViewModel>(context, listen: false);
       final scheduleId = widget.trip.scheduleId.toString(); // Accessing scheduleId from the Trip model
-      driverViewModel.fetchPassengerDetails(scheduleId); // Fetch passengers for the trip
+      tripViewModel.fetchPassengerDetails(scheduleId); // Fetch passengers for the trip
     });
   }
 
@@ -65,7 +65,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   driverViewModel.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : PassengerList(
-                    passengers: driverViewModel.passengers, // Displaying passengers
+                    passengers: tripViewModel.passengers, // Displaying passengers
                     noPassengerMessage: 'No passengers found.',
                   ),
                 ],

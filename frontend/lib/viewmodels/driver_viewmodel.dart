@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bussin_buses/models/Passengers.dart';
 import 'package:bussin_buses/models/RouteResponse.dart';
 import 'package:bussin_buses/models/DriverProfile.dart';
 import 'package:bussin_buses/services/route_service.dart';
@@ -15,8 +14,6 @@ class DriverViewModel extends ChangeNotifier {
   final DriverService _driverService;
   final RouteService _routeService;
   final SupabaseClient _supabase = SupabaseClientService.client;
-
-  List<Passenger> passengers = [];
 
   List<LatLng> polylineCoordinates = [];
   String estimatedArrivalTime = "";
@@ -37,14 +34,6 @@ class DriverViewModel extends ChangeNotifier {
 
   DriverViewModel(this._driverService, this._routeService) {
     fetchPersonalInformation();
-  }
-
-  Future<void> fetchPassengerDetails(String scheduleId) async {
-    isLoading = true;
-    notifyListeners();
-    passengers = await _driverService.fetchPassengerDetails(scheduleId);
-    isLoading = false;
-    notifyListeners();
   }
 
   Future<void> loadLocations() async {

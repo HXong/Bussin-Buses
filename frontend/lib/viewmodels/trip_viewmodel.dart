@@ -1,3 +1,4 @@
+import 'package:bussin_buses/models/Passengers.dart';
 import 'package:bussin_buses/services/driver_service.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ class TripViewModel extends ChangeNotifier {
   List<Trip> upcomingConfirmedTrips = [];
   List<Trip> upcomingAllTrips = [];
   List<Trip> pastTrips = [];
+  List<Passenger> passengers = [];
   bool isLoading = false;
   Trip? currentTripDetails;
   String? pickedTime;
@@ -142,6 +144,14 @@ class TripViewModel extends ChangeNotifier {
     selectedDestination = null;
     await fetchUpcomingConfirmedTrips(timeNow);
     await fetchAllUpcomingTrips(timeNow);
+    notifyListeners();
+  }
+
+  Future<void> fetchPassengerDetails(String scheduleId) async {
+    isLoading = true;
+    notifyListeners();
+    passengers = await _driverService.fetchPassengerDetails(scheduleId);
+    isLoading = false;
     notifyListeners();
   }
 
