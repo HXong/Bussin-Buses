@@ -1,4 +1,5 @@
 import 'package:bussin_buses/pages/DriverNav/passenger_details_UI.dart';
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bussin_buses/models/Trips.dart';
@@ -17,14 +18,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final driverViewModel = Provider.of<DriverViewModel>(context, listen: false);
+      final tripViewModel = Provider.of<TripViewModel>(context, listen: false);
       final scheduleId = widget.trip.scheduleId.toString(); // Accessing scheduleId from the Trip model
-      driverViewModel.fetchPassengerDetails(scheduleId); // Fetch passengers for the trip
+      tripViewModel.fetchPassengerDetails(scheduleId); // Fetch passengers for the trip
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final tripViewModel = Provider.of<TripViewModel>(context);
     final driverViewModel = Provider.of<DriverViewModel>(context);
 
     return Scaffold(
@@ -63,7 +65,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   driverViewModel.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : PassengerList(
-                    passengers: driverViewModel.passengers, // Displaying passengers
+                    passengers: tripViewModel.passengers, // Displaying passengers
                     noPassengerMessage: 'No passengers found.',
                   ),
                 ],
@@ -81,7 +83,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 onPressed: () {
-                  _showDeleteConfirmationDialog(context, driverViewModel);
+                  _showDeleteConfirmationDialog(context, tripViewModel);
                 },
                 child: const Text(
                   'Delete Trip',
@@ -95,7 +97,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, DriverViewModel viewModel) {
+  void _showDeleteConfirmationDialog(BuildContext context, TripViewModel viewModel) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

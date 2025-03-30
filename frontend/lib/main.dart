@@ -10,6 +10,8 @@ import 'package:bussin_buses/services/route_service.dart';
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/journey_tracking_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,11 +25,14 @@ void main() async{
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9neWpvZXl4cXJnbHp2c2lsdnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyMjExNzQsImV4cCI6MjA1NTc5NzE3NH0.BTLr2BXZKZc9eXI8UejsCLeFAcUfIL2Ls7Hf5uPTgUM',
   );
 
+  final driverService = DriverService();
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
-      ChangeNotifierProvider(create: (_) => DriverViewModel(DriverService(), RouteService())),
-      ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService()))
+      ChangeNotifierProvider(create: (_) => DriverViewModel(driverService)),
+      ChangeNotifierProvider(create: (_) => JourneyTrackingViewModel(driverService, RouteService())),
+      ChangeNotifierProvider(create: (_) => TripViewModel(driverService)),
+      ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService())),
     ],
     child: const MyApp(),),
   );
