@@ -1,3 +1,4 @@
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
@@ -21,6 +22,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
   @override
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
+    final tripViewModel = Provider.of<TripViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(),
@@ -48,14 +50,14 @@ class _ScheduleNavState extends State<ScheduleNav> {
                   : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
-                  value: driverViewModel.selectedPickup,
+                  value: tripViewModel.selectedPickup,
                   items: driverViewModel.locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
                     );
                   }).toList(),
-                  onChanged: driverViewModel.updateSelectedPickup,
+                  onChanged: tripViewModel.updateSelectedPickup,
                   decoration: InputDecoration(
                     labelText: "Pick-Up Point",
                     filled: true,
@@ -75,14 +77,14 @@ class _ScheduleNavState extends State<ScheduleNav> {
                   : Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
-                  value: driverViewModel.selectedDestination,
+                  value: tripViewModel.selectedDestination,
                   items: driverViewModel.locations.map((location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location),
                     );
                   }).toList(),
-                  onChanged: driverViewModel.updateSelectedDestination,
+                  onChanged: tripViewModel.updateSelectedDestination,
                   decoration: InputDecoration(
                     labelText: "Destination",
                     filled: true,
@@ -98,7 +100,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: TextFormField(
-                  controller: driverViewModel.dateController,
+                  controller: tripViewModel.dateController,
                   decoration: InputDecoration(
                     labelText: 'Date',
                     filled: true,
@@ -118,7 +120,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                     );
 
                     if (pickedDate != null) {
-                      driverViewModel.dateController.text =
+                      tripViewModel.dateController.text =
                       "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
                     }
                   },
@@ -129,7 +131,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
-                  value: driverViewModel.pickedTime,
+                  value: tripViewModel.pickedTime,
                   decoration: InputDecoration(
                     labelText: 'Time',
                     filled: true,
@@ -147,7 +149,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
                       child: Text(time),
                     );
                   }),
-                  onChanged: driverViewModel.updateSelectedTime,
+                  onChanged: tripViewModel.updateSelectedTime,
                 ),
               ),
               const SizedBox(height: 30),
@@ -155,7 +157,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               // Submit Button
               ElevatedButton(
                 onPressed: () {
-                  driverViewModel.submitJourney(context);
+                  tripViewModel.submitJourney(context);
                 },
                 child: const Text('Submit Journey', style: TextStyle(color: Colors.white,)),
                 style: ElevatedButton.styleFrom(

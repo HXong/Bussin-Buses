@@ -1,5 +1,6 @@
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -41,6 +42,7 @@ class _RideNavState extends State<RideNav> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final driverViewModel = Provider.of<DriverViewModel>(context);
+    final tripViewModel = Provider.of<TripViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (driverViewModel.message != "") {
@@ -53,7 +55,7 @@ class _RideNavState extends State<RideNav> {
 
     return Scaffold(
       body:
-          driverViewModel.currentTripDetails == null
+        tripViewModel.currentTripDetails == null
               ? Center(child: Text("No journey started"))
               : FlutterMap(
                 mapController: mapController,
@@ -94,11 +96,11 @@ class _RideNavState extends State<RideNav> {
                             children: [
                               driverViewModel.estimatedArrivalTime != "" ? Text("Estimated Time of Arrival: ${driverViewModel.estimatedArrivalTime}") : Text(""),
                               Text(
-                                "Pick Up: ${driverViewModel.currentTripDetails?.pickup}",
+                                "Pick Up: ${tripViewModel.currentTripDetails?.pickup}",
                                 style: const TextStyle(fontSize: 16),
                               ),
                               Text(
-                                "Destination: ${driverViewModel.currentTripDetails?.destination}",
+                                "Destination: ${tripViewModel.currentTripDetails?.destination}",
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -110,7 +112,7 @@ class _RideNavState extends State<RideNav> {
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
-                                    driverViewModel
+                                    tripViewModel
                                         .currentTripDetails?.scheduleId;
                                 driverViewModel.startJourney(
                                   authViewModel.user!.id,
@@ -123,11 +125,15 @@ class _RideNavState extends State<RideNav> {
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
-                                    driverViewModel
+                                    tripViewModel
                                         .currentTripDetails?.scheduleId;
                                 driverViewModel.stopJourney(
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
+                                    () {
+                                      tripViewModel.fetchUpcomingConfirmedTrips(DateTime.now());
+                                      tripViewModel.currentTripDetails = null;
+                                    }
                                 );
                               },
                               child: const Text("Stop Journey"),
