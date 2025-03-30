@@ -225,9 +225,7 @@ class DriverViewModel extends ChangeNotifier {
     polylineCoordinates.clear();
     RouteResponse routeResponse = await _routeService.startJourney(driverId, scheduleId);
     polylineCoordinates = routeResponse.decodedRoute;
-    final currentTime = DateTime.now();
-    final eta =  currentTime.add(Duration(seconds: routeResponse.duration));
-    estimatedArrivalTime = DateFormat('hh:mm a').format(eta);
+    estimatedArrivalTime = getFormattedTimeAfter(routeResponse.duration);
     isStartJourney = true;
     _driverService.subscribeToNotifications();
     _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
@@ -254,6 +252,12 @@ class DriverViewModel extends ChangeNotifier {
     else {
       // something went wrong
     }
+  }
+
+  String getFormattedTimeAfter(int duration) {
+    final currentTime = DateTime.now();
+    final eta =  currentTime.add(Duration(seconds: duration));
+    return DateFormat('hh:mm a').format(eta);
   }
 
   void _startLocationUpdates() {
@@ -287,6 +291,7 @@ class DriverViewModel extends ChangeNotifier {
     final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
     polylineCoordinates.clear();
     polylineCoordinates.addAll(rerouteData.decodedRoute);
+    estimatedArrivalTime = getFormattedTimeAfter(rerouteData.duration);
     message = data["message"];
     notifyListeners();
   }
