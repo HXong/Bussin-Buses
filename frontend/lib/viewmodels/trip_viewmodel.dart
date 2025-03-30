@@ -13,6 +13,7 @@ class TripViewModel extends ChangeNotifier {
   List<Trip> pastTrips = [];
   List<Passenger> passengers = [];
   bool isLoading = false;
+  bool isSubmitJourneyLoading = false;
   Trip? currentTripDetails;
   String? pickedTime;
   String? selectedPickup;
@@ -100,6 +101,8 @@ class TripViewModel extends ChangeNotifier {
           .showSnackBar(const SnackBar(content: Text("Pickup and destination points have to be different.")));
       return;
     }
+    isSubmitJourneyLoading = true;
+    notifyListeners();
 
     final driverId = _supabase.auth.currentUser!.id;
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
@@ -135,6 +138,9 @@ class TripViewModel extends ChangeNotifier {
       driverId: driverId,
     );
 
+    isSubmitJourneyLoading = false;
+    notifyListeners();
+
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
 
@@ -144,7 +150,6 @@ class TripViewModel extends ChangeNotifier {
     selectedDestination = null;
     await fetchUpcomingConfirmedTrips(timeNow);
     await fetchAllUpcomingTrips(timeNow);
-    notifyListeners();
   }
 
   Future<void> fetchPassengerDetails(String scheduleId) async {

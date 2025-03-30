@@ -2,7 +2,6 @@ import 'package:bussin_buses/viewmodels/route_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 
 class ScheduleNav extends StatefulWidget {
   const ScheduleNav({super.key});
@@ -22,14 +21,16 @@ class _ScheduleNavState extends State<ScheduleNav> {
 
   @override
   Widget build(BuildContext context) {
-    final driverViewModel = Provider.of<DriverViewModel>(context);
     final routeViewModel = Provider.of<RouteViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: SingleChildScrollView(
+
+        child: tripViewModel.isSubmitJourneyLoading
+            ? SizedBox.expand( child: Center(child: CircularProgressIndicator(),),) :
+        SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -47,9 +48,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               const SizedBox(height: 30),
 
               // Pick-Up Point Dropdown with Downward Arrow
-              driverViewModel.isLoading
-                  ? const CircularProgressIndicator()
-                  : Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
                   value: tripViewModel.selectedPickup,
@@ -74,9 +73,7 @@ class _ScheduleNavState extends State<ScheduleNav> {
               const SizedBox(height: 20),
 
               // Destination Dropdown with Downward Arrow
-              driverViewModel.isLoading
-                  ? const CircularProgressIndicator()
-                  : Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: DropdownButtonFormField<String>(
                   value: tripViewModel.selectedDestination,
