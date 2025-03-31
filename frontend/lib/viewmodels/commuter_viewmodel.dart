@@ -16,8 +16,6 @@ class CommuterViewModel extends ChangeNotifier {
   bool isCanceled(int bookingId) => _canceledBookings.contains(bookingId);
   bool isCheckIn(int bookingId) => _checkedInBookings.contains(bookingId);
 
-
-
   Future<void> obtainId() async {
     final id = _commuterService.getCommuterId();
     if (id != null) {
@@ -38,7 +36,6 @@ class CommuterViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   Future<bool> handleCancelWithTimeCheck(Booking booking) async {
     final schedule = booking.schedule;
@@ -108,6 +105,8 @@ class CommuterViewModel extends ChangeNotifier {
       );
       if (success) {
         bookedSeats.add(seatNumber.toString());
+        // Refresh bookings list after successful booking
+        await fetchBookings(commuterId);
         notifyListeners();
       }
       return null;
@@ -115,4 +114,16 @@ class CommuterViewModel extends ChangeNotifier {
       return e.toString();
     }
   }
+
+  Future<int> getAvailableSeatsCount(int scheduleId) async {
+    try {
+      final totalSeats = 25; // Assuming the bus has 25 seats total
+      final bookedSeats = await _commuterService.fetchBookedSeatNumbers(scheduleId);
+      return totalSeats - bookedSeats.length;
+    } catch (e) {
+      print('Error getting available seats count: $e');
+      return 0;
+    }
+  }
 }
+
