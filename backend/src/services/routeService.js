@@ -1,6 +1,6 @@
 const axios = require('axios');
 const turf = require('@turf/turf');
-const { loadCongestionData } = require('../utils/congestionStore');
+const { loadCongestionData } = require('../model/congestionStore');
 const { decode } = require('@here/flexpolyline');
 require('dotenv').config();
 

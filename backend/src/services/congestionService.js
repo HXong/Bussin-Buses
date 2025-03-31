@@ -1,9 +1,7 @@
-const fs = require('fs');
-const path = require('path');
 const axios = require('axios');
 
 const { decodeRoute, getRoutesNearCamera, getNearestRoutePoint } = require('./routeService');
-const { loadActiveDrivers } = require('../utils/driverStore');
+const { loadActiveDrivers } = require('../model/driverStore');
 const { getSGTime } = require('../utils/timeUtils');
 
 async function getDriverLocation(driverId) {

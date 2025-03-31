@@ -1,6 +1,6 @@
 const routeService = require('../services/routeService');
 const { getDriverLocation } = require('../services/supabaseService');
-const { loadActiveDrivers, saveActiveDrivers } = require('../utils/driverStore');
+const { findActiveDriver, updateActiveDriverRoute } = require('../services/activeDriverService');
 
 exports.getReroute = async (req, res) => {
     try {
@@ -16,8 +16,7 @@ exports.getReroute = async (req, res) => {
             return res.status(404).json({ error: "No driver location found" });
         }
 
-        const activeDrivers = loadActiveDrivers();
-        const driver = activeDrivers.find(d => d.driver_id === driverId);
+        const driver = findActiveDriver(driverId);
 
         driver.currentLocation = [driverLocation.latitude, driverLocation.longitude];
 
@@ -30,8 +29,7 @@ exports.getReroute = async (req, res) => {
             return res.status(404).json({ error: "No route found." });
         }
 
-        driver.polyline = polyline;
-        saveActiveDrivers(activeDrivers);
+        updateActiveDriverRoute(driverId, polyline);
 
         const decodedRoute = routeService.decodeRoute(polyline);
 
