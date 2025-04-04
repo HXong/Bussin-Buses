@@ -60,6 +60,13 @@ router.post('/stop-journey', journeyController.stopJourney);
 router.post('/notify-driver', notificationController.notifyDriver);
 
 /**
+ * API to get the ETA for a driver
+ * Gets the driver's pickup and destination locations from schedule table
+ */
+router.post('/get-eta', routeController.getETA);
+
+
+/**
  * For lab testing only
  */
 router.post('/test-congestion', (req, res) => {

@@ -8,8 +8,8 @@ const {
     deleteNotifcation
   } = require('../services/supabaseService');
   
-  const { getOptimisedRoute, decodeRoute } = require('../services/routeService');
-  const { loadActiveDrivers, saveActiveDrivers } = require('../utils/driverStore');
+const { getOptimisedRoute, decodeRoute } = require('../services/routeService');
+const { updateActiveDriver, removeActiveDriver } = require('../services/activeDriverService');
   
   exports.startJourney = async (req, res) => {
     try {
@@ -45,10 +45,7 @@ const {
         return res.status(404).json({ error: "No optimized route found" });
       }
   
-      let activeDrivers = loadActiveDrivers();
-      activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id);
-      activeDrivers.push({ driver_id, schedule_id, polyline, currentLocation, destination: destinationCoords });
-      saveActiveDrivers(activeDrivers);
+      updateActiveDriver(driver_id, schedule_id, polyline, currentLocation, destinationCoords);
   
       const decodedRoute = decodeRoute(polyline);
   
@@ -84,9 +81,7 @@ const {
         return res.status(500).json({ error: "Failed to delete notifications", details: deleteNotificationError.message });
       }
   
-      let activeDrivers = loadActiveDrivers();
-      activeDrivers = activeDrivers.filter(d => d.driver_id !== driver_id);
-      saveActiveDrivers(activeDrivers);
+      removeActiveDriver(driver_id);
   
       return res.json({ message: "Journey stopped successfully" });
   

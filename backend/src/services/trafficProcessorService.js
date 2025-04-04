@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { getAffectedDrivers, sendNotification } = require("./congestionService");
-const { loadCongestionData, saveCongestionData } = require('../utils/congestionStore');
+const { loadCongestionData, saveCongestionData } = require('../model/congestionStore');
 const { getSGTime } = require('../utils/timeUtils');
 
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');

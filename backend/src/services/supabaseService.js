@@ -1,6 +1,21 @@
 const { supabase } = require("../model/supabaseClient");
 
 /**
+ * Updates the ETA (in minutes) for a given schedule_id
+ * @param {number} schedule_id 
+ * @param {number} eta 
+ * @returns error if any
+ */
+async function updateScheduleETA(schedule_id, eta) {
+    const { error } = await supabase
+        .from('schedules')
+        .update({ eta: eta })
+        .eq('schedule_id', schedule_id);
+
+    return error;
+}
+
+/**
  * Fetches the driver's data from the supabase
  * @param {string} driver_id 
  * @param {string} schedule_id 
@@ -172,5 +187,6 @@ module.exports = {
     deleteSchedule,
     deleteNotifcation,
     checkExistingNotification,
-    insertNotification
+    insertNotification,
+    updateScheduleETA
 };

@@ -1,5 +1,5 @@
 const fetchTrafficCameras = require('./fetchCameraService');
-const { saveCameraData, downloadImage } = require('../utils/cameraFileStore');
+const { saveCameraData, downloadImage } = require('../model/cameraData');
 
 async function processTrafficData() {
 
