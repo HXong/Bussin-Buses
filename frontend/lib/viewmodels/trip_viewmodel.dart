@@ -109,23 +109,29 @@ class TripViewModel extends ChangeNotifier {
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
     final selectedDateTime = DateTime.parse("$date $time");
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
-
+    final formattedDate = await _driverService.formatDate(date);
     final theDaySchedules = existingTrips
-        .where((trip) => trip.date == date)
+        .where((trip) => trip.date == formattedDate)
         .map((trip) => trip.startTime)
         .toList();
 
     if (selectedDateTime.isBefore(timeNow)) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
+      isSubmitJourneyLoading = false;
+      notifyListeners();
       return;
     }
 
     for (var scheduleTime in theDaySchedules) {
-      final existingTime = DateTime.parse("$date $scheduleTime");
-      if ((selectedDateTime.difference(existingTime).inHours).abs() < 5) {
+      final existingScheduleDateTime = DateTime.parse("$date $scheduleTime");
+      //print("Existing time: $existingScheduleDateTime | Selected time: $selectedDateTime | Diff: ${(selectedDateTime.difference(existingScheduleDateTime).inHours).abs()} hours");
+
+      if ((selectedDateTime.difference(existingScheduleDateTime).inHours).abs() < 5) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("You must have at least 5 hours between trips.")));
+        isSubmitJourneyLoading = false;
+        notifyListeners();
         return;
       }
     }
