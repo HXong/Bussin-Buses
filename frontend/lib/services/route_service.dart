@@ -44,6 +44,30 @@ class RouteService {
     }
   }
 
+  Future<void> calculateETA(String driverId, String scheduleId) async {
+    const String _calculateEtaPath = "$_basePath/get-eta";
+    Uri url = Uri.http(_host, _calculateEtaPath);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'driver_id': driverId,
+          'schedule_id': scheduleId,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        print("Failed to calculate ETA. Status: ${response.statusCode}, Body: ${response.body}");
+      } else {
+        print("ETA calculated and stored successfully.");
+      }
+    } catch (e) {
+      print("Error calling calculateETA: $e");
+    }
+  }
+
   Future<RouteResponse> getReroute(String driverId) async {
     Uri uri = Uri.http(_host, _getReroutePath, {
       "driverId": driverId

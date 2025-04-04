@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bussin_buses/models/Passengers.dart';
 import 'package:bussin_buses/models/Trips.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
+import 'package:bussin_buses/services/route_service.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +12,7 @@ class DriverService {
   final _notificationController = StreamController<Map<String, dynamic>>();
   RealtimeChannel? _notificationChannel;
   Stream<Map<String, dynamic>> get updates => _notificationController.stream;
+  final RouteService _routeService = RouteService();
 
   //Function to fetch passenger details for corresponding schedule
   Future<List<Passenger>> fetchPassengerDetails(String scheduleId) async {
@@ -202,6 +204,14 @@ class DriverService {
 
     if (response.isEmpty) {
       throw Exception("No data returned, journey not added");
+    }
+
+    final scheduleId = response.first['schedule_id'];
+    
+    try {
+      await _routeService.calculateETA(driverId, scheduleId.toString());
+    } catch (e) {
+      print("Error calling calculateETA: $e");
     }
   }
 
