@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bussin_buses/models/Passengers.dart';
 import 'package:bussin_buses/models/Trips.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
+import 'package:bussin_buses/services/route_service.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +12,7 @@ class DriverService {
   final _notificationController = StreamController<Map<String, dynamic>>();
   RealtimeChannel? _notificationChannel;
   Stream<Map<String, dynamic>> get updates => _notificationController.stream;
+  final RouteService _routeService = RouteService();
 
   //Function to fetch passenger details for corresponding schedule
   Future<List<Passenger>> fetchPassengerDetails(String scheduleId) async {
@@ -94,10 +96,11 @@ class DriverService {
       String destinationName = await getLocationName(trip['destination']);
       String dateStr = trip['date']; // YYYY-MM-DD
       String timeStr = trip['time']; // HH:MM:SS
+      int duration = trip['eta'] ?? 75;
       DateTime startDateTime = DateTime.parse('$dateStr $timeStr');
-      DateTime endStartTime = startDateTime.add(const Duration(minutes: 75));
+      DateTime endStartDateTime = startDateTime.add(Duration(minutes: duration));
       String formattedDate = formatDate(dateStr);
-      String formattedEndTime = DateFormat('HH:mm').format(endStartTime);
+      String formattedEndTime = DateFormat('HH:mm').format(endStartDateTime);
 
       String driverName = '';
       if (trip['driver_id'] != null) {
@@ -136,7 +139,7 @@ class DriverService {
           date: formattedDate,
           startTime: timeStr.substring(0, 5),
           endTime: formattedEndTime,
-          duration: '1h 15min',
+          duration: "$duration mins",
           pickup: pickupName,
           destination: destinationName,
           status: status,
@@ -202,6 +205,14 @@ class DriverService {
 
     if (response.isEmpty) {
       throw Exception("No data returned, journey not added");
+    }
+
+    final scheduleId = response.first['schedule_id'];
+    
+    try {
+      await _routeService.calculateETA(driverId, scheduleId.toString());
+    } catch (e) {
+      print("Error calling calculateETA: $e");
     }
   }
 

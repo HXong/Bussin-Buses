@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
-import '../../models/Schedule.dart';
 import './booking_nav.dart';
 
 class BusResultsScreen extends StatefulWidget {
@@ -25,106 +23,22 @@ class BusResultsScreen extends StatefulWidget {
 }
 
 class _BusResultsScreenState extends State<BusResultsScreen> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  List<Map<String, dynamic>> schedules = [];
-  List<Map<String, dynamic>> filteredSchedules = [];
-  Map<int, String> locationNames = {}; // Map to store location IDs to names
-  bool isLoading = true;
-  bool showingAllSchedules = false;
-  
   @override
   void initState() {
     super.initState();
-    _fetchLocations().then((_) => _fetchAllSchedules());
+    _initializeData();
   }
   
-  Future<void> _fetchLocations() async {
-    try {
-      final response = await supabase
-          .from('location')
-          .select('location_id, location_name');
-      
-      for (var location in response) {
-        locationNames[location['location_id']] = location['location_name'];
-      }
-    } catch (e) {
-      print('Error fetching locations: $e');
-    }
+  Future<void> _initializeData() async {
+    final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
+    await viewModel.initializeBusResults();
+    viewModel.filterSchedules(
+      pickup: widget.pickup,
+      destination: widget.destination,
+      date: widget.date
+    );
   }
   
-  Future<void> _fetchAllSchedules() async {
-    setState(() => isLoading = true);
-    
-    try {
-      // Fetch all schedules from Supabase
-      final response = await supabase
-          .from('schedules')
-          .select('*')
-          .order('time');
-      
-      setState(() {
-        schedules = List<Map<String, dynamic>>.from(response);
-        _filterSchedules(); // Apply initial filter
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error fetching schedules: $e');
-      setState(() => isLoading = false);
-    }
-  }
-  
-  void _filterSchedules() {
-    if (showingAllSchedules) {
-      setState(() {
-        filteredSchedules = schedules;
-      });
-      return;
-    }
-    
-    setState(() {
-      filteredSchedules = schedules.where((schedule) {
-        final pickupId = schedule['pickup'];
-        final destinationId = schedule['destination'];
-        
-        final pickupName = locationNames[pickupId] ?? '';
-        final destinationName = locationNames[destinationId] ?? '';
-        
-        final pickupMatch = pickupName.toLowerCase().contains(widget.pickup.toLowerCase());
-        final destinationMatch = destinationName.toLowerCase().contains(widget.destination.toLowerCase());
-        final dateMatch = schedule['date'].toString() == widget.date;
-        
-        return pickupMatch && destinationMatch && dateMatch;
-      }).toList();
-    });
-  }
-  
-  void _toggleShowAllSchedules() {
-    setState(() {
-      showingAllSchedules = !showingAllSchedules;
-      _filterSchedules();
-    });
-  }
-  
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('EEE dd MMM yyyy').format(date);
-    } catch (_) {
-      return dateStr;
-    }
-  }
-  
-  String _addTimeToString(String timeStr, int minutes) {
-    final parts = timeStr.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    
-    final time = DateTime(2025, 1, 1, hour, minute);
-    final newTime = time.add(Duration(minutes: minutes));
-    
-    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
-  }
-
   void _navigateToBooking(int scheduleId) {
     // First call the onScheduleSelected callback to update the parent state
     widget.onScheduleSelected(scheduleId);
@@ -140,7 +54,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
   
   @override
   Widget build(BuildContext context) {
-    final commuterVM = Provider.of<CommuterViewModel>(context);
+    final viewModel = Provider.of<CommuterViewModel>(context);
     
     return Scaffold(
       backgroundColor: Colors.white,
@@ -158,7 +72,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              showingAllSchedules 
+              viewModel.showingAllSchedules 
                   ? "All Bus Schedules" 
                   : "${widget.pickup} - ${widget.destination}",
               style: const TextStyle(
@@ -166,7 +80,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (!showingAllSchedules)
+            if (!viewModel.showingAllSchedules)
               Text(
                 _formatDate(widget.date),
                 style: TextStyle(
@@ -178,7 +92,11 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
             
             // Toggle button
             ElevatedButton(
-              onPressed: _toggleShowAllSchedules,
+              onPressed: () => viewModel.toggleShowAllSchedules(
+                pickup: widget.pickup,
+                destination: widget.destination,
+                date: widget.date
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[300],
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -187,7 +105,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                 ),
               ),
               child: Text(
-                showingAllSchedules ? "Show Filtered Results" : "Show All Schedules",
+                viewModel.showingAllSchedules ? "Show Filtered Results" : "Show All Schedules",
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 14,
@@ -197,9 +115,9 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
             
             const SizedBox(height: 24),
             
-            isLoading
+            viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredSchedules.isEmpty
+                : viewModel.filteredSchedules.isEmpty
                     ? const Center(
                         child: Text(
                           "No schedules available for this route and date",
@@ -208,9 +126,9 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                       )
                     : Expanded(
                         child: ListView.builder(
-                          itemCount: filteredSchedules.length,
+                          itemCount: viewModel.filteredSchedules.length,
                           itemBuilder: (context, index) {
-                            final schedule = filteredSchedules[index];
+                            final schedule = viewModel.filteredSchedules[index];
                             
                             // Ensure schedule_id is an int.
                             final int scheduleId = schedule['schedule_id'] is int
@@ -222,7 +140,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                             final timeStr = timeField.contains(':') 
                                 ? timeField.substring(0, 5) 
                                 : timeField;
-                            final arrivalTime = _addTimeToString(timeField, 75);
+                            final arrivalTime = viewModel.addTimeToString(timeField, 75);
                             
                             // Convert date to string.
                             final date = schedule['date'].toString();
@@ -230,11 +148,11 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                             // Get location names from the IDs
                             final pickupId = schedule['pickup'];
                             final destinationId = schedule['destination'];
-                            final pickupName = locationNames[pickupId] ?? 'Unknown';
-                            final destinationName = locationNames[destinationId] ?? 'Unknown';
+                            final pickupName = viewModel.locationNames[pickupId] ?? 'Unknown';
+                            final destinationName = viewModel.locationNames[destinationId] ?? 'Unknown';
                             
                             return FutureBuilder<int>(
-                              future: commuterVM.getAvailableSeatsCount(scheduleId),
+                              future: viewModel.getAvailableSeatsCount(scheduleId),
                               builder: (context, snapshot) {
                                 final availableSeats = snapshot.data ?? 0;
                                 
@@ -383,5 +301,13 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
       ),
     );
   }
+  
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('EEE dd MMM yyyy').format(date);
+    } catch (_) {
+      return dateStr;
+    }
+  }
 }
-

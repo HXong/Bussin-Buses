@@ -149,9 +149,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   final confirmPassword = confirmPasswordController.text;
                   final userType = _selectedUser[0] ? 'commuter' : 'driver';
 
-                  if (password.length < 6) {
+                  if (password.length < 6 || password.length > 20) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Password must be at least 6 characters long")),
+                      SnackBar(content: Text("Password must be between 6 to 20 characters long")),
+                    );
+                    return;
+                  }
+
+                  if (username.length < 3 || username.length > 10) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Username must be between 3 to 10 characters long")),
                     );
                     return;
                   }
@@ -177,7 +184,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   const Text("Already have an account?"),
                   const SizedBox(width: 4),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async{
+                      await Future.delayed(Duration(seconds: 5));
                       Navigator.pop(context);
                     },
                     child: const Text(

@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 import '../../models/Booking.dart';
 
@@ -23,103 +22,36 @@ class HomeNav extends StatefulWidget {
 }
 
 class _HomeNavState extends State<HomeNav> {
-  final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController pickupController = TextEditingController(text: 'NTU');
   final TextEditingController destinationController = TextEditingController(text: 'Tampines');
-  String selectedDate = '';
-  String selectedTime = '';
-  List<Booking> upcomingBookings = [];
-  bool isLoading = true;
-  String? username;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-    _loadUpcomingBookings();
-    
-    // Initialize with current date
-    final now = DateTime.now();
-    selectedDate = DateFormat('yyyy-MM-dd').format(now);
+    _initializeData();
   }
-
-  Future<void> _loadUserData() async {
-    try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId != null) {
-        final userData = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', userId)
-            .single();
-        
-        setState(() {
-          username = userData['username'];
-        });
-      }
-    } catch (e) {
-      print('Error loading user data: $e');
-    }
-  }
-
-  Future<void> _loadUpcomingBookings() async {
-    setState(() => isLoading = true);
-    
-    try {
-      final commuterVM = Provider.of<CommuterViewModel>(context, listen: false);
-      await commuterVM.obtainId();
-      
-      setState(() {
-        upcomingBookings = commuterVM.bookings;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading upcoming bookings: $e');
-      setState(() => isLoading = false);
-    }
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 90)),
-    );
-    
-    if (picked != null) {
-      setState(() {
-        selectedDate = DateFormat('yyyy-MM-dd').format(picked);
-      });
-    }
-  }
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    
-    if (picked != null) {
-      setState(() {
-        selectedTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      });
-    }
+  
+  Future<void> _initializeData() async {
+    final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
+    await viewModel.initializeHomeNav();
   }
 
   void _findBus() {
     if (widget.onSearchSubmitted != null) {
+      final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
       widget.onSearchSubmitted!(
         pickupController.text,
         destinationController.text,
-        selectedDate,
-        selectedTime.isEmpty ? '' : selectedTime,
+        viewModel.selectedDate,
+        viewModel.selectedTime.isEmpty ? '' : viewModel.selectedTime,
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<CommuterViewModel>(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -130,7 +62,7 @@ class _HomeNavState extends State<HomeNav> {
             children: [
               // Welcome message
               Text(
-                "Welcome Back${username != null ? '\n$username' : ''}",
+                "Welcome Back${viewModel.username != null ? '\n${viewModel.username}' : ''}",
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -223,7 +155,7 @@ class _HomeNavState extends State<HomeNav> {
                         // Date picker
                         Expanded(
                           child: InkWell(
-                            onTap: () => _selectDate(context),
+                            onTap: () => viewModel.selectDate(context),
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
@@ -232,9 +164,9 @@ class _HomeNavState extends State<HomeNav> {
                               ),
                               child: Center(
                                 child: Text(
-                                  selectedDate.isEmpty 
+                                  viewModel.selectedDate.isEmpty 
                                       ? "Date" 
-                                      : DateFormat('dd MMM yyyy').format(DateTime.parse(selectedDate)),
+                                      : DateFormat('dd MMM yyyy').format(DateTime.parse(viewModel.selectedDate)),
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               ),
@@ -246,7 +178,7 @@ class _HomeNavState extends State<HomeNav> {
                         // Time picker
                         Expanded(
                           child: InkWell(
-                            onTap: () => _selectTime(context),
+                            onTap: () => viewModel.selectTime(context),
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
@@ -255,7 +187,7 @@ class _HomeNavState extends State<HomeNav> {
                               ),
                               child: Center(
                                 child: Text(
-                                  selectedTime.isEmpty ? "Time" : selectedTime,
+                                  viewModel.selectedTime.isEmpty ? "Time" : viewModel.selectedTime,
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               ),
@@ -311,9 +243,9 @@ class _HomeNavState extends State<HomeNav> {
                     ),
                     const SizedBox(height: 16),
                     
-                    isLoading
+                    viewModel.isLoading
                         ? const Center(child: CircularProgressIndicator())
-                        : upcomingBookings.isEmpty
+                        : viewModel.bookings.isEmpty
                             ? const Center(
                                 child: Text(
                                   "No upcoming bookings",
@@ -321,7 +253,7 @@ class _HomeNavState extends State<HomeNav> {
                                 ),
                               )
                             : Column(
-                                children: upcomingBookings.take(3).map((booking) {
+                                children: viewModel.bookings.take(3).map((booking) {
                                   final schedule = booking.schedule;
                                   if (schedule == null) return const SizedBox.shrink();
                                   
@@ -394,7 +326,7 @@ class _HomeNavState extends State<HomeNav> {
                                                       ),
                                                       const SizedBox(width: 8),
                                                       Text(
-                                                        _addTimeToString(schedule.time, 75),
+                                                        viewModel.addTimeToString(schedule.time, 75),
                                                         style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight: FontWeight.bold,
@@ -437,16 +369,5 @@ class _HomeNavState extends State<HomeNav> {
         ),
       ),
     );
-  }
-  
-  String _addTimeToString(String timeStr, int minutes) {
-    final parts = timeStr.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    
-    final time = DateTime(2025, 1, 1, hour, minute);
-    final newTime = time.add(Duration(minutes: minutes));
-    
-    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
   }
 }
