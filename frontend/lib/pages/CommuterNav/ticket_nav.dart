@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 
 class TicketNav extends StatefulWidget {
-  const TicketNav({Key? key}) : super(key: key);
+  final Function(int)? onBookingSelected;
+  const TicketNav({this.onBookingSelected, Key? key}) : super(key: key);
 
   @override
   TicketNavState createState() => TicketNavState();
