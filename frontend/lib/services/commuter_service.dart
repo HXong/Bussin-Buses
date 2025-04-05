@@ -127,4 +127,63 @@ class CommuterService {
     return _supabase.auth.currentUser?.id;
   }
 
+  Future<Map<int, String>> fetchLocationNames() async {
+    try {
+      final response = await _supabase
+          .from('location')
+          .select('location_id, location_name');
+
+      Map<int, String> locationNames = {};
+      for (var location in response) {
+        locationNames[location['location_id']] = location['location_name'];
+      }
+      return locationNames;
+    } catch (e) {
+      print('Error fetching locations: $e');
+      return {};
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAllSchedules() async {
+    try {
+      final response = await _supabase
+          .from('schedules')
+          .select('*')
+          .order('time');
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('Error fetching schedules: $e');
+      return [];
+    }
+  }
+
+  // New methods for HomeNav
+  Future<String?> fetchUsername(String userId) async {
+    try {
+      final userData = await _supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', userId)
+          .single();
+
+      return userData['username'] as String?;
+    } catch (e) {
+      print('Error loading user data: $e');
+      return null;
+    }
+  }
+
+  String addTimeToString(String timeStr, int minutes) {
+    final parts = timeStr.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    final time = DateTime(2025, 1, 1, hour, minute);
+    final newTime = time.add(Duration(minutes: minutes));
+
+    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
+  }
+
+
 }
