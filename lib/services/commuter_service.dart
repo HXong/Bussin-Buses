@@ -142,4 +142,31 @@ class CommuterService {
       return [];
     }
   }
+  
+  // New methods for HomeNav
+  Future<String?> fetchUsername(String userId) async {
+    try {
+      final userData = await _supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', userId)
+          .single();
+      
+      return userData['username'] as String?;
+    } catch (e) {
+      print('Error loading user data: $e');
+      return null;
+    }
+  }
+  
+  String addTimeToString(String timeStr, int minutes) {
+    final parts = timeStr.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    
+    final time = DateTime(2025, 1, 1, hour, minute);
+    final newTime = time.add(Duration(minutes: minutes));
+    
+    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
+  }
 }

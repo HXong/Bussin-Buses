@@ -1,5 +1,6 @@
 import 'package:bussin_buses/services/commuter_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../pages/CommuterNav/seat_manager.dart';
 import '../models/Booking.dart';
 import '../models/Schedule.dart';
@@ -19,6 +20,11 @@ class CommuterViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> filteredSchedules = [];
   Map<int, String> locationNames = {};
   bool showingAllSchedules = false;
+  
+  // New properties for HomeNav
+  String? username;
+  String selectedDate = '';
+  String selectedTime = '';
   
   bool isCanceled(int bookingId) => _canceledBookings.contains(bookingId);
   bool isCheckIn(int bookingId) => _checkedInBookings.contains(bookingId);
@@ -133,7 +139,7 @@ class CommuterViewModel extends ChangeNotifier {
     }
   }
   
-  // New methods for BusResultsScreen
+  // Methods for BusResultsScreen
   Future<void> initializeBusResults() async {
     isLoading = true;
     notifyListeners();
@@ -189,13 +195,76 @@ class CommuterViewModel extends ChangeNotifier {
   }
   
   String addTimeToString(String timeStr, int minutes) {
-    final parts = timeStr.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
+    return _commuterService.addTimeToString(timeStr, minutes);
+  }
+  
+  // New methods for HomeNav
+  Future<void> initializeHomeNav() async {
+    isLoading = true;
+    notifyListeners();
     
-    final time = DateTime(2025, 1, 1, hour, minute);
-    final newTime = time.add(Duration(minutes: minutes));
+    try {
+      // Initialize with current date
+      final now = DateTime.now();
+      selectedDate = DateFormat('yyyy-MM-dd').format(now);
+      
+      // Load user data and bookings
+      await loadUserData();
+      await loadUpcomingBookings();
+    } catch (e) {
+      print('Error initializing home nav: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  Future<void> loadUserData() async {
+    try {
+      final userId = _commuterService.getCommuterId();
+      if (userId != null) {
+        username = await _commuterService.fetchUsername(userId);
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading user data in ViewModel: $e');
+    }
+  }
+  
+  Future<void> loadUpcomingBookings() async {
+    try {
+      final commuterId = _commuterService.getCommuterId();
+      if (commuterId != null) {
+        await fetchBookings(commuterId);
+      }
+    } catch (e) {
+      print('Error loading upcoming bookings in ViewModel: $e');
+    }
+  }
+  
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+    );
     
-    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
+    if (picked != null) {
+      selectedDate = DateFormat('yyyy-MM-dd').format(picked);
+      notifyListeners();
+    }
+  }
+  
+  Future<void> selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    
+    if (picked != null) {
+      selectedTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      notifyListeners();
+    }
   }
 }
