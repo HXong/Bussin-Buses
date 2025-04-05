@@ -68,9 +68,11 @@ class JourneyTrackingViewModel extends ChangeNotifier {
     estimatedArrivalTime = getFormattedTimeAfter(routeResponse.duration);
     isStartJourney = true;
     _driverService.subscribeToNotifications();
-    _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
-      print("Stream error: $e");
-    });
+    if  (_subscription != null){
+      _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
+        print("Stream error: $e");
+      });
+    }
     notifyListeners();
   }
 
@@ -84,6 +86,7 @@ class JourneyTrackingViewModel extends ChangeNotifier {
       polylineCoordinates.clear();
       onSuccess?.call();
       _driverService.unsubscribeToNotifications();
+      _subscription?.cancel();
       _subscription = null;
       notifyListeners();
     }

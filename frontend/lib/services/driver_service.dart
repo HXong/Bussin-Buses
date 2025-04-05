@@ -11,7 +11,7 @@ class DriverService {
   List<Map<String, dynamic>> passengerDetails = [];
   final _notificationController = StreamController<Map<String, dynamic>>();
   RealtimeChannel? _notificationChannel;
-  Stream<Map<String, dynamic>> get updates => _notificationController.stream;
+  Stream<Map<String, dynamic>> get updates => _notificationController.stream.asBroadcastStream();
   final RouteService _routeService = RouteService();
 
   //Function to fetch passenger details for corresponding schedule
