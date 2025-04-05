@@ -34,8 +34,7 @@ class DriverViewModel extends ChangeNotifier {
 
     try {
       final profileData = await _driverService.fetchDriverProfile(driverId);
-      final busPlate = await _driverService.fetchBusPlate(driverId);
-      driverProfile = DriverProfile.fromMap(profileData, busPlate);
+      driverProfile = DriverProfile.fromMap(profileData);
       notifyListeners();
 
     } catch (e) {

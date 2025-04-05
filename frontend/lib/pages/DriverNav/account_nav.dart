@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'personal_information.dart';
 import 'past_trips.dart';
 import 'upcoming_trips.dart';
-import 'feedback.dart';
 
 class AccountNav extends StatefulWidget {
   const AccountNav({super.key});
@@ -30,8 +29,6 @@ class _AccountNavState extends State<AccountNav> {
             _buildButton(context, "Past Trips", const PastTrips()),
             const SizedBox(height: 30),
             _buildButton(context, "All Upcoming Trips", const UpcomingTrips()),
-            const SizedBox(height: 30),
-            _buildButton(context, "Feedback", const FeedbackScreen()),
             const SizedBox(height: 90),
           ],
         ),
