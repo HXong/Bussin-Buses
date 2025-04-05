@@ -1,3 +1,4 @@
+// lib/pages/CommuterNav/upcoming_booking.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:bussin_buses/models/Booking.dart';
@@ -6,7 +7,13 @@ import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
-  const BookingCard({required this.booking});
+  final Function(int)? onViewLiveLocation;
+  
+  const BookingCard({
+    required this.booking,
+    this.onViewLiveLocation,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -121,43 +128,56 @@ class BookingCard extends StatelessWidget {
             const SizedBox(height: 12),
             booking.isCheckedIn
                 ? Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: const [
-                Text(
-                  "Checked In",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            )
-                : Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingDetailScreen(booking: booking),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Checked In",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
-                    );
-                    if (result == true) {
-                      final state = context.findAncestorStateOfType<TicketNavState>();
-                      state?.fetchBookings();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (onViewLiveLocation != null) {
+                            onViewLiveLocation!(booking.id);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        child: const Text("Live Location", style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookingDetailScreen(booking: booking),
+                            ),
+                          );
+                          if (result == true) {
+                            final state = context.findAncestorStateOfType<TicketNavState>();
+                            state?.fetchBookings();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        child: const Text("Details", style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
                   ),
-                  child: const Text("Details", style: TextStyle(color: Colors.white)),
-                ),
-              ],
-            ),
           ],
         ),
       ),
