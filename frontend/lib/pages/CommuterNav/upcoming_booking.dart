@@ -1,4 +1,3 @@
-// lib/pages/CommuterNav/upcoming_booking.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:bussin_buses/models/Booking.dart';
@@ -7,13 +6,7 @@ import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
-  final Function(int)? onViewLiveLocation;
-  
-  const BookingCard({
-    required this.booking,
-    this.onViewLiveLocation,
-    Key? key,
-  }) : super(key: key);
+  const BookingCard({required this.booking});
 
   @override
   Widget build(BuildContext context) {
@@ -116,68 +109,60 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
                 Row(
-                  children: const [
-                    Icon(Icons.directions_bus, size: 16),
-                    SizedBox(width: 4),
-                    Text("SMB123S", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    Icon(Icons.info_outline, size: 16, color: Colors.black54),
+                  children: [
+                    const Icon(Icons.directions_bus, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      booking.schedule?.busPlate ?? 'Unknown',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.info_outline, size: 16, color: Colors.black54),
                   ],
                 ),
+
               ],
             ),
             const SizedBox(height: 12),
             booking.isCheckedIn
                 ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Checked In",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (onViewLiveLocation != null) {
-                            onViewLiveLocation!(booking.id);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        ),
-                        child: const Text("Live Location", style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookingDetailScreen(booking: booking),
-                            ),
-                          );
-                          if (result == true) {
-                            final state = context.findAncestorStateOfType<TicketNavState>();
-                            state?.fetchBookings();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        ),
-                        child: const Text("Details", style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: const [
+                Text(
+                  "Checked In",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
                   ),
+                ),
+              ],
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingDetailScreen(booking: booking),
+                      ),
+                    );
+                    if (result == true) {
+                      final state = context.findAncestorStateOfType<TicketNavState>();
+                      state?.fetchBookings();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: const Text("Details", style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
           ],
         ),
       ),

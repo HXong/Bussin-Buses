@@ -1,13 +1,10 @@
-// lib/pages/CommuterNav/ticket_nav.dart
 import 'package:bussin_buses/pages/CommuterNav/upcoming_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 
 class TicketNav extends StatefulWidget {
-  final Function(int)? onBookingSelected;
-  
-  const TicketNav({this.onBookingSelected, Key? key}) : super(key: key);
+  const TicketNav({Key? key}) : super(key: key);
 
   @override
   TicketNavState createState() => TicketNavState();
@@ -17,12 +14,17 @@ class TicketNavState extends State<TicketNav> {
   @override
   void initState() {
     super.initState();
-    Provider.of<CommuterViewModel>(context, listen: false).obtainId();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CommuterViewModel>(context, listen: false).obtainId();
+    });
   }
+
 
   void fetchBookings() {
     Provider.of<CommuterViewModel>(context, listen: false).obtainId();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +48,7 @@ class TicketNavState extends State<TicketNav> {
         child: ListView.builder(
           itemCount: bookings.length,
           itemBuilder: (context, index) {
-            return BookingCard(
-              booking: bookings[index],
-              onViewLiveLocation: widget.onBookingSelected,
-            );
+            return BookingCard(booking: bookings[index]);
           },
         ),
       ),
