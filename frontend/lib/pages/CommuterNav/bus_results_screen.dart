@@ -52,6 +52,15 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
     );
   }
   
+  String _getMonthAbbreviation(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM').format(date).toUpperCase();
+    } catch (_) {
+      return "---";
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<CommuterViewModel>(context);
@@ -144,6 +153,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                             
                             // Convert date to string.
                             final date = schedule['date'].toString();
+                            final monthAbbreviation = _getMonthAbbreviation(date);
                             
                             // Get location names from the IDs
                             final pickupId = schedule['pickup'];
@@ -177,7 +187,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                                               ),
                                             ),
                                             Text(
-                                              "JAN",
+                                              monthAbbreviation,
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.grey[700],
