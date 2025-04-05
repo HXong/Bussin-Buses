@@ -11,7 +11,7 @@ class DriverService {
   List<Map<String, dynamic>> passengerDetails = [];
   final _notificationController = StreamController<Map<String, dynamic>>();
   RealtimeChannel? _notificationChannel;
-  Stream<Map<String, dynamic>> get updates => _notificationController.stream;
+  Stream<Map<String, dynamic>> get updates => _notificationController.stream.asBroadcastStream();
   final RouteService _routeService = RouteService();
 
   //Function to fetch passenger details for corresponding schedule
@@ -228,21 +228,6 @@ class DriverService {
     } catch (e) {
       print('Error fetching driver profile: $e');
       return {};
-    }
-  }
-
-  Future<String> fetchBusPlate(String driverId) async {
-    try {
-      final busPlate = await _supabase
-          .from('buses')
-          .select('bus_number')
-          .eq('driver_id', driverId)
-          .single();
-      return busPlate['bus_number'] ?? 'unknown';
-
-    } catch (e) {
-      print('Error fetching bus plate: $e');
-      return 'unknown';
     }
   }
 
