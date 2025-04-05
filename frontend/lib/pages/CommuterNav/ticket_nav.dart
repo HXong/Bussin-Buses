@@ -48,7 +48,10 @@ class TicketNavState extends State<TicketNav> {
         child: ListView.builder(
           itemCount: bookings.length,
           itemBuilder: (context, index) {
-            return BookingCard(booking: bookings[index]);
+            return BookingCard(
+              booking: bookings[index],
+              onViewLiveLocation: widget.onBookingSelected,
+            );
           },
         ),
       ),
