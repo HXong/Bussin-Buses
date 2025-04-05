@@ -1,7 +1,6 @@
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Booking.dart';
-import '../models/Schedule.dart';
 
 class CommuterService {
   final SupabaseClient _supabase = SupabaseClientService.client;
@@ -9,7 +8,7 @@ class CommuterService {
   Future<List<Booking>> fetchUpcomingBookings(String commuterId) async {
     final response = await _supabase
         .from('bookings')
-        .select('booking_id, booking_date, is_checked_in, seat_id(seat_number), schedule_id(date, time, pickup(location_name), destination(location_name))')
+        .select('booking_id, booking_date, is_checked_in, seat_id(seat_number), schedule_id(date, time, pickup(location_name), destination(location_name), bus_id(bus_number))')
         .eq('commuter_id', commuterId);
 
     final List data = response as List;
@@ -33,6 +32,8 @@ class CommuterService {
     }).map((b) => Booking.fromMap(b)).toList();
   }
 
+
+
   Future<void> cancelBooking(int bookingId) async {
     await _supabase.from('bookings').delete().eq('booking_id', bookingId);
   }
@@ -48,10 +49,12 @@ class CommuterService {
   Future<Map<String, dynamic>?> fetchScheduleDetails(int scheduleId) async {
     return await _supabase
         .from('schedules')
-        .select('date, time, pickup(location_name), destination(location_name)')
+        .select('date, time, pickup(location_name), destination(location_name), bus_id(bus_number)')
         .eq('schedule_id', scheduleId)
         .maybeSingle();
   }
+
+
 
   Future<List<String>> fetchBookedSeatNumbers(int scheduleId) async {
     final seatIds = await _supabase
@@ -79,14 +82,22 @@ class CommuterService {
     required int scheduleId,
     required int seatNumber,
   }) async {
+    print("[DEBUG] Trying to book seatNumber: $seatNumber for scheduleId: $scheduleId");
+
     final seatData = await _supabase
         .from('seats')
         .select('seat_id')
         .eq('seat_number', seatNumber)
+        .limit(1)
         .maybeSingle();
 
+    print("[DEBUG] seatData fetched: $seatData");
+
     final seatId = seatData?['seat_id'];
-    if (seatId == null) throw Exception("Seat not found");
+    if (seatId == null) {
+      print("[ERROR] Seat ID is NULL. Seat number not found in seats table.");
+      throw Exception("Seat not found");
+    }
 
     final alreadyBooked = await _supabase
         .from('bookings')
@@ -95,7 +106,10 @@ class CommuterService {
         .eq('seat_id', seatId)
         .maybeSingle();
 
-    if (alreadyBooked != null) throw Exception("Seat already booked");
+    if (alreadyBooked != null) {
+      print("[ERROR] Seat already booked for this schedule.");
+      throw Exception("Seat already booked");
+    }
 
     await _supabase.from('bookings').insert({
       'commuter_id': commuterId,
@@ -104,69 +118,13 @@ class CommuterService {
       'booking_date': DateTime.now().toIso8601String(),
     });
 
+    print("[SUCCESS] Seat booked successfully.");
     return true;
   }
+
 
   String? getCommuterId() {
     return _supabase.auth.currentUser?.id;
   }
 
-  // New methods for BusResultsScreen
-  Future<Map<int, String>> fetchLocationNames() async {
-    try {
-      final response = await _supabase
-          .from('location')
-          .select('location_id, location_name');
-      
-      Map<int, String> locationNames = {};
-      for (var location in response) {
-        locationNames[location['location_id']] = location['location_name'];
-      }
-      return locationNames;
-    } catch (e) {
-      print('Error fetching locations: $e');
-      return {};
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> fetchAllSchedules() async {
-    try {
-      final response = await _supabase
-          .from('schedules')
-          .select('*')
-          .order('time');
-      
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      print('Error fetching schedules: $e');
-      return [];
-    }
-  }
-  
-  // New methods for HomeNav
-  Future<String?> fetchUsername(String userId) async {
-    try {
-      final userData = await _supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', userId)
-          .single();
-      
-      return userData['username'] as String?;
-    } catch (e) {
-      print('Error loading user data: $e');
-      return null;
-    }
-  }
-  
-  String addTimeToString(String timeStr, int minutes) {
-    final parts = timeStr.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    
-    final time = DateTime(2025, 1, 1, hour, minute);
-    final newTime = time.add(Duration(minutes: minutes));
-    
-    return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
-  }
 }
