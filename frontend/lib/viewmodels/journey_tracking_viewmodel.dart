@@ -68,11 +68,9 @@ class JourneyTrackingViewModel extends ChangeNotifier {
     estimatedArrivalTime = getFormattedTimeAfter(routeResponse.duration);
     isStartJourney = true;
     _driverService.subscribeToNotifications();
-    if  (_subscription != null){
-      _subscription = _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
+    _subscription ??= _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
         print("Stream error: $e");
       });
-    }
     notifyListeners();
   }
 
