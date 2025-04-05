@@ -131,8 +131,9 @@ class _RideNavState extends State<RideNav> {
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
                                     () {
+                                      routeViewModel.reset();
+                                      tripViewModel.reset();
                                       tripViewModel.fetchUpcomingConfirmedTrips(DateTime.now());
-                                      tripViewModel.currentTripDetails = null;
                                     }
                                 );
                               },

@@ -112,4 +112,17 @@ class JourneyTrackingViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    locations = [];
+    polylineCoordinates = [];
+
+    estimatedArrivalTime = "";
+    message = "";
+
+    _locationUpdateTimer;
+    isStartJourney = false;
+    _subscription = null;
+    notifyListeners();
+  }
+
 }
