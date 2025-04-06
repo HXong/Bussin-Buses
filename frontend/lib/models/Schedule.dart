@@ -5,12 +5,14 @@ class Schedule {
   final String destination;
   final String date;
   final String time;
+  final String busPlate;
 
   Schedule({
     required this.pickup,
     required this.destination,
     required this.date,
     required this.time,
+    required this.busPlate,
   });
 
   factory Schedule.fromMap(Map<String, dynamic> map) {
@@ -19,8 +21,11 @@ class Schedule {
       destination: map['destination']?['location_name'] ?? 'N/A',
       date: map['date'] ?? '',
       time: map['time']?.toString() ?? '',
+      busPlate: map['bus_id']?['bus_number'] ?? 'Unknown',
     );
   }
+
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -28,6 +33,7 @@ class Schedule {
       'destination': destination,
       'date': date,
       'time': time,
+      'bus_plate': busPlate,
     };
   }
 

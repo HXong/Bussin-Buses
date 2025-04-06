@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
-import 'package:bussin_buses/models/DriverProfile.dart';
 
 class PersonalInformation extends StatefulWidget {
   const PersonalInformation({super.key});
@@ -61,10 +60,7 @@ class _PersonalInformationState extends State<PersonalInformation> {
 
             Text("Role: ${driverProfile.userType[0].toUpperCase()}${driverProfile.userType.substring(1)}",
                 style: const TextStyle(fontSize: 23)),
-            const SizedBox(height: 20),
 
-            Text("Bus Plate: ${driverProfile.busPlate}",
-                style: const TextStyle(fontSize: 23)),
             const SizedBox(height: 20),
 
             Text("Date Joined: ${driverProfile.createdAt}",

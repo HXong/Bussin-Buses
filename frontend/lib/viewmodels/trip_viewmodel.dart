@@ -166,5 +166,16 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reset() {
+    upcomingConfirmedTrips = [];
+    upcomingAllTrips = [];
+    pastTrips = [];
+    passengers = [];
+    isLoading = false;
+    isSubmitJourneyLoading = false;
+    currentTripDetails = null;
+    notifyListeners();
+  }
+
 
 }

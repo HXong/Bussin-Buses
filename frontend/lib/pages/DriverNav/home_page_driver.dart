@@ -1,5 +1,7 @@
 import 'package:bussin_buses/viewmodels/auth_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/journey_tracking_viewmodel.dart';
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +28,8 @@ class _HomePageDriverState extends State<HomePageDriver> {
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final driverViewModel = Provider.of<DriverViewModel>(context);
+    final tripViewModel = Provider.of<TripViewModel>(context);
+    final journeyTrackingViewModel = Provider.of<JourneyTrackingViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // show error snackbar
@@ -42,6 +46,8 @@ class _HomePageDriverState extends State<HomePageDriver> {
         actions: [
           GestureDetector(
             onTap: () {
+              tripViewModel.reset();
+              journeyTrackingViewModel.reset();
               authViewModel.signOut();
             },
             child: Container(

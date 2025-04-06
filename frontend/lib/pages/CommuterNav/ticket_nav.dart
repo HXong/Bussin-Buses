@@ -1,10 +1,13 @@
+// lib/pages/CommuterNav/ticket_nav.dart
 import 'package:bussin_buses/pages/CommuterNav/upcoming_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 
 class TicketNav extends StatefulWidget {
-  const TicketNav({Key? key}) : super(key: key);
+  final Function(int)? onBookingSelected;
+  
+  const TicketNav({this.onBookingSelected, Key? key}) : super(key: key);
 
   @override
   TicketNavState createState() => TicketNavState();
@@ -14,14 +17,25 @@ class TicketNavState extends State<TicketNav> {
   @override
   void initState() {
     super.initState();
-    Provider.of<CommuterViewModel>(context, listen: false).obtainId();
+    _loadData();
+  }
+  
+  Future<void> _loadData() async {
+    final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
+    await viewModel.obtainId();
+    
+    // Ensure ETAs are loaded for all bookings
+    for (var booking in viewModel.bookings) {
+      final scheduleId = viewModel.getScheduleIdFromBooking(booking);
+      if (scheduleId > 0) {
+        viewModel.fetchETA(scheduleId);
+      }
+    }
   }
 
   void fetchBookings() {
-    Provider.of<CommuterViewModel>(context, listen: false).obtainId();
+    _loadData();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +49,18 @@ class TicketNavState extends State<TicketNav> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
+        actions: [
+          // Add refresh button
+          IconButton(
+            icon: Icon(Icons.refresh, color: Colors.black),
+            onPressed: () {
+              fetchBookings();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Refreshing bookings and ETAs...'))
+              );
+            },
+          ),
+        ],
       ),
       body: commuterVM.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -45,7 +71,10 @@ class TicketNavState extends State<TicketNav> {
         child: ListView.builder(
           itemCount: bookings.length,
           itemBuilder: (context, index) {
-            return BookingCard(booking: bookings[index]);
+            return BookingCard(
+              booking: bookings[index],
+              onViewLiveLocation: widget.onBookingSelected,
+            );
           },
         ),
       ),

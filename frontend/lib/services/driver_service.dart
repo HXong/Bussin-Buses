@@ -231,21 +231,6 @@ class DriverService {
     }
   }
 
-  Future<String> fetchBusPlate(String driverId) async {
-    try {
-      final busPlate = await _supabase
-          .from('buses')
-          .select('bus_number')
-          .eq('driver_id', driverId)
-          .single();
-      return busPlate['bus_number'] ?? 'unknown';
-
-    } catch (e) {
-      print('Error fetching bus plate: $e');
-      return 'unknown';
-    }
-  }
-
   Future<void> storeFeedback(String feedback, String userId) async {
     try {
       await _supabase.from('feedback').insert({'feedback': feedback, 'user_id': userId});
