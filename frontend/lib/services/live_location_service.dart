@@ -1,10 +1,12 @@
 // lib/services/live_location_service.dart
 import 'package:bussin_buses/services/supabase_client_service.dart';
+import 'package:bussin_buses/services/commuter_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:latlong2/latlong.dart';
 
 class LiveLocationService {
   final SupabaseClient _supabase = SupabaseClientService.client;
+  final CommuterService _commuterService = CommuterService();
 
   // Get the current location of a bus for a specific booking
   Future<Map<String, dynamic>> getBusLiveLocation(int bookingId) async {
@@ -21,7 +23,7 @@ class LiveLocationService {
       // Then get the driver_id from the schedule
       final scheduleData = await _supabase
           .from('schedules')
-          .select('driver_id, pickup(location_name), destination(location_name), date, time')
+          .select('driver_id, pickup(location_name), destination(location_name), date, time, eta')
           .eq('schedule_id', scheduleId)
           .single();
       
@@ -38,10 +40,26 @@ class LiveLocationService {
           .eq('driver_id', driverId)
           .maybeSingle();
       
+      // Get the ETA from the schedule or calculate it if needed
+      int eta = 30; // Default to 30 minutes instead of 75
+      
+      // Try to get a fresh ETA calculation
+      try {
+        await _commuterService.calculateETA(scheduleId);
+        eta = await _commuterService.getScheduleETA(scheduleId);
+      } catch (e) {
+        print('Error calculating ETA: $e');
+        
+        // If calculation fails, try to get the stored ETA
+        if (scheduleData['eta'] != null) {
+          eta = scheduleData['eta'];
+        }
+      }
+      
       // For demo purposes, calculate a mock progress based on time
       final departureTime = DateTime.parse('${scheduleData['date']} ${scheduleData['time']}');
       final now = DateTime.now();
-      final totalJourneyTime = const Duration(hours: 1, minutes: 15); // 1h 15m journey
+      final totalJourneyTime = Duration(minutes: eta); // Use the actual ETA
       
       double progress = 0.0;
       if (now.isAfter(departureTime)) {
@@ -51,12 +69,12 @@ class LiveLocationService {
       }
       
       // Generate stops based on the route
-      final stops = _generateStops(pickupName, destinationName, time, progress);
+      final stops = _generateStops(pickupName, destinationName, time, progress, eta);
       
       // Calculate ETA
-      final eta = _addMinutesToTime(
+      final etaTime = _addMinutesToTime(
         time.toString(), 
-        75 - (75 * progress).round()
+        eta - (eta * progress).round()
       );
       
       // Determine current location name based on progress
@@ -68,7 +86,7 @@ class LiveLocationService {
       return {
         'current_location': currentLocation,
         'destination': destinationName,
-        'eta': eta,
+        'eta': etaTime,
         'current_time': DateTime.now().hour.toString().padLeft(2, '0') + ':' + 
                       DateTime.now().minute.toString().padLeft(2, '0'),
         'progress': progress,
@@ -77,11 +95,13 @@ class LiveLocationService {
         'longitude': locationData?['longitude'] ?? 103.8198,
         'last_update': locationData?['last_update'] ?? DateTime.now().toIso8601String(),
         'bus_number': busNumber,
+        'eta_minutes': eta,
+        'schedule_id': scheduleId,
       };
     } catch (e) {
       print('Error getting bus location: $e');
       
-      // Return mock data for demo purposes
+      // Return mock data with a more reasonable ETA
       return {
         'current_location': 'Jurong West',
         'destination': 'Tampines',
@@ -100,12 +120,14 @@ class LiveLocationService {
         'longitude': 103.8198,
         'last_update': DateTime.now().toIso8601String(),
         'bus_number': 'SMB123S',
+        'eta_minutes': 30, // Changed from 75 to 30
+        'schedule_id': 0,
       };
     }
   }
   
   // Helper method to generate stops based on pickup and destination
-  List<Map<String, dynamic>> _generateStops(String pickup, String destination, String startTime, double progress) {
+  List<Map<String, dynamic>> _generateStops(String pickup, String destination, String startTime, double progress, int etaMinutes) {
     List<Map<String, dynamic>> stops = [];
   
     // Add pickup as first stop
@@ -118,7 +140,7 @@ class LiveLocationService {
     // Add destination as last stop (no intermediate stops)
     stops.add({
       'name': destination,
-      'time': _addMinutesToTime(startTime, 75),
+      'time': _addMinutesToTime(startTime, etaMinutes),
       'passed': progress >= 1.0,
     });
   

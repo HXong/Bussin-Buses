@@ -139,13 +139,6 @@ class _AccountNavState extends State<AccountNav> {
                           () => _navigateToUpcomingTrips(context),
                         ),
                         
-                        _buildAccountOption(
-                          context,
-                          'Feedback',
-                          Icons.feedback_outlined,
-                          () => _showFeedbackDialog(context, viewModel),
-                        ),
-                        
                         const SizedBox(height: 24),
                         
                         // Log out button
@@ -356,45 +349,6 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
   
-  void _showFeedbackDialog(BuildContext context, AccountViewModel viewModel) {
-    final feedbackController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Send Feedback'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: feedbackController,
-              decoration: const InputDecoration(
-                labelText: 'Your Feedback',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 5,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final success = await viewModel.submitFeedback(feedbackController.text);
-              if (success) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Submit'),
-          ),
-        ],
-      ),
-    );
-  }
-  
   void _navigateToPastTrips(BuildContext context) {
     // Navigate to past trips screen
     // This would be implemented in a real app
@@ -411,3 +365,4 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
 }
+

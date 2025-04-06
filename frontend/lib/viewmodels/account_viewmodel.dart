@@ -132,38 +132,6 @@ class AccountViewModel extends ChangeNotifier {
     }
   }
   
-  // Submit feedback
-  Future<bool> submitFeedback(String feedback) async {
-    if (feedback.trim().isEmpty) {
-      _errorMessage = 'Feedback cannot be empty';
-      notifyListeners();
-      return false;
-    }
-    
-    _isLoading = true;
-    _errorMessage = null;
-    _successMessage = null;
-    notifyListeners();
-    
-    try {
-      final success = await _accountService.submitFeedback(feedback);
-      
-      if (success) {
-        _successMessage = 'Feedback submitted successfully';
-        return true;
-      } else {
-        _errorMessage = 'Failed to submit feedback';
-        return false;
-      }
-    } catch (e) {
-      _errorMessage = 'Error: $e';
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-  
   // Sign out
   Future<void> signOut() async {
     _isLoading = true;
@@ -187,3 +155,4 @@ class AccountViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
