@@ -29,6 +29,13 @@ exports.getReroute = async (req, res) => {
             return res.status(404).json({ error: "No route found." });
         }
 
+        const etaInMinutes = Math.ceil(duration / 60);
+
+        const updateError = await updateScheduleETA(driver.schedule_id, etaInMinutes);
+        if (updateError) {
+            throw updateError;
+        }
+
         updateActiveDriverRoute(driverId, polyline);
 
         const decodedRoute = routeService.decodeRoute(polyline);

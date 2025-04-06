@@ -163,6 +163,15 @@ async function deleteSchedule(schedule_id){
     return deleteScheduleError;
 }
 
+async function deleteCommuterBookings(schedule_id){
+    const { error: deleteCommuterBookingsError } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('schedule_id', schedule_id);
+    
+    return deleteCommuterBookingsError;
+}
+
 /**
  * deletes the notification from the supabase
  * @param {string} driver_id 
@@ -185,6 +194,7 @@ module.exports = {
     getDriverLocation,
     deleteJourney,
     deleteSchedule,
+    deleteCommuterBookings,
     deleteNotifcation,
     checkExistingNotification,
     insertNotification,

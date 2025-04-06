@@ -74,6 +74,7 @@ class RouteService {
     });
     final response = await http.get(uri, headers: {"Content-Type": "application/json"});
     final parsedResponse = jsonDecode(response.body);
+    print(parsedResponse.toString());
     return RouteResponse.fromJson(parsedResponse);
   }
 }

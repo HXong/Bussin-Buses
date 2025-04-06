@@ -84,7 +84,7 @@ class JourneyTrackingViewModel extends ChangeNotifier {
       polylineCoordinates.clear();
       onSuccess?.call();
       _driverService.unsubscribeToNotifications();
-      _subscription?.cancel();
+      await _subscription?.cancel();
       _subscription = null;
       notifyListeners();
     }
