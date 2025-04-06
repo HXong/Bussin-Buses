@@ -4,8 +4,10 @@ const {
     getLocationCoordinates,
     updateJourneyStarted,
     deleteJourney,
+    deleteCommuterBookings,
     deleteSchedule,
-    deleteNotifcation
+    deleteNotifcation,
+    updateScheduleETA
   } = require('../services/supabaseService');
   
 const { getOptimisedRoute, decodeRoute } = require('../services/routeService');
@@ -48,6 +50,13 @@ const { updateActiveDriver, removeActiveDriver } = require('../services/activeDr
       updateActiveDriver(driver_id, schedule_id, polyline, currentLocation, destinationCoords);
   
       const decodedRoute = decodeRoute(polyline);
+
+      const etaInMinutes = Math.ceil(duration / 60);
+
+      const updateError = await updateScheduleETA(schedule_id, etaInMinutes);
+      if (updateError) {
+          throw updateError;
+      }
   
       return res.json({ duration, polyline, decodedRoute });
   
@@ -74,6 +83,11 @@ const { updateActiveDriver, removeActiveDriver } = require('../services/activeDr
       const deleteScheduleError = await deleteSchedule(schedule_id);
       if (deleteScheduleError) {
         return res.status(500).json({ error: "Failed to update delete schedule", details: deleteScheduleError.message });
+      }
+
+      const deleteCommuterBookingsError = await deleteCommuterBookings(schedule_id);
+      if(deleteCommuterBookingsError){
+        return res.status(500).json({ error: "Failed to delete commuter bookings", details: deleteCommuterBookingsError.message });
       }
   
       const deleteNotificationError = await deleteNotifcation(driver_id);
