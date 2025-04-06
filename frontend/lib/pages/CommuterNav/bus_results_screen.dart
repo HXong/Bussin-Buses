@@ -149,7 +149,10 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                             final timeStr = timeField.contains(':') 
                                 ? timeField.substring(0, 5) 
                                 : timeField;
-                            final arrivalTime = viewModel.addTimeToString(timeField, 75);
+                                
+                            // Get ETA and calculate arrival time
+                            final eta = viewModel.getETA(scheduleId);
+                            final arrivalTime = viewModel.calculateArrivalTime(timeField, scheduleId);
                             
                             // Convert date to string.
                             final date = schedule['date'].toString();
@@ -221,12 +224,12 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                                                       fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
-                                                  const Text(
-                                                    "1h 15m",
-                                                    style: TextStyle(fontSize: 14),
+                                                  Text(
+                                                    "${eta}m",
+                                                    style: const TextStyle(fontSize: 14),
                                                   ),
                                                   Text(
-                                                    arrivalTime,
+                                                    arrivalTime.substring(0, 5),
                                                     style: const TextStyle(
                                                       fontSize: 18,
                                                       fontWeight: FontWeight.bold,

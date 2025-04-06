@@ -53,6 +53,18 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
               ),
               backgroundColor: Colors.white,
               elevation: 0,
+              actions: [
+                // Add refresh button
+                IconButton(
+                  icon: Icon(Icons.refresh, color: Colors.black),
+                  onPressed: () {
+                    viewModel.refreshLocation();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Refreshing location and ETA...'))
+                    );
+                  },
+                ),
+              ],
             ),
             body: viewModel.isLoading && !viewModel.hasData
                 ? const Center(child: CircularProgressIndicator())
@@ -115,12 +127,24 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                       "ETA",
                                       style: TextStyle(fontSize: 14, color: Colors.black54),
                                     ),
-                                    Text(
-                                      busLocation['eta'] ?? '--:--',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          busLocation['eta'] ?? '--:--',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        if (busLocation.containsKey('eta_minutes'))
+                                          Text(
+                                            " (${busLocation['eta_minutes']}m)",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -336,7 +360,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                     ),
                                   ),
                                   Text(
-                                    "${(busLocation['progress'] * 100).round()}% of journey completed",
+                                    "${((busLocation['progress'] ?? 0.0) * 100).round()}% of journey completed",
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.blue[700],
@@ -351,11 +375,11 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                     ],
                   ),
                 ),
-        );
-      },
-    ),
-  );
-}
+          );
+        },
+      ),
+    );
+  }
   
   Widget _buildMap(LiveLocationViewModel viewModel) {
     final currentLocation = viewModel.getCurrentLocation();
@@ -401,4 +425,3 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
     );
   }
 }
-

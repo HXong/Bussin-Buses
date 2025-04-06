@@ -263,6 +263,13 @@ class _HomeNavState extends State<HomeNav> {
                                     date = DateTime.parse(schedule.date);
                                   } catch (_) {}
                                   
+                                  // Get schedule ID from booking
+                                  final scheduleId = viewModel.getScheduleIdFromBooking(booking);
+                                  
+                                  // Get ETA for this schedule
+                                  final eta = viewModel.getETA(scheduleId);
+                                  final arrivalTime = viewModel.calculateArrivalTime(schedule.time, scheduleId);
+                                  
                                   return InkWell(
                                     onTap: () {
                                       if (widget.onUpcomingBookingTap != null) {
@@ -320,13 +327,13 @@ class _HomeNavState extends State<HomeNav> {
                                                         ),
                                                       ),
                                                       const SizedBox(width: 8),
-                                                      const Text(
-                                                        "1h 15m",
-                                                        style: TextStyle(fontSize: 12),
+                                                      Text(
+                                                        "${eta}m",
+                                                        style: const TextStyle(fontSize: 12),
                                                       ),
                                                       const SizedBox(width: 8),
                                                       Text(
-                                                        viewModel.addTimeToString(schedule.time, 75),
+                                                        arrivalTime.substring(0, 5),
                                                         style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight: FontWeight.bold,
