@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bussin_buses/models/Trips.dart';
+import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 
 class TripList extends StatelessWidget {
-  final List<Trip> trips; // Change the type of trips to List<Trip>
+  final List<Trip> trips;
   final String noTripsMessage;
   final void Function(Trip)? onTap;
   final void Function(Trip)? onLoadJourney;
@@ -17,6 +18,7 @@ class TripList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Directly use the trips passed into the constructor
     return trips.isEmpty
         ? Center(
       child: Text(
@@ -137,7 +139,8 @@ class TripList extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Text('Driver Name: ${trip.driverName}', // Accessing with dot notation
+                    Text('Driver Name: ${trip.driverName}',
+                        // Accessing with dot notation
                         style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w500)),
                   ],
@@ -156,7 +159,8 @@ class TripList extends StatelessWidget {
                         child: Row(
                           children: [
                             Icon(Icons.location_on, color: Colors.white),
-                            Text("Navigate", style: TextStyle(color: Colors.white)),
+                            Text("Navigate",
+                                style: TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),

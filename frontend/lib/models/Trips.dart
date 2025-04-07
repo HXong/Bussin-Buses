@@ -2,13 +2,13 @@ class Trip {
   final String scheduleId;
   final String driverName;
   final String date;
-  final String startTime;
-  final String endTime;
-  final String duration;
+  String startTime;
+  String endTime;
+  String duration;
   final String pickup;
   final String destination;
-  final String status;
-  final bool isJourneyStarted;
+  String status;
+  bool isJourneyStarted;
 
   Trip({
     required this.scheduleId,

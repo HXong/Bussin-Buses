@@ -44,8 +44,6 @@ class DriverService {
         Passenger(
           id: commuterId,
           name: commuterResponse['username'].toString(),
-          email: "",  // If email is available, fetch it
-          phone: "",  // If phone is available, fetch it
           seatNumber: seatResponse['seat_number'].toString(),
           isCheckedIn: checkInStatus,
         ),
@@ -78,6 +76,30 @@ class DriverService {
         .eq('schedule_id', trip.scheduleId);
   }
 
+  Future<String> fetchDriverName(String driverId) async {
+    final driverProfile = await _supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', driverId)
+        .single();
+
+    String driverName = driverProfile['username'];
+    return driverName;
+  }
+
+  Future<DateTime> fetchDateTime(String scheduleId) async {
+    final response = await _supabase
+        .from('schedules')
+        .select('date, time')
+        .eq('schedule_id', scheduleId)
+        .single();
+
+    String date = response['date'];
+    String time = response['time'];
+    DateTime combinedDateTime = DateTime.parse('$date $time');
+    return combinedDateTime;
+  }
+
   // Function to fetch trips based on the boolean condition (before or after today)
   Future<List<Trip>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
     var baseQuery = _supabase.from('schedules').select();
@@ -86,7 +108,7 @@ class DriverService {
       baseQuery = baseQuery.eq('driver_id', driverId);
     }
 
-    var orderedQuery = baseQuery.order('date', ascending: true);
+    var orderedQuery = baseQuery.order('date', ascending: true).order('time', ascending: true);
     final response = await orderedQuery;
 
     List<Trip> tripsWithLocations = [];
@@ -98,10 +120,10 @@ class DriverService {
       String timeStr = trip['time']; // HH:MM:SS
       int duration = trip['eta'] ?? 75;
       DateTime startDateTime = DateTime.parse('$dateStr $timeStr');
-      DateTime endStartDateTime = startDateTime.add(Duration(minutes: duration));
+      DateTime endDateTime = startDateTime.add(Duration(minutes: duration));
       String formattedDate = formatDate(dateStr);
-      String formattedEndTime = DateFormat('HH:mm').format(endStartDateTime);
-
+      String formattedEndTime = DateFormat('HH:mm').format(endDateTime);
+      //String driverName = await fetchDriverName(trip['driver_id']);
       String driverName = '';
       if (trip['driver_id'] != null) {
         final driverProfile = await _supabase
@@ -151,6 +173,15 @@ class DriverService {
     return tripsWithLocations;
   }
 
+  Future<int> getETA(String scheduleId) async {
+    final response = await _supabase
+        .from('schedules')
+        .select('eta')
+        .eq('schedule_id', scheduleId)
+        .single();
+    return response['eta'] ?? 75;
+  }
+
 // Helper function to fetch location name
   Future<String> getLocationName(int locationId) async {
     final response = await _supabase
@@ -186,7 +217,7 @@ class DriverService {
   }
 
   // Add a new journey to the database
-  Future<void> addJourney({
+  Future<String> addJourney({
     required int pickupId,
     required int destinationId,
     required String date,
@@ -208,12 +239,16 @@ class DriverService {
     }
 
     final scheduleId = response.first['schedule_id'];
+    print("ScheduleID: $scheduleId");
+    print("DriverId: $driverId");
     
     try {
       await _routeService.calculateETA(driverId, scheduleId.toString());
     } catch (e) {
       print("Error calling calculateETA: $e");
     }
+
+    return (scheduleId.toString());
   }
 
   Future<Map<String, dynamic>> fetchDriverProfile(String driverId) async {

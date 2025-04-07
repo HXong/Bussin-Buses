@@ -3,7 +3,7 @@ import 'package:bussin_buses/services/driver_service.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:intl/intl.dart';
 import '../models/Trips.dart';
 
 class TripViewModel extends ChangeNotifier {
@@ -14,6 +14,7 @@ class TripViewModel extends ChangeNotifier {
   List<Passenger> passengers = [];
   bool isLoading = false;
   bool isSubmitJourneyLoading = false;
+  bool hasFetchedAllTrips = false;
   Trip? currentTripDetails;
   String? pickedTime;
   String? selectedPickup;
@@ -28,6 +29,7 @@ class TripViewModel extends ChangeNotifier {
     fetchAllUpcomingTrips(timeNow);
     fetchPastTrips(timeNow);
   }
+
   Future<void> fetchUpcomingConfirmedTrips(DateTime targetDate) async {
     isLoading = true;
     notifyListeners();
@@ -45,12 +47,16 @@ class TripViewModel extends ChangeNotifier {
 
   Future<void> fetchAllUpcomingTrips(DateTime targetDate) async {
     isLoading = true;
+    hasFetchedAllTrips = false;
     notifyListeners();
 
     upcomingAllTrips = await _driverService.fetchTrips("", targetDate, false, false);
+
     isLoading = false;
+    hasFetchedAllTrips = true;
     notifyListeners();
   }
+
 
   Future<void> fetchPastTrips(DateTime targetDate) async {
     isLoading = true;
@@ -63,11 +69,14 @@ class TripViewModel extends ChangeNotifier {
 
   Future<void> deleteTrip(Trip trip) async {
     await _driverService.deleteTrip(trip);
-
-    // Remove the trip using the Trip object's scheduleId
+    trip.status = 'DELETED';
     upcomingConfirmedTrips.removeWhere((t) => t.scheduleId == trip.scheduleId);
+    int index = upcomingAllTrips.indexWhere((t) => t.scheduleId == trip.scheduleId);
+    if (index != -1) {
+      upcomingAllTrips[index].status = 'DELETED';
+    }
 
-    await fetchAllUpcomingTrips(timeNow);
+
     notifyListeners();
   }
 
@@ -105,9 +114,11 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
 
     final driverId = _supabase.auth.currentUser!.id;
+    final driverName = await _driverService.fetchDriverName(driverId);
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
-    final selectedDateTime = DateTime.parse("$date $time");
+    DateTime selectedDateTime = DateTime.parse("$date $time");
+    DateTime endDateTime = selectedDateTime.add(const Duration(minutes: 75));
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
     final formattedDate = await _driverService.formatDate(date);
     final theDaySchedules = existingTrips
@@ -125,7 +136,6 @@ class TripViewModel extends ChangeNotifier {
 
     for (var scheduleTime in theDaySchedules) {
       final existingScheduleDateTime = DateTime.parse("$date $scheduleTime");
-      //print("Existing time: $existingScheduleDateTime | Selected time: $selectedDateTime | Diff: ${(selectedDateTime.difference(existingScheduleDateTime).inHours).abs()} hours");
 
       if ((selectedDateTime.difference(existingScheduleDateTime).inHours).abs() < 5) {
         ScaffoldMessenger.of(context)
@@ -135,8 +145,9 @@ class TripViewModel extends ChangeNotifier {
         return;
       }
     }
+    print("Before adding new trip: ${upcomingConfirmedTrips.length}");
 
-    await _driverService.addJourney(
+    final scheduleId = await _driverService.addJourney(
       pickupId: pickupId,
       destinationId: destinationId,
       date: date,
@@ -144,19 +155,49 @@ class TripViewModel extends ChangeNotifier {
       driverId: driverId,
     );
 
+    int duration = await _driverService.getETA(scheduleId);
+    endDateTime = selectedDateTime.add(Duration(minutes: duration));
+    final updatedTrip = Trip(
+      scheduleId: scheduleId,
+      driverName: driverName,
+      date: formattedDate,
+      startTime: time.substring(0, 5),
+      endTime: DateFormat('HH:mm').format(endDateTime),
+      duration: "$duration mins",
+      pickup: selectedPickup!,
+      destination: selectedDestination!,
+      status: 'CONFIRMED',
+      isJourneyStarted: false,
+    );
+    upcomingConfirmedTrips.add(updatedTrip);
+    print("BEFORe: ${upcomingAllTrips.length}");
+    upcomingAllTrips.add(updatedTrip);
+    print("AFTER: ${upcomingAllTrips.length}");
+
+    // sorting the list
+    upcomingConfirmedTrips = await sortList(upcomingConfirmedTrips);
+    upcomingAllTrips = await sortList(upcomingAllTrips);
+
     isSubmitJourneyLoading = false;
     notifyListeners();
-
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
-
     dateController.clear();
     pickedTime = null;
     selectedPickup = null;
     selectedDestination = null;
-    await fetchUpcomingConfirmedTrips(timeNow);
-    await fetchAllUpcomingTrips(timeNow);
   }
+
+  Future<List<Trip>> sortList(List<Trip> trips) async {
+    List<MapEntry<Trip, DateTime>> tripDateTimePairs = [];
+    for (var trip in trips) {
+      DateTime tripDateTime = await _driverService.fetchDateTime(trip.scheduleId);
+      tripDateTimePairs.add(MapEntry(trip, tripDateTime));
+    }
+    tripDateTimePairs.sort((a, b) => a.value.compareTo(b.value));
+    return tripDateTimePairs.map((entry) => entry.key).toList();
+  }
+
 
   Future<void> fetchPassengerDetails(String scheduleId) async {
     isLoading = true;

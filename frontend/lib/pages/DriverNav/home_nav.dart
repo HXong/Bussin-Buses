@@ -1,4 +1,5 @@
 import 'package:bussin_buses/pages/DriverNav/trip_detail_screen.dart';
+import 'package:bussin_buses/pages/DriverNav/upcoming_trips.dart';
 import 'package:bussin_buses/viewmodels/driver_viewmodel.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class _HomeNavState extends State<HomeNav> {
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
-
+    print("HomeNav is being rebuilt!");
     return Scaffold(
       appBar: AppBar(
         title: const Text(
