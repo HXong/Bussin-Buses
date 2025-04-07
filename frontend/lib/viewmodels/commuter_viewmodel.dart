@@ -78,9 +78,18 @@ class CommuterViewModel extends ChangeNotifier {
     _etaCalculationInProgress.add(scheduleId);
     
     try {
-      final eta = await _commuterService.getScheduleETA(scheduleId);
-      scheduleETAs[scheduleId] = eta;
-      notifyListeners();
+      // First check if the ETA is in the shared cache
+      if (CommuterService.isSharedETAValid(scheduleId)) {
+        scheduleETAs[scheduleId] = CommuterService.getSharedETA(scheduleId);
+        notifyListeners();
+      } else {
+        // If not in shared cache, fetch from service
+        final eta = await _commuterService.getScheduleETA(scheduleId);
+        scheduleETAs[scheduleId] = eta;
+        // Update the shared cache
+        CommuterService.updateSharedETA(scheduleId, eta);
+        notifyListeners();
+      }
     } catch (e) {
       print('Error fetching ETA: $e');
     } finally {
@@ -260,12 +269,22 @@ class CommuterViewModel extends ChangeNotifier {
   
   // Get ETA for a specific schedule
   int getETA(int scheduleId) {
-    // If we don't have the ETA yet, trigger a fetch but return default value
-    if (!scheduleETAs.containsKey(scheduleId) && !_etaCalculationInProgress.contains(scheduleId)) {
-      fetchETA(scheduleId);
-      return 75; // Default while loading
+    // First check the shared cache
+    if (CommuterService.isSharedETAValid(scheduleId)) {
+      return CommuterService.getSharedETA(scheduleId);
     }
-    return scheduleETAs[scheduleId] ?? 75; // Default to 75 minutes if not found
+    
+    // Then check our local cache
+    if (scheduleETAs.containsKey(scheduleId)) {
+      return scheduleETAs[scheduleId]!;
+    }
+    
+    // If we don't have the ETA yet, trigger a fetch but return default value
+    if (!_etaCalculationInProgress.contains(scheduleId)) {
+      fetchETA(scheduleId);
+    }
+    
+    return 30; // Default to 30 minutes while loading
   }
   
   // Helper method to extract schedule ID from a booking
@@ -359,3 +378,4 @@ class CommuterViewModel extends ChangeNotifier {
     }
   }
 }
+

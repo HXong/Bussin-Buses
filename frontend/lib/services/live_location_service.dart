@@ -40,19 +40,25 @@ class LiveLocationService {
           .eq('driver_id', driverId)
           .maybeSingle();
       
-      // Get the ETA from the schedule or calculate it if needed
-      int eta = 30; // Default to 30 minutes instead of 75
-      
-      // Try to get a fresh ETA calculation
-      try {
-        await _commuterService.calculateETA(scheduleId);
-        eta = await _commuterService.getScheduleETA(scheduleId);
-      } catch (e) {
-        print('Error calculating ETA: $e');
-        
-        // If calculation fails, try to get the stored ETA
-        if (scheduleData['eta'] != null) {
-          eta = scheduleData['eta'];
+      // Get the ETA from the shared cache or calculate it if needed
+      int eta = 30; // Default to 30 minutes
+
+      // First check if we have a valid value in the shared cache
+      if (CommuterService.isSharedETAValid(scheduleId)) {
+        eta = CommuterService.getSharedETA(scheduleId);
+      } else {
+        // Try to get a fresh ETA calculation
+        try {
+          await _commuterService.calculateETA(scheduleId);
+          eta = await _commuterService.getScheduleETA(scheduleId);
+        } catch (e) {
+          print('Error calculating ETA: $e');
+          
+          // If calculation fails, try to get the stored ETA
+          if (scheduleData['eta'] != null) {
+            eta = scheduleData['eta'];
+            CommuterService.updateSharedETA(scheduleId, eta);
+          }
         }
       }
       
@@ -120,7 +126,7 @@ class LiveLocationService {
         'longitude': 103.8198,
         'last_update': DateTime.now().toIso8601String(),
         'bus_number': 'SMB123S',
-        'eta_minutes': 30, // Changed from 75 to 30
+        'eta_minutes': CommuterService.getSharedETA(0),
         'schedule_id': 0,
       };
     }
