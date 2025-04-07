@@ -125,20 +125,6 @@ class _AccountNavState extends State<AccountNav> {
                           () => _showChangePasswordDialog(context, viewModel),
                         ),
                         
-                        _buildAccountOption(
-                          context,
-                          'Past Trips',
-                          Icons.history,
-                          () => _navigateToPastTrips(context),
-                        ),
-                        
-                        _buildAccountOption(
-                          context,
-                          'Upcoming Trips',
-                          Icons.upcoming,
-                          () => _navigateToUpcomingTrips(context),
-                        ),
-                        
                         const SizedBox(height: 24),
                         
                         // Log out button
@@ -346,22 +332,6 @@ class _AccountNavState extends State<AccountNav> {
           ),
         ],
       ),
-    );
-  }
-  
-  void _navigateToPastTrips(BuildContext context) {
-    // Navigate to past trips screen
-    // This would be implemented in a real app
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Past Trips feature coming soon')),
-    );
-  }
-  
-  void _navigateToUpcomingTrips(BuildContext context) {
-    // Navigate to upcoming trips screen
-    // This would be implemented in a real app
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Upcoming Trips feature coming soon')),
     );
   }
 }

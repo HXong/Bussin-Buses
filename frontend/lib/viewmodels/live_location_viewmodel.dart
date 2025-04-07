@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/live_location_service.dart';
 import '../services/commuter_service.dart';
+import 'package:intl/intl.dart';
 
 class LiveLocationViewModel extends ChangeNotifier {
   final LiveLocationService _service;
@@ -48,7 +49,34 @@ class LiveLocationViewModel extends ChangeNotifier {
       _scheduleId = busLocation['schedule_id'];
     }
     
+    // Calculate arrival time based on current time + ETA
+    _updateArrivalTimeFromCurrentTime();
+    
     notifyListeners();
+  }
+  
+  // New method to update arrival time based on current time + ETA
+  void _updateArrivalTimeFromCurrentTime() {
+    if (busLocation.containsKey('eta_minutes')) {
+      final etaMinutes = busLocation['eta_minutes'] as int;
+      final now = DateTime.now();
+      final arrivalTime = now.add(Duration(minutes: etaMinutes));
+      
+      // Format as HH:mm
+      final formattedArrivalTime = DateFormat('HH:mm').format(arrivalTime);
+      
+      // Update the ETA time in the busLocation map
+      busLocation['eta'] = formattedArrivalTime;
+      
+      // Also update the stops if they exist
+      if (busLocation.containsKey('stops') && 
+          busLocation['stops'] is List && 
+          busLocation['stops'].length >= 2) {
+        
+        // Update the arrival time in the last stop
+        busLocation['stops'][busLocation['stops'].length - 1]['time'] = formattedArrivalTime;
+      }
+    }
   }
   
   Future<void> refreshLocation() async {
@@ -80,26 +108,8 @@ class LiveLocationViewModel extends ChangeNotifier {
       if (eta != 75) {
         busLocation['eta_minutes'] = eta;
         
-        // Update the ETA time display
-        if (busLocation.containsKey('stops') && 
-            busLocation['stops'] is List && 
-            busLocation['stops'].length >= 2 &&
-            busLocation.containsKey('progress')) {
-          
-          final startTime = busLocation['stops'][0]['time'];
-          final progress = busLocation['progress'] as double;
-          final remainingEta = (eta * (1 - progress)).round();
-          
-          // Update the ETA time
-          busLocation['eta'] = _addMinutesToTime(
-            DateTime.now().hour.toString().padLeft(2, '0') + ':' + 
-            DateTime.now().minute.toString().padLeft(2, '0'),
-            remainingEta
-          );
-          
-          // Update the arrival time in stops
-          busLocation['stops'][1]['time'] = _addMinutesToTime(startTime, eta);
-        }
+        // Update arrival time based on current time + ETA
+        _updateArrivalTimeFromCurrentTime();
         
         notifyListeners();
       }
