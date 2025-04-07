@@ -170,9 +170,7 @@ class TripViewModel extends ChangeNotifier {
       isJourneyStarted: false,
     );
     upcomingConfirmedTrips.add(updatedTrip);
-    print("BEFORe: ${upcomingAllTrips.length}");
     upcomingAllTrips.add(updatedTrip);
-    print("AFTER: ${upcomingAllTrips.length}");
 
     // sorting the list
     upcomingConfirmedTrips = await sortList(upcomingConfirmedTrips);

@@ -18,7 +18,6 @@ class _HomeNavState extends State<HomeNav> {
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
-    print("HomeNav is being rebuilt!");
     return Scaffold(
       appBar: AppBar(
         title: const Text(

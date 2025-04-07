@@ -239,8 +239,6 @@ class DriverService {
     }
 
     final scheduleId = response.first['schedule_id'];
-    print("ScheduleID: $scheduleId");
-    print("DriverId: $driverId");
     
     try {
       await _routeService.calculateETA(driverId, scheduleId.toString());

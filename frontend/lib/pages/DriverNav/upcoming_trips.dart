@@ -25,7 +25,6 @@ class _UpcomingTripsState extends State<UpcomingTrips> {
   @override
   Widget build(BuildContext context) {
     final tripViewModel = Provider.of<TripViewModel>(context);
-    print("UpcomingTrips is being rebuilt!");
 
     return Scaffold(
       appBar: AppBar(title: const Text('All Upcoming Trips')),
