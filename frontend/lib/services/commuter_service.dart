@@ -34,6 +34,28 @@ class CommuterService {
   final Map<int, int> _etaCache = {};
   final Map<int, DateTime> _etaCacheTimestamp = {};
   final Duration _etaCacheValidity = Duration(minutes: 5); // Cache valid for 5 minutes
+  
+  // Shared static ETA cache for use across ViewModels
+  static final Map<int, int> sharedEtaCache = {};
+  static final Map<int, DateTime> sharedEtaCacheTimestamp = {};
+  static final Duration sharedEtaCacheValidity = Duration(minutes: 5);
+  
+  // Static methods to access the shared ETA cache
+  static int getSharedETA(int scheduleId) {
+    return sharedEtaCache[scheduleId] ?? 30; // Default to 30 minutes if not found
+  }
+  
+  static void updateSharedETA(int scheduleId, int etaMinutes) {
+    sharedEtaCache[scheduleId] = etaMinutes;
+    sharedEtaCacheTimestamp[scheduleId] = DateTime.now();
+  }
+  
+  static bool isSharedETAValid(int scheduleId) {
+    final timestamp = sharedEtaCacheTimestamp[scheduleId];
+    if (timestamp == null) return false;
+    
+    return DateTime.now().difference(timestamp) < sharedEtaCacheValidity;
+  }
 
   Future<List<Booking>> fetchUpcomingBookings(String commuterId) async {
     final response = await _supabase
@@ -68,6 +90,9 @@ class CommuterService {
         if (scheduleId > 0) {
           _etaCache[scheduleId] = b['schedule_id']['eta'];
           _etaCacheTimestamp[scheduleId] = DateTime.now();
+          
+          // Update shared cache as well
+          updateSharedETA(scheduleId, b['schedule_id']['eta']);
         }
       }
       return Booking.fromMap(b);
@@ -99,6 +124,9 @@ class CommuterService {
     if (data != null && data['eta'] != null) {
       _etaCache[scheduleId] = data['eta'];
       _etaCacheTimestamp[scheduleId] = DateTime.now();
+      
+      // Update shared cache as well
+      updateSharedETA(scheduleId, data['eta']);
     }
     
     return data;
@@ -203,6 +231,9 @@ class CommuterService {
         if (schedule['schedule_id'] != null && schedule['eta'] != null) {
           _etaCache[schedule['schedule_id']] = schedule['eta'];
           _etaCacheTimestamp[schedule['schedule_id']] = DateTime.now();
+          
+          // Update shared cache as well
+          updateSharedETA(schedule['schedule_id'], schedule['eta']);
         }
       }
       
@@ -285,6 +316,9 @@ class CommuterService {
           if (jsonResponse.containsKey('eta')) {
             _etaCache[scheduleId] = jsonResponse['eta'];
             _etaCacheTimestamp[scheduleId] = DateTime.now();
+            
+            // Update shared cache as well
+            updateSharedETA(scheduleId, jsonResponse['eta']);
           }
         } catch (e) {
           print("Error parsing ETA response: $e");
@@ -297,12 +331,20 @@ class CommuterService {
   
   // Get the current ETA for a schedule with caching
   Future<int> getScheduleETA(int scheduleId) async {
-    // Check if we have a valid cached value
+    // First, check if we have a valid shared cached value
+    if (isSharedETAValid(scheduleId)) {
+      print("Using shared cached ETA for schedule $scheduleId: ${getSharedETA(scheduleId)} minutes");
+      return getSharedETA(scheduleId);
+    }
+    
+    // Otherwise, check local cache
     final cachedTimestamp = _etaCacheTimestamp[scheduleId];
     if (cachedTimestamp != null && 
         DateTime.now().difference(cachedTimestamp) < _etaCacheValidity &&
         _etaCache.containsKey(scheduleId)) {
-      print("Using cached ETA for schedule $scheduleId: ${_etaCache[scheduleId]} minutes");
+      // Update shared cache with local cache
+      updateSharedETA(scheduleId, _etaCache[scheduleId]!);
+      print("Using local cached ETA for schedule $scheduleId: ${_etaCache[scheduleId]} minutes");
       return _etaCache[scheduleId]!;
     }
     
@@ -314,9 +356,11 @@ class CommuterService {
           .maybeSingle();
       
       if (scheduleData != null && scheduleData['eta'] != null) {
-        // Cache the result
+        // Cache the result in both local and shared cache
         _etaCache[scheduleId] = scheduleData['eta'];
         _etaCacheTimestamp[scheduleId] = DateTime.now();
+        updateSharedETA(scheduleId, scheduleData['eta']);
+        
         print("Retrieved ETA from database for schedule $scheduleId: ${scheduleData['eta']} minutes");
         return scheduleData['eta'];
       } else {
@@ -333,22 +377,38 @@ class CommuterService {
               .maybeSingle();
               
           if (updatedData != null && updatedData['eta'] != null) {
-            // Cache the result
+            // Cache the result in both local and shared cache
             _etaCache[scheduleId] = updatedData['eta'];
             _etaCacheTimestamp[scheduleId] = DateTime.now();
+            updateSharedETA(scheduleId, updatedData['eta']);
+            
             print("Calculated new ETA for schedule $scheduleId: ${updatedData['eta']} minutes");
             return updatedData['eta'];
           }
         }
       }
       
-      // Return cached value or default
-      final eta = _etaCache[scheduleId] ?? 75;
+      // Return shared cache value, local cached value, or default
+      if (sharedEtaCache.containsKey(scheduleId)) {
+        return sharedEtaCache[scheduleId]!;
+      }
+      
+      final eta = _etaCache[scheduleId] ?? 30; // Default to 30 minutes
+      updateSharedETA(scheduleId, eta);
       print("Using fallback ETA for schedule $scheduleId: $eta minutes");
       return eta;
     } catch (e) {
       print("Error getting schedule ETA: $e");
-      return _etaCache[scheduleId] ?? 75; // Return cached or default ETA
+      
+      // Return shared cache value, local cached value, or default
+      if (sharedEtaCache.containsKey(scheduleId)) {
+        return sharedEtaCache[scheduleId]!;
+      }
+      
+      final eta = _etaCache[scheduleId] ?? 30; // Default to 30 minutes
+      updateSharedETA(scheduleId, eta);
+      return eta;
     }
   }
 }
+

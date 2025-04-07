@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/live_location_service.dart';
 import '../services/commuter_service.dart';
+import 'package:intl/intl.dart';
 
 class LiveLocationViewModel extends ChangeNotifier {
   final LiveLocationService _service;
@@ -48,11 +49,61 @@ class LiveLocationViewModel extends ChangeNotifier {
       _scheduleId = busLocation['schedule_id'];
     }
     
+    // Check the shared cache for updates
+    if (_scheduleId > 0 && CommuterService.isSharedETAValid(_scheduleId)) {
+      final sharedEta = CommuterService.getSharedETA(_scheduleId);
+      if (busLocation['eta_minutes'] != sharedEta) {
+        busLocation['eta_minutes'] = sharedEta;
+      }
+    }
+    
+    // Update times based on current time
+    _updateTimesWithCurrentTime();
+    
     notifyListeners();
+  }
+  
+  // New method to update all times based on current time
+  void _updateTimesWithCurrentTime() {
+    if (busLocation.containsKey('eta_minutes')) {
+      final etaMinutes = busLocation['eta_minutes'] as int;
+      final now = DateTime.now();
+      final currentTime = DateFormat('HH:mm').format(now);
+      final arrivalTime = now.add(Duration(minutes: etaMinutes));
+      final formattedArrivalTime = DateFormat('HH:mm').format(arrivalTime);
+      
+      // Update current time
+      busLocation['current_time'] = currentTime;
+      
+      // Update the ETA time
+      busLocation['eta'] = formattedArrivalTime;
+      
+      // Update the stops if they exist
+      if (busLocation.containsKey('stops') && 
+          busLocation['stops'] is List && 
+          busLocation['stops'].length >= 2) {
+        
+        // Update departure time (first stop) to current time
+        busLocation['stops'][0]['time'] = currentTime;
+        
+        // Update arrival time (last stop) to current time + ETA
+        busLocation['stops'][busLocation['stops'].length - 1]['time'] = formattedArrivalTime;
+      }
+    }
   }
   
   Future<void> refreshLocation() async {
     try {
+      // First check the shared cache for updates
+      if (_scheduleId > 0 && CommuterService.isSharedETAValid(_scheduleId)) {
+        final sharedEta = CommuterService.getSharedETA(_scheduleId);
+        if (busLocation['eta_minutes'] != sharedEta) {
+          busLocation['eta_minutes'] = sharedEta;
+          _updateTimesWithCurrentTime();
+          notifyListeners();
+        }
+      }
+      
       await _fetchLocationData();
       
       // Check if we should update the ETA
@@ -76,33 +127,13 @@ class LiveLocationViewModel extends ChangeNotifier {
       // Get the updated ETA
       final eta = await _commuterService.getScheduleETA(_scheduleId);
       
-      // Only update if we got a real value (not the default 75)
-      if (eta != 75) {
-        busLocation['eta_minutes'] = eta;
-        
-        // Update the ETA time display
-        if (busLocation.containsKey('stops') && 
-            busLocation['stops'] is List && 
-            busLocation['stops'].length >= 2 &&
-            busLocation.containsKey('progress')) {
-          
-          final startTime = busLocation['stops'][0]['time'];
-          final progress = busLocation['progress'] as double;
-          final remainingEta = (eta * (1 - progress)).round();
-          
-          // Update the ETA time
-          busLocation['eta'] = _addMinutesToTime(
-            DateTime.now().hour.toString().padLeft(2, '0') + ':' + 
-            DateTime.now().minute.toString().padLeft(2, '0'),
-            remainingEta
-          );
-          
-          // Update the arrival time in stops
-          busLocation['stops'][1]['time'] = _addMinutesToTime(startTime, eta);
-        }
-        
-        notifyListeners();
-      }
+      // Update the busLocation with the ETA
+      busLocation['eta_minutes'] = eta;
+      
+      // Update times based on current time
+      _updateTimesWithCurrentTime();
+      
+      notifyListeners();
     } catch (e) {
       print('Error updating ETA: $e');
     }

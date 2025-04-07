@@ -1,9 +1,11 @@
 // lib/pages/CommuterNav/upcoming_booking.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:bussin_buses/models/Booking.dart';
 import 'package:bussin_buses/pages/CommuterNav/booking_detail_screen.dart';
 import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
+import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -17,6 +19,7 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<CommuterViewModel>(context);
     final schedule = booking.schedule;
     final pickup = schedule?.pickup ?? 'N/A';
     final destination = schedule?.destination ?? 'N/A';
@@ -25,6 +28,19 @@ class BookingCard extends StatelessWidget {
     String departureTime = 'N/A';
     String arrivalTime = 'N/A';
     String scheduleDate = 'N/A';
+    
+    // Extract schedule ID from booking
+    final scheduleId = viewModel.getScheduleIdFromBooking(booking);
+    
+    // Get ETA for this schedule
+    final etaMinutes = viewModel.getETA(scheduleId);
+    
+    // Format ETA as hours and minutes
+    final etaHours = etaMinutes ~/ 60;
+    final etaRemainingMinutes = etaMinutes % 60;
+    final etaFormatted = etaHours > 0 
+        ? "${etaHours}h ${etaRemainingMinutes}m" 
+        : "${etaRemainingMinutes}m";
 
     if (schedule != null) {
       try {
@@ -35,7 +51,9 @@ class BookingCard extends StatelessWidget {
         final hour = int.tryParse(parts[0]) ?? 0;
         final minute = int.tryParse(parts[1]) ?? 0;
         final departureDateTime = DateTime(2025, 1, 20, hour, minute);
-        final arrivalDateTime = departureDateTime.add(const Duration(hours: 1, minutes: 15));
+        
+        // Calculate arrival time using the dynamic ETA
+        final arrivalDateTime = departureDateTime.add(Duration(minutes: etaMinutes));
 
         departureTime = DateFormat('HH:mm').format(departureDateTime);
         arrivalTime = DateFormat('HH:mm').format(arrivalDateTime);
@@ -77,9 +95,9 @@ class BookingCard extends StatelessWidget {
                   ),
                 ),
                 Column(
-                  children: const [
-                    Text("1h 15m", style: TextStyle(fontSize: 14, color: Colors.black54)),
-                    Icon(Icons.directions_bus, size: 20),
+                  children: [
+                    Text(etaFormatted, style: const TextStyle(fontSize: 14, color: Colors.black54)),
+                    const Icon(Icons.directions_bus, size: 20),
                   ],
                 ),
                 Expanded(
@@ -116,15 +134,11 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
                 Row(
-                  children: [
-                    const Icon(Icons.directions_bus, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      booking.schedule?.busPlate ?? 'Unknown',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.info_outline, size: 16, color: Colors.black54),
+                  children: const [
+                    Icon(Icons.directions_bus, size: 16),
+                    SizedBox(width: 4),
+                    Text("SMB123S", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    Icon(Icons.info_outline, size: 16, color: Colors.black54),
                   ],
                 ),
               ],
@@ -188,3 +202,4 @@ class BookingCard extends StatelessWidget {
     );
   }
 }
+
