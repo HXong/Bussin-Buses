@@ -102,6 +102,14 @@ class JourneyTrackingViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void reroute() async {
+    final rerouteData = await _routeService.getReroute(_supabase.auth.currentUser!.id);
+    polylineCoordinates.clear();
+    polylineCoordinates.addAll(rerouteData.decodedRoute);
+    estimatedArrivalTime = getFormattedTimeAfter(rerouteData.duration);
+    notifyListeners();
+  }
+
   String getFormattedTimeAfter(int duration) {
     final currentTime = DateTime.now();
     final eta =  currentTime.add(Duration(seconds: duration));

@@ -51,6 +51,11 @@ class _RideNavState extends State<RideNav> {
         );
         routeViewModel.clearMsg();
       }
+
+      if( tripViewModel.currentTripDetails?.status == "IN PROGRESS") {
+        routeViewModel.isStartJourney = true;
+        routeViewModel.reroute();
+      }
     });
 
     return Scaffold(
@@ -108,7 +113,7 @@ class _RideNavState extends State<RideNav> {
                               ),
                             ],
                           ),
-                          if (!routeViewModel.isStartJourney)
+                          if (!routeViewModel.isStartJourney && tripViewModel.currentTripDetails?.status == "CONFIRMED")
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
@@ -121,7 +126,7 @@ class _RideNavState extends State<RideNav> {
                               },
                               child: const Text("Start Journey"),
                             ),
-                          if (routeViewModel.isStartJourney)
+                          if ((routeViewModel.isStartJourney) || tripViewModel.currentTripDetails?.status == "IN PROGRESS")
                             ElevatedButton(
                               onPressed: () {
                                 String? scheduleId =
