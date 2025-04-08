@@ -117,7 +117,7 @@ class TripViewModel extends ChangeNotifier {
     final driverName = await _driverService.fetchDriverName(driverId);
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
-    DateTime selectedDateTime = DateTime.parse("$date $time");
+    DateTime selectedDateTime = DateTime.parse("$date $time").toUtc().add(Duration(hours: 8));
     DateTime endDateTime = selectedDateTime.add(const Duration(minutes: 75));
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
     final formattedDate = await _driverService.formatDate(date);
@@ -126,6 +126,7 @@ class TripViewModel extends ChangeNotifier {
         .map((trip) => trip.startTime)
         .toList();
 
+    print("isBefore ${selectedDateTime} < $timeNow, ${selectedDateTime.isBefore(timeNow)}");
     if (selectedDateTime.isBefore(timeNow)) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
