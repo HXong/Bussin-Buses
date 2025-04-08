@@ -111,9 +111,10 @@ class _ScheduleNavState extends State<ScheduleNav> {
                   ),
                   readOnly: true,
                   onTap: () async {
+                    DateTime currentUtcPlus8 = DateTime.now().toUtc().add(Duration(hours: 8));
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: currentUtcPlus8,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
                     );

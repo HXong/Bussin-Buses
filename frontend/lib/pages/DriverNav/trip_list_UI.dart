@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bussin_buses/models/Trips.dart';
 import 'package:bussin_buses/viewmodels/trip_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class TripList extends StatelessWidget {
   final List<Trip> trips;
@@ -18,6 +19,7 @@ class TripList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("TRIPLIST is rebuilding");
     // Directly use the trips passed into the constructor
     return trips.isEmpty
         ? Center(
@@ -59,6 +61,8 @@ class TripList extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color: trip.status == 'CANCELLED'
                             ? Colors.red
+                            : trip.status == 'IN PROGRESS'
+                            ? Colors.green
                             : Colors.blue,
                       ),
                     ),

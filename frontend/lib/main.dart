@@ -27,14 +27,16 @@ void main() async{
 
   final driverService = DriverService();
   runApp(
-    MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
-      ChangeNotifierProvider(create: (_) => DriverViewModel(driverService)),
-      ChangeNotifierProvider(create: (_) => JourneyTrackingViewModel(driverService, RouteService())),
-      ChangeNotifierProvider(create: (_) => TripViewModel(driverService)),
-      ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService())),
-    ],
-    child: const MyApp(),),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthViewModel(AuthService())),
+        ChangeNotifierProvider(create: (_) => DriverViewModel(driverService)),
+        ChangeNotifierProvider(create: (_) => JourneyTrackingViewModel(driverService, RouteService())),
+        ChangeNotifierProvider(create: (_) => TripViewModel(driverService)), // Ensure this is correct
+        ChangeNotifierProvider(create: (_) => CommuterViewModel(CommuterService())),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 

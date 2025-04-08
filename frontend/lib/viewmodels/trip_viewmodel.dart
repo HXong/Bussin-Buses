@@ -23,7 +23,6 @@ class TripViewModel extends ChangeNotifier {
   final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
   final TextEditingController dateController = TextEditingController();
 
-
   TripViewModel(this._driverService) {
     fetchUpcomingConfirmedTrips(timeNow);
     fetchAllUpcomingTrips(timeNow);
@@ -75,8 +74,6 @@ class TripViewModel extends ChangeNotifier {
     if (index != -1) {
       upcomingAllTrips[index].status = 'DELETED';
     }
-
-
     notifyListeners();
   }
 
@@ -117,7 +114,7 @@ class TripViewModel extends ChangeNotifier {
     final driverName = await _driverService.fetchDriverName(driverId);
     final pickupId = await _driverService.getLocationIdByName(selectedPickup!);
     final destinationId = await _driverService.getLocationIdByName(selectedDestination!);
-    DateTime selectedDateTime = DateTime.parse("$date $time").toUtc().add(Duration(hours: 8));
+    DateTime selectedDateTime = DateTime.parse("$date $time");
     DateTime endDateTime = selectedDateTime.add(const Duration(minutes: 75));
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
     final formattedDate = await _driverService.formatDate(date);
@@ -146,7 +143,6 @@ class TripViewModel extends ChangeNotifier {
         return;
       }
     }
-    print("Before adding new trip: ${upcomingConfirmedTrips.length}");
 
     final scheduleId = await _driverService.addJourney(
       pickupId: pickupId,

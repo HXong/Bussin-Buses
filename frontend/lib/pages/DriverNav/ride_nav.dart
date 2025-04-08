@@ -123,6 +123,9 @@ class _RideNavState extends State<RideNav> {
                                   authViewModel.user!.id,
                                   scheduleId.toString(),
                                 );
+                                tripViewModel.fetchUpcomingConfirmedTrips(
+                                    DateTime.now().toUtc().add(const Duration(hours: 8)),
+                                );
                               },
                               child: const Text("Start Journey"),
                             ),
@@ -138,7 +141,7 @@ class _RideNavState extends State<RideNav> {
                                     () {
                                       routeViewModel.reset();
                                       tripViewModel.reset();
-                                      tripViewModel.fetchUpcomingConfirmedTrips(DateTime.now());
+                                      tripViewModel.fetchUpcomingConfirmedTrips(DateTime.now().toUtc().add(const Duration(hours: 8)));
                                     }
                                 );
                               },

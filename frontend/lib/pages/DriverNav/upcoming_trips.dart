@@ -18,7 +18,7 @@ class _UpcomingTripsState extends State<UpcomingTrips> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       Provider.of<TripViewModel>(context, listen: false)
-          .fetchAllUpcomingTrips(DateTime.now());
+          .fetchAllUpcomingTrips(DateTime.now().toUtc().add(const Duration(hours: 8)));
       _isInitialized = true;
     }
   }

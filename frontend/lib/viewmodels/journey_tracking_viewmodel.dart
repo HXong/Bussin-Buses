@@ -1,6 +1,5 @@
-
 import 'dart:async';
-
+import 'package:provider/provider.dart';
 import 'package:bussin_buses/services/route_service.dart';
 import 'package:bussin_buses/services/supabase_client_service.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/RouteResponse.dart';
 import '../services/driver_service.dart';
+import '../viewmodels/trip_viewmodel.dart';
 
 class JourneyTrackingViewModel extends ChangeNotifier {
   final SupabaseClient _supabase = SupabaseClientService.client;
@@ -25,7 +25,6 @@ class JourneyTrackingViewModel extends ChangeNotifier {
   Timer? _locationUpdateTimer;
   bool isStartJourney = false;
   StreamSubscription<Map<String,dynamic>>? _subscription;
-
 
   JourneyTrackingViewModel(this._driverService, this._routeService);
 
@@ -67,11 +66,11 @@ class JourneyTrackingViewModel extends ChangeNotifier {
     polylineCoordinates = routeResponse.decodedRoute;
     estimatedArrivalTime = getFormattedTimeAfter(routeResponse.duration);
     isStartJourney = true;
+
     _driverService.subscribeToNotifications();
     _subscription ??= _driverService.updates.listen((data) => _handleNotification(data), onError: (e) {
         print("Stream error: $e");
       });
-    notifyListeners();
   }
 
   Future<void> stopJourney(String driverId, String scheduleId, VoidCallback? onSuccess) async {

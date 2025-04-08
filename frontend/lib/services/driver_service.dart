@@ -103,11 +103,9 @@ class DriverService {
   // Function to fetch trips based on the boolean condition (before or after today)
   Future<List<Trip>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
     var baseQuery = _supabase.from('schedules').select();
-
     if (driverId.isNotEmpty) {
       baseQuery = baseQuery.eq('driver_id', driverId);
     }
-
     var orderedQuery = baseQuery.order('date', ascending: true).order('time', ascending: true);
     final response = await orderedQuery;
 
@@ -123,17 +121,7 @@ class DriverService {
       DateTime endDateTime = startDateTime.add(Duration(minutes: duration));
       String formattedDate = formatDate(dateStr);
       String formattedEndTime = DateFormat('HH:mm').format(endDateTime);
-      //String driverName = await fetchDriverName(trip['driver_id']);
-      String driverName = '';
-      if (trip['driver_id'] != null) {
-        final driverProfile = await _supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', trip['driver_id'])
-            .single();
-
-        driverName = driverProfile['username'] ?? 'Unknown Driver';
-      }
+      String driverName = await fetchDriverName(trip['driver_id']);
 
       // Determine if we should include the trip based on the boolean condition
       bool includeTrip = false;
@@ -143,9 +131,12 @@ class DriverService {
       if (fetchBefore && startDateTime.isBefore(targetDate)) {
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "COMPLETED";
-      } else if (!fetchBefore && startDateTime.isAfter(targetDate)) {
+      } else if (!fetchBefore && startDateTime.isAfter(targetDate)){
         includeTrip = true;
         status = trip['delete_schedule'] ? "CANCELLED" : "CONFIRMED";
+      }
+      if (driverId.isNotEmpty && !fetchBefore && startDateTime.isBefore(targetDate) && isJourneyStarted && !trip['delete_schedule']) {
+        includeTrip = true;
       }
       if (isJourneyStarted) {
         status = "IN PROGRESS";
