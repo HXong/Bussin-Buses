@@ -124,7 +124,7 @@ class _RideNavState extends State<RideNav> {
                                   scheduleId.toString(),
                                 );
                                 tripViewModel.fetchUpcomingConfirmedTrips(
-                                    DateTime.now().toUtc().add(const Duration(hours: g8)),
+                                    DateTime.now().toUtc().add(const Duration(hours: 8)),
                                 );
                               },
                               child: const Text("Start Journey"),
