@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import '../../viewmodels/live_location_viewmodel.dart';
 import '../../services/live_location_service.dart';
 
@@ -324,50 +323,6 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                   ),
                                 ),
                               ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Journey status
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue[200]!),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.blue[700],
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Bus is ${busLocation['current_location']}",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue[700],
-                                    ),
-                                  ),
-                                  Text(
-                                    "${((busLocation['progress'] ?? 0.0) * 100).round()}% of journey completed",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.blue[700],
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ],
                         ),
