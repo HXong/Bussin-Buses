@@ -1,7 +1,7 @@
 # 2006-SCSD-C2
 
 ## Set Up
-Required: Android Studio, Flutter SDK, NodeJS Supabase keys, HERE API key <br>
+Required: Android Studio, Flutter SDK, NodeJS, Supabase keys, HERE API key <br>
 Flutter SDK: <br>
 On Mac, download using Homebrew with `brew install --cask flutter` <br>
 On Windows, download here: https://docs.flutter.dev/get-started/install
