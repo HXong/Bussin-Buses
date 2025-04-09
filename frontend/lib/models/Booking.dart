@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'Schedule.dart';
 
+/// Booking model is used for Commuter's bus bookings
 class Booking {
   final int id;
   final String? seatNumber;

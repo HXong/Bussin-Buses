@@ -25,7 +25,7 @@ class _PersonalInformationState extends State<PersonalInformation> {
   Widget build(BuildContext context) {
     final driverViewModel = Provider.of<DriverViewModel>(context);
 
-    // Ensure the driver profile is fetched before displaying
+    /// Ensure the driver profile is fetched before displaying
     if (driverViewModel.isLoading) {
       return Scaffold(
         appBar: AppBar(title: Text("Personal Information")),
@@ -33,7 +33,7 @@ class _PersonalInformationState extends State<PersonalInformation> {
       );
     }
 
-    // If the profile data is null, display an error message
+    /// If the profile data is null, display an error message
     if (driverViewModel.driverProfile == null) {
       return Scaffold(
         body: Center(child: Text('No profile information available.')),

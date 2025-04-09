@@ -45,6 +45,7 @@ class _RideNavState extends State<RideNav> {
     final routeViewModel = Provider.of<JourneyTrackingViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      /// display notification that we get from Supabase notifications table
       if (routeViewModel.message != "") {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(routeViewModel.message)),
@@ -52,6 +53,7 @@ class _RideNavState extends State<RideNav> {
         routeViewModel.clearMsg();
       }
 
+      /// if trip is in progress, set isStartJourney is true in the JourneyTrackingViewModel and get a reroute from our routing server
       if( tripViewModel.currentTripDetails?.status == "IN PROGRESS") {
         routeViewModel.isStartJourney = true;
         routeViewModel.reroute();

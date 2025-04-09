@@ -1,3 +1,5 @@
+
+/// Trip model is to store details about the driver's journeys
 class Trip {
   final String scheduleId;
   final String driverName;

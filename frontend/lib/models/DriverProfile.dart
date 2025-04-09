@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+/// DriverProfile model is used for driver to store their profile details
 class DriverProfile {
   final String username;
   final String userType;

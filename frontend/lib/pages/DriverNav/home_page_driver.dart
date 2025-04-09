@@ -26,13 +26,14 @@ class _HomePageDriverState extends State<HomePageDriver> {
 
   @override
   Widget build(BuildContext context) {
+    /// get reference to the providers injected into the app
     final authViewModel = Provider.of<AuthViewModel>(context);
     final driverViewModel = Provider.of<DriverViewModel>(context);
     final tripViewModel = Provider.of<TripViewModel>(context);
     final journeyTrackingViewModel = Provider.of<JourneyTrackingViewModel>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // show error snackbar
+      /// show error snackbar
       if (authViewModel.errorMsg != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authViewModel.errorMsg!)),

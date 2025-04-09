@@ -8,7 +8,12 @@ const String _basePath = "api";
 const String _startJoruneyPath = "$_basePath/start-journey";
 const String _stopJourneyPath = "$_basePath/stop-journey";
 const String _getReroutePath = "$_basePath/get-reroute";
+const String _calculateEtaPath = "$_basePath/get-eta";
+
+/// RouteService contains all API calls to our custom routing server on NodeJS/Express
 class RouteService {
+
+  /// calls the /start-journey endpoint to signal driver is on trip and get route data to display
   Future<RouteResponse> startJourney(String driverId, String scheduleId) async {
     Uri url = Uri.http(_host, _startJoruneyPath);
     var response = await http.post(url,
@@ -23,6 +28,7 @@ class RouteService {
     return RouteResponse.fromJson(jsonResponse);
   }
 
+  /// calls /stop-journey endpoint to signal driver is not on trip anymore
   Future<int> stopJourney(String driverId, String scheduleId) async {
     Uri url = Uri.http(_host, _stopJourneyPath);
     var response = await http.post(url, headers: {"Content-Type": "application/json"},
@@ -44,8 +50,8 @@ class RouteService {
     }
   }
 
+  /// calls /get-eta endpoint to update the ETA
   Future<void> calculateETA(String driverId, String scheduleId) async {
-    const String _calculateEtaPath = "$_basePath/get-eta";
     Uri url = Uri.http(_host, _calculateEtaPath);
 
     try {
@@ -68,6 +74,7 @@ class RouteService {
     }
   }
 
+  /// calls /get-reroute endpoint to get new polyline and ETA
   Future<RouteResponse> getReroute(String driverId) async {
     Uri uri = Uri.http(_host, _getReroutePath, {
       "driverId": driverId

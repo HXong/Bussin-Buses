@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService{
   final SupabaseClient _supabase = SupabaseClientService.client;
 
+  /// Signs into Supabase Auth
   Future<AuthResponse> signIn(String email, String password) async {
     return await _supabase.auth.signInWithPassword(
       email: email,
@@ -11,6 +12,7 @@ class AuthService{
     );
   }
 
+  /// Signs up on Supabase Auth and Creates new entry in profiles table
   Future<AuthResponse> signUp(String email, String password, String username, String userType) async {
     final AuthResponse response = await _supabase.auth.signUp(
       email: email,
@@ -26,15 +28,18 @@ class AuthService{
     return response;
   }
 
+  /// signs out of Supabase Auth
   Future<void> signOut() async {
     await _supabase.auth.signOut();
   }
 
+  /// get the current user signed into Supabase Auth
   User? getCurrentUser() {
     final session = _supabase.auth.currentSession;
     return session?.user;
   }
 
+  /// find out whether user is commuter or driver
   Future<String?> getUserType(String userId) async {
     try {
       final response = await _supabase

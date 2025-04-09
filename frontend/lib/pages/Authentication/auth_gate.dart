@@ -18,6 +18,8 @@ class AuthGate extends StatelessWidget {
       );
     }
 
+    /// load correct client based on whether userType is commuter/driver.
+    /// Otherwise show the login page
     if (authViewModel.user != null) {
       if (authViewModel.userType == 'commuter') {
         return HomePageCommuter();

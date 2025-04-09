@@ -6,6 +6,7 @@ import 'package:bussin_buses/services/route_service.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// DriverService fetches all the data needed by driver from Supabase
 class DriverService {
   final SupabaseClient _supabase = SupabaseClientService.client;
   List<Map<String, dynamic>> passengerDetails = [];
@@ -14,7 +15,7 @@ class DriverService {
   Stream<Map<String, dynamic>> get updates => _notificationController.stream.asBroadcastStream();
   final RouteService _routeService = RouteService();
 
-  //Function to fetch passenger details for corresponding schedule
+  // Function to fetch passenger details for corresponding schedule
   Future<List<Passenger>> fetchPassengerDetails(String scheduleId) async {
     List<Passenger> passengers = [];
 
@@ -56,6 +57,7 @@ class DriverService {
     return passengers;
   }
 
+  /// Check whether journey started by checking the journey table on Supabase
   Future<bool> checkJourneyStarted(int scheduleId) async {
     final journeyStartedResponse = await _supabase
       .from('journey')
@@ -68,7 +70,9 @@ class DriverService {
     return journeyStartedResponse['journey_started'] as bool;
   }
 
-  //Function to delete a schedule
+  /// Soft deletes a schedule on Supabase.
+  /// Changes the delete_schedule boolean to true.
+  /// Entry not hard deleted so we can have a history
   Future<void> deleteTrip(Trip trip) async {
     await _supabase
         .from('schedules')
@@ -76,6 +80,7 @@ class DriverService {
         .eq('schedule_id', trip.scheduleId);
   }
 
+  /// get driver's name from Supabase profiles table
   Future<String> fetchDriverName(String driverId) async {
     final driverProfile = await _supabase
         .from('profiles')
@@ -87,6 +92,7 @@ class DriverService {
     return driverName;
   }
 
+  /// fetches the date and time of the schedules in Supabase schedules table
   Future<DateTime> fetchDateTime(String scheduleId) async {
     final response = await _supabase
         .from('schedules')
@@ -100,7 +106,7 @@ class DriverService {
     return combinedDateTime;
   }
 
-  // Function to fetch trips based on the boolean condition (before or after today)
+  /// Function to fetch trips based on the boolean condition (before or after today)
   Future<List<Trip>> fetchTrips(String driverId, DateTime targetDate, bool fetchBefore, bool onlyConfirmed) async {
     var baseQuery = _supabase.from('schedules').select();
     if (driverId.isNotEmpty) {
@@ -164,6 +170,7 @@ class DriverService {
     return tripsWithLocations;
   }
 
+  /// gets the ETA stored in the schedules table on Supabase
   Future<int> getETA(String scheduleId) async {
     final response = await _supabase
         .from('schedules')
@@ -173,7 +180,7 @@ class DriverService {
     return response['eta'] ?? 75;
   }
 
-// Helper function to fetch location name
+  /// Helper function to fetch location name
   Future<String> getLocationName(int locationId) async {
     final response = await _supabase
         .from('location')
@@ -189,6 +196,7 @@ class DriverService {
     return DateFormat('dd MMM').format(date).toUpperCase();
   }
 
+  /// get location names from location table on Supabase
   Future<List<String>> fetchLocations() async {
     try {
       final response = await _supabase.from('location').select('location_name');
@@ -198,6 +206,7 @@ class DriverService {
     }
   }
 
+  /// get locationId given the location name
   Future<int> getLocationIdByName(String locationName) async {
     final response = await _supabase
         .from('location')
@@ -207,7 +216,7 @@ class DriverService {
     return response['location_id'];
   }
 
-  // Add a new journey to the database
+  /// Add a new journey to the database
   Future<String> addJourney({
     required int pickupId,
     required int destinationId,
@@ -240,6 +249,7 @@ class DriverService {
     return (scheduleId.toString());
   }
 
+  /// fetches from profiles table in Supabase
   Future<Map<String, dynamic>> fetchDriverProfile(String driverId) async {
     try {
       final driverProfile = await _supabase
@@ -255,14 +265,7 @@ class DriverService {
     }
   }
 
-  Future<void> storeFeedback(String feedback, String userId) async {
-    try {
-      await _supabase.from('feedback').insert({'feedback': feedback, 'user_id': userId});
-    } catch (e) {
-      throw Exception("Error submitting feedback: $e");
-    }
-  }
-
+  /// updates the driver's location on Supabase so that backend can pull
   Future<void> updateDriverLocation(String driverId, double lat, double lng) async {
     final res = await _supabase.from("driver_location")
         .upsert({
@@ -274,6 +277,7 @@ class DriverService {
 
   }
 
+  /// starts subscribing to changes to the notifications table on Supabase
   void subscribeToNotifications() {
     if (_notificationChannel != null) return;
 
@@ -291,6 +295,7 @@ class DriverService {
     _notificationChannel?.subscribe();
   }
 
+  /// stops subscribing to notifications table on Supabase
   void unsubscribeToNotifications() {
     if (_notificationChannel != null) {
       _supabase.removeChannel(_notificationChannel!);

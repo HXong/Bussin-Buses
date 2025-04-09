@@ -14,8 +14,9 @@ class _ScheduleNavState extends State<ScheduleNav> {
   @override
   void initState() {
     super.initState();
-    // Call loadLocations when the widget is initialized
+    /// get reference to the providers injected into the app
     final routeViewModel = Provider.of<JourneyTrackingViewModel>(context, listen: false);
+    /// Call loadLocations when the widget is initialized
     routeViewModel.loadLocations();
   }
 

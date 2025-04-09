@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
+/// RouteResponse model is the model the backend response when we do routing
 class RouteResponse {
   final int duration;
   final String polyline;

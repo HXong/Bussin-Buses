@@ -13,6 +13,7 @@ class PastTrips extends StatefulWidget {
 class _PastTripsState extends State<PastTrips> {
   @override
   Widget build(BuildContext context) {
+    /// get reference to the providers injected into the app
     final tripViewModel = Provider.of<TripViewModel>(context);
 
     return Scaffold(

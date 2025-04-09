@@ -1,4 +1,3 @@
-// lib/viewmodels/account_viewmodel.dart
 import 'package:flutter/material.dart';
 import '../services/account_service.dart';
 import '../services/auth_service.dart';

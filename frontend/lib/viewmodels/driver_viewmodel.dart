@@ -5,6 +5,7 @@ import '../services/driver_service.dart';
 import '../services/supabase_client_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// DriverViewModel stores data about the driver, including personal information, and the current page they are on in the UI
 class DriverViewModel extends ChangeNotifier {
   final DriverService _driverService;
   final SupabaseClient _supabase = SupabaseClientService.client;
@@ -22,6 +23,7 @@ class DriverViewModel extends ChangeNotifier {
     fetchPersonalInformation();
   }
 
+  /// gets data from profile table and displays on screen
   Future<void> fetchPersonalInformation() async {
     isLoading = true;
     notifyListeners();
@@ -44,19 +46,8 @@ class DriverViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> submitFeedback(BuildContext context) async{
-      final feedback = feedbackController.text;
 
-      if (feedback.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please enter feedback.")));
-        return;
-      }
-      final driverId = _supabase.auth.currentUser!.id;
-      await _driverService.storeFeedback(feedback, driverId);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Feedback submitted successfully!")));
-      feedbackController.clear();
-  }
-
+  /// to navigate to correct screen on driver UI
   void setPageIndex(int newIndex) {
     selectedIndex = newIndex;
     notifyListeners();

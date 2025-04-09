@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/Trips.dart';
 
+/// Handles Create,Read,Update,Delete operations for the trips that the driver manages
 class TripViewModel extends ChangeNotifier {
   final SupabaseClient _supabase = SupabaseClientService.client;
   List<Trip> upcomingConfirmedTrips = [];

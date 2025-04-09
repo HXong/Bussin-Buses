@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AccountService {
   final SupabaseClient _supabase = SupabaseClientService.client;
 
-  // Get user profile information
+  /// Get user profile information
   Future<Map<String, dynamic>> getUserProfile() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
@@ -27,7 +27,7 @@ class AccountService {
     }
   }
   
-  // Update user profile
+  /// Update user profile
   Future<bool> updateUserProfile({
     required String fullName,
     required String phone,
@@ -54,7 +54,7 @@ class AccountService {
     }
   }
   
-  // Change password
+  /// Change password
   Future<bool> changePassword(String newPassword) async {
     try {
       await _supabase.auth.updateUser(
@@ -65,27 +65,6 @@ class AccountService {
       return true;
     } catch (e) {
       print('Error changing password: $e');
-      return false;
-    }
-  }
-  
-  // Submit feedback
-  Future<bool> submitFeedback(String feedback) async {
-    try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-      
-      await _supabase.from('feedback').insert({
-        'user_id': userId,
-        'feedback': feedback,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-      
-      return true;
-    } catch (e) {
-      print('Error submitting feedback: $e');
       return false;
     }
   }

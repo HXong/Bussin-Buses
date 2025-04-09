@@ -21,6 +21,8 @@ class AuthViewModel extends ChangeNotifier {
   String? get successMsg => _successMsg;
   bool get isLoading => _isLoading;
 
+  /// Subscribes to database changes
+  /// When _userType is commuter/driver, auth_gate.dart will load the commuter/driver page
   void _listenToAuthChanges() {
     supabaseClient.auth.onAuthStateChange.listen((event) async {
       _user = _authService.getCurrentUser();
@@ -33,6 +35,7 @@ class AuthViewModel extends ChangeNotifier {
     });
   }
 
+  /// Signs into Supabase Auth
   Future<void> signIn(String email, String password) async {
     _isLoading = true;
     notifyListeners();
@@ -47,6 +50,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Creates new account on Supabase Auth + creates a new entry on the Profile table in Sthe database
   Future<void> signUp(String email, String password, String username, String userType) async {
     _isLoading = true;
     _errorMsg = null;
@@ -64,6 +68,7 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Signs out of Supabaase Auth
   Future<void> signOut() async {
     _isLoading = true;
     notifyListeners();

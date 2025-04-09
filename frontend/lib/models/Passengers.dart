@@ -1,3 +1,4 @@
+/// Passenger model is used to store data about passengers in a particular driver's journey
 class Passenger {
   final String id;
   final String name;

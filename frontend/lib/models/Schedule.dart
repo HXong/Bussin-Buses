@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+/// Schedule model is to store the details of a driver's journey when the commuter is searching
 class Schedule {
   final String pickup;
   final String destination;
