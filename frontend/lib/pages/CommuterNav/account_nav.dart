@@ -5,6 +5,7 @@ import '../../services/account_service.dart';
 import '../../services/auth_service.dart';
 import '../../viewmodels/account_viewmodel.dart';
 
+/// Account management screen with profile information and settings
 class AccountNav extends StatefulWidget {
   const AccountNav({Key? key}) : super(key: key);
 
@@ -27,7 +28,7 @@ class _AccountNavState extends State<AccountNav> {
       value: _viewModel,
       child: Consumer<AccountViewModel>(
         builder: (context, viewModel, _) {
-          // Show snackbar for messages
+          /// Shows snackbar for error and success messages after the frame is built
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (viewModel.errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -130,6 +131,7 @@ class _AccountNavState extends State<AccountNav> {
                         // Log out button
                         ElevatedButton(
                           onPressed: () async {
+                            /// Shows confirmation dialog before logging out
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -177,6 +179,7 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
   
+  /// Builds an account option item with icon and title
   Widget _buildAccountOption(
     BuildContext context,
     String title,
@@ -214,6 +217,7 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
   
+  /// Shows dialog to edit personal information
   void _showPersonalInfoDialog(BuildContext context, AccountViewModel viewModel) {
     final nameController = TextEditingController(text: viewModel.fullName);
     final phoneController = TextEditingController(text: viewModel.phone);
@@ -265,6 +269,7 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
   
+  /// Shows dialog to change password
   void _showChangePasswordDialog(BuildContext context, AccountViewModel viewModel) {
     final currentPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
@@ -312,6 +317,7 @@ class _AccountNavState extends State<AccountNav> {
           ),
           TextButton(
             onPressed: () async {
+              /// Validates that passwords match before submitting
               if (newPasswordController.text != confirmPasswordController.text) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Passwords do not match')),
@@ -335,4 +341,3 @@ class _AccountNavState extends State<AccountNav> {
     );
   }
 }
-

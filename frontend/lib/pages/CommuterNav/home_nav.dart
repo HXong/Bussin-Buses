@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 import '../../models/Booking.dart';
 
+/// Home screen with search form and upcoming bookings
 class HomeNav extends StatefulWidget {
   final void Function(int)? onScheduleSelected;
   final void Function(String, String, String, String)? onSearchSubmitted;
@@ -31,11 +32,14 @@ class _HomeNavState extends State<HomeNav> {
     _initializeData();
   }
   
+  /// Initializes data by calling the view model
   Future<void> _initializeData() async {
     final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
     await viewModel.initializeHomeNav();
   }
 
+  /// Handles find bus button press
+  /// Calls the onSearchSubmitted callback with search parameters
   void _findBus() {
     if (widget.onSearchSubmitted != null) {
       final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
@@ -62,6 +66,7 @@ class _HomeNavState extends State<HomeNav> {
             children: [
               // Welcome message
               Text(
+                /// Conditionally adds username to welcome message if available
                 "Welcome Back${viewModel.username != null ? '\n${viewModel.username}' : ''}",
                 style: const TextStyle(
                   fontSize: 28,
@@ -164,6 +169,7 @@ class _HomeNavState extends State<HomeNav> {
                               ),
                               child: Center(
                                 child: Text(
+                                  /// Shows formatted date if selected, otherwise shows "Date"
                                   viewModel.selectedDate.isEmpty 
                                       ? "Date" 
                                       : DateFormat('dd MMM yyyy').format(DateTime.parse(viewModel.selectedDate)),
@@ -187,6 +193,7 @@ class _HomeNavState extends State<HomeNav> {
                               ),
                               child: Center(
                                 child: Text(
+                                  /// Shows selected time if available, otherwise shows "Time"
                                   viewModel.selectedTime.isEmpty ? "Time" : viewModel.selectedTime,
                                   style: const TextStyle(fontSize: 14),
                                 ),
@@ -243,6 +250,7 @@ class _HomeNavState extends State<HomeNav> {
                     ),
                     const SizedBox(height: 16),
                     
+                    /// Conditionally shows loading indicator, empty message, or bookings list
                     viewModel.isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : viewModel.bookings.isEmpty
@@ -255,6 +263,7 @@ class _HomeNavState extends State<HomeNav> {
                             : Column(
                                 children: viewModel.bookings.take(3).map((booking) {
                                   final schedule = booking.schedule;
+                                  /// Skip if schedule is null
                                   if (schedule == null) return const SizedBox.shrink();
                                   
                                   // Parse date
@@ -291,6 +300,7 @@ class _HomeNavState extends State<HomeNav> {
                                             child: Column(
                                               children: [
                                                 Text(
+                                                  /// Shows day number if date is valid, otherwise shows placeholder
                                                   date != null ? date.day.toString() : "--",
                                                   style: const TextStyle(
                                                     fontSize: 18,
@@ -298,6 +308,7 @@ class _HomeNavState extends State<HomeNav> {
                                                   ),
                                                 ),
                                                 Text(
+                                                  /// Shows month abbreviation if date is valid, otherwise shows placeholder
                                                   date != null 
                                                       ? DateFormat('MMM').format(date).toUpperCase() 
                                                       : "---",

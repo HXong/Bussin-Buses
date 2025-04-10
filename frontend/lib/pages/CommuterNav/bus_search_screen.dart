@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 import './bus_results_screen.dart';
 
+/// Screen for searching bus schedules with form inputs
 class BusSearchScreen extends StatefulWidget {
   final String pickup;
   final String destination;
@@ -34,12 +35,14 @@ class _BusSearchScreenState extends State<BusSearchScreen> {
   @override
   void initState() {
     super.initState();
+    /// Initialize form fields with values passed from parent
     pickupController.text = widget.pickup;
     destinationController.text = widget.destination;
     selectedDate = widget.date;
     selectedTime = widget.time;
   }
   
+  /// Shows date picker and updates selected date
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -55,6 +58,7 @@ class _BusSearchScreenState extends State<BusSearchScreen> {
     }
   }
 
+  /// Shows time picker and updates selected time
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -68,8 +72,8 @@ class _BusSearchScreenState extends State<BusSearchScreen> {
     }
   }
   
+  /// Navigates to results screen with search parameters
   void _searchBuses() {
-    // Navigate to results screen with the search parameters
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -209,6 +213,7 @@ class _BusSearchScreenState extends State<BusSearchScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
+                            /// Shows formatted date if selected, otherwise shows placeholder
                             selectedDate.isEmpty 
                                 ? "Select Date" 
                                 : DateFormat('dd MMM yyyy').format(DateTime.parse(selectedDate)),
@@ -242,6 +247,7 @@ class _BusSearchScreenState extends State<BusSearchScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
+                            /// Shows selected time if available, otherwise shows placeholder
                             selectedTime.isEmpty ? "Select Time" : selectedTime,
                           ),
                         ),
