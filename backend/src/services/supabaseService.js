@@ -81,6 +81,11 @@ async function getLocationCoordinates(location_id){
     return { locationData: data, locationError: null };
 }
 
+/**
+ * @description get the driver location from the supabase
+ * @param {String} driver_id 
+ * @returns driver location and error
+ */
 async function getDriverLocation(driver_id){
     const { data, error } = await supabase
         .from('driver_location')

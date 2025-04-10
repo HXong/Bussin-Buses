@@ -1,3 +1,8 @@
+/**
+ * @description This function returns the current date and time in Singapore timezone formatted as "DD/MM/YYYY HH:MM:SS AM/PM"
+ * @example getSGTime()
+ * @returns {String} sgTime - formatted date and time in Singapore timezone
+ */
 function getSGTime(){
     const options = {
         year: 'numeric',

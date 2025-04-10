@@ -4,6 +4,13 @@ const { decodeRoute, getRoutesNearCamera, getNearestRoutePoint } = require('./ro
 const { loadActiveDrivers } = require('../model/driverStore');
 const { getSGTime } = require('../utils/timeUtils');
 
+/**
+ * @description Get the current location of a driver.
+ * This function fetches the driver's location from the database.
+ * @route GET /api/get-driver-location/:driverId
+ * @param {String} driverId 
+ * @returns {Object} driverLocation
+ */
 async function getDriverLocation(driverId) {
     try {
         const response = await axios.get(`http://localhost:3000/api/get-driver-location/${driverId}`);
@@ -14,6 +21,13 @@ async function getDriverLocation(driverId) {
     }
 }
 
+/**
+ * @description Get the affected drivers based on camera data.
+ * This function checks if the driver's route is near the camera location and if the driver is on the route towards the camera.
+ * If so, it adds the driver to the affected drivers list.
+ * @param {List<Object>} cameraData 
+ * @returns {List<Object>} affectedDrivers
+ */
 async function getAffectedDrivers(cameraData) {
     const activeDrivers = loadActiveDrivers();
     let affectedDrivers = [];
@@ -38,6 +52,16 @@ async function getAffectedDrivers(cameraData) {
     return affectedDrivers;
 }
 
+/**
+ * @description send a notification to the affected drivers.
+ * This function sends a notification to the affected drivers using the axios library.
+ * It is then updated on the notification table in the supabase.
+ * Frontend supscribe to this table and listen for changes.
+ * @route POST /api/notify-driver
+ * @param {List<Object>} affectedDrivers 
+ * @param {String} cameraId 
+ * @returns {Promise<void>} - Sends a notification to the affected drivers
+ */
 async function sendNotification(affectedDrivers, cameraId) {
     const now = getSGTime();
 

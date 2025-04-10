@@ -7,6 +7,13 @@ if (!fs.existsSync(IMAGES_DIR)) {
     fs.mkdirSync(IMAGES_DIR, { recursive: true });
 }
 
+/**
+ * @description Save camera data to a JSON file.
+ * This function retrieves existing data from the file, updates it with new camera data,
+ * and saves it back to the file.
+ * It also ensures that the directory for the images exists.
+ * @param {object} cameras 
+ */
 function saveCameraData(cameras) {
     let existingData = [];
 
@@ -33,6 +40,13 @@ function saveCameraData(cameras) {
     console.log(`Traffic camera data updated with ${updatedData.length} entries.`);
 }
 
+/**
+ * @description Download an image from a URL and save it to the local filesystem.
+ * The image is saved in the IMAGES_DIR directory with the specified filename.
+ * @param {String} url 
+ * @param {String} filename 
+ * @returns {Promise<String>} - The path to the downloaded image file
+ */
 async function downloadImage(url, filename) {
     const axios = require('axios');
     try {

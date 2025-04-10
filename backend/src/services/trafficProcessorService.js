@@ -17,6 +17,13 @@ if (!fs.existsSync(HIGH_CONGESTION_DIR)) {
     fs.mkdirSync(HIGH_CONGESTION_DIR);
 }
 
+/**
+ * @description Count cars in an image using a Python script.
+ * This function spawns a Python process to run the script and returns the result.
+ * @param {String} imagePath 
+ * @returns {Promise<Object>} - The result from the Python script
+ * @throws {Error} - Throws an error if the Python script fails or if JSON parsing fails.
+ */
 async function countCars(imagePath){ 
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn(PYTHON_PATH, ['src/scripts/count_cars.py', imagePath]);
@@ -78,6 +85,11 @@ async function countCars(imagePath){
     });
 }
 
+/**
+ * @description Analyze traffic images in the specified directory.
+ * @returns {boolean} - Returns true if the analysis was successful, false otherwise.
+ * @throws {Error} - Throws an error if the analysis fails or if no images are found.
+ */
 async function analyzeTraffic() {
 
     const files = fs.readdirSync(IMAGES_DIR).filter(file => file.endsWith(".jpg"));
@@ -115,6 +127,13 @@ async function analyzeTraffic() {
     return true;
 }
 
+/**
+ * @description Manually trigger congestion for a specific camera. Used only for testing purposes.
+ * This function simulates high congestion and sends notifications to affected drivers.
+ * @param {String} cameraId 
+ * @returns {Promise<void>} - Returns a promise that resolves when the process is complete.
+ * @throws {Error} - Throws an error if the congestion data is not found or if the notification process fails.
+ */
 async function triggerManualCongestion(cameraId) {
     console.log("Manually triggering high congestion...");
     const result = { congestion_level: 'high' };
@@ -142,6 +161,14 @@ async function triggerManualCongestion(cameraId) {
     updateCongestionData(congestionData, cameraId, result.congestion_level);
 }
 
+/**
+ * @description Update congestion data for a specific camera.
+ * @param {List<Object>} data 
+ * @param {String} cameraId 
+ * @param {String} congestionLevel 
+ * @returns {void} - Returns nothing.
+ * @throws {Error} - Throws an error if the camera ID is not found in the data.
+ */
 function updateCongestionData(data, cameraId, congestionLevel) {
     const timestamp = getSGTime();
     const entry = data.find(cam => cam.id === cameraId);

@@ -1,6 +1,12 @@
 const { getDriverLocation } = require('../services/supabaseService');
 const { updateActiveDriverLocation } = require('../services/activeDriverService');
 
+/**
+ * @description retrieve driver location from the database and update active driver location
+ * Get driver location by driverId
+ * @param {String} driverId 
+ * @returns {Object} driverLocation
+ */
 exports.getDriverLocation = async (req, res) => {
     const { driverId } = req.params;
 
