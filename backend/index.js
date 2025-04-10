@@ -1,3 +1,7 @@
+/**
+ * This is the entry point of the backend application.
+ * It sets up the Express server and configures the API routes.
+ */
 const express = require('express');
 const app = express();
 const router = require('./src/routes/index');

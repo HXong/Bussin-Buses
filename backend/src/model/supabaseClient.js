@@ -1,3 +1,8 @@
+/**
+ * Supabase client configuration
+ * This file is responsible for creating a Supabase client instance using the provided URL and API key.
+ */
+
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '../../.env' });
 

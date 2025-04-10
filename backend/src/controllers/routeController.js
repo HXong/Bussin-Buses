@@ -2,6 +2,15 @@ const routeService = require('../services/routeService');
 const { getDriverLocation, getStartJourneyDriver, getLocationCoordinates, updateScheduleETA } = require('../services/supabaseService');
 const { findActiveDriver, updateActiveDriverRoute } = require('../services/activeDriverService');
 
+/**
+ * @description Get the rerouted path for a driver.
+ * Call this API once the frontend receives a notification
+ * that there is congestion ahead on the driver's route
+ * from the notification table (flutter subscribe to this table).
+ * sends optimised route to the driver, from the current location to the destination.
+ * @param {String} driverId
+ * @returns duration, polyline, decodedRoute
+ */
 exports.getReroute = async (req, res) => {
     try {
         const { driverId } = req.query;
@@ -51,6 +60,14 @@ exports.getReroute = async (req, res) => {
     }
 };
 
+/**
+ * @description Get the ETA for a driver.
+ * Gets the driver's pickup and destination locations from schedule table.
+ * Updates the schedule table with the ETA.
+ * @param {String} driver_id
+ * @param {String} schedule_id
+ * @returns success message
+ */
 exports.getETA = async (req, res) => {
     try{
         const { driver_id, schedule_id } = req.body;

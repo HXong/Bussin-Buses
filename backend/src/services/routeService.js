@@ -6,7 +6,15 @@ require('dotenv').config();
 
 const HERE_API = process.env.HERE_API_KEY;
 
-//fetching optimised routes from API call
+/**
+ * @description Fetches an optimized route from HERE API.
+ * The route avoids congestion areas if specified.
+ * @param {Array} origin 
+ * @param {Array} destination 
+ * @param {boolean} avoidCongestion 
+ * @returns {Promise<Object>} - Route object containing polyline and duration
+ * @throws {Error} - Throws an error if the route cannot be fetched or decoded.
+ */
 async function getOptimisedRoute(origin, destination, avoidCongestion = true) {
     let avoidAreasQuery = "";
 
