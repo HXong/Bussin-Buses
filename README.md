@@ -23,3 +23,4 @@ Open /frontend in Android Studio
 - run `npm i`
 - clone .env.empty into a file called `.env` and fill in API key details (HERE API: https://www.here.com/platform)
 - run `npm start` to start the backend
+- run `npm run start:scheduler` to run the fetch and analyse of traffic images (every 3 minutes).
