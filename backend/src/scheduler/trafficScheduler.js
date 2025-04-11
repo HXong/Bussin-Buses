@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const processTrafficData = require("../services/LTADataPollerService");
+const { processTrafficData } = require("../services/LTADataPollerService");
 const { analyzeTraffic } = require("../services/trafficProcessorService");
 
 let isRunning = false
