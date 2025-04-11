@@ -24,12 +24,14 @@ class TripViewModel extends ChangeNotifier {
   final timeNow = DateTime.now().toUtc().add(const Duration(hours: 8));
   final TextEditingController dateController = TextEditingController();
 
+  /// Constructor: automatically fetches all trip data when ViewModel is initialized
   TripViewModel(this._driverService) {
     fetchUpcomingConfirmedTrips(timeNow);
     fetchAllUpcomingTrips(timeNow);
     fetchPastTrips(timeNow);
   }
 
+  /// Fetch confirmed trips for the current driver that are in the future
   Future<void> fetchUpcomingConfirmedTrips(DateTime targetDate) async {
     isLoading = true;
     notifyListeners();
@@ -45,6 +47,7 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Fetch all upcoming trips for all drivers (used for prevent trips conflict)
   Future<void> fetchAllUpcomingTrips(DateTime targetDate) async {
     isLoading = true;
     hasFetchedAllTrips = false;
@@ -57,7 +60,7 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
+  /// Fetch past trips for the current driver
   Future<void> fetchPastTrips(DateTime targetDate) async {
     isLoading = true;
     notifyListeners();
@@ -67,6 +70,7 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Deletes a trip and updates trip lists accordingly
   Future<void> deleteTrip(Trip trip) async {
     await _driverService.deleteTrip(trip);
     trip.status = 'DELETED';
@@ -78,31 +82,37 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update pickup point selection
   void updateSelectedPickup(String? newPickup) {
     selectedPickup = newPickup;
     notifyListeners();
   }
 
+  /// Update destination point selection
   void updateSelectedDestination(String? newDestination) {
     selectedDestination = newDestination;
     notifyListeners();
   }
 
+  /// Update time selection
   void updateSelectedTime(String? newTime){
     pickedTime = newTime;
     notifyListeners();
   }
 
+  /// Submits a new journey by validating input
   Future<void> submitJourney(BuildContext context) async {
     final date = dateController.text;
     final time = pickedTime;
 
+    // Check for empty fields
     if (selectedPickup == null || selectedDestination == null || date.isEmpty || time == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Please fill in all fields.")));
       return;
     }
 
+    // Prevent pickup and destination from being the same
     if (selectedPickup == selectedDestination) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Pickup and destination points have to be different.")));
@@ -119,12 +129,14 @@ class TripViewModel extends ChangeNotifier {
     DateTime endDateTime = selectedDateTime.add(const Duration(minutes: 75));
     final existingTrips = await _driverService.fetchTrips(driverId, DateTime.parse(date), false, true); //Fetch future trips
     final formattedDate = await _driverService.formatDate(date);
+
+    // Extract times of trips on the same day
     final theDaySchedules = existingTrips
         .where((trip) => trip.date == formattedDate)
         .map((trip) => trip.startTime)
         .toList();
 
-    print("isBefore ${selectedDateTime} < $timeNow, ${selectedDateTime.isBefore(timeNow)}");
+    // Check if scheduled time is in the past
     if (selectedDateTime.isBefore(timeNow)) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("The schedule must be in the future.")));
@@ -133,9 +145,9 @@ class TripViewModel extends ChangeNotifier {
       return;
     }
 
+    // Check for 5-hour gap between trips on the same day
     for (var scheduleTime in theDaySchedules) {
       final existingScheduleDateTime = DateTime.parse("$date $scheduleTime");
-
       if ((selectedDateTime.difference(existingScheduleDateTime).inHours).abs() < 5) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("You must have at least 5 hours between trips.")));
@@ -145,6 +157,7 @@ class TripViewModel extends ChangeNotifier {
       }
     }
 
+    // Call _driverService to add new trip to Supabase
     final scheduleId = await _driverService.addJourney(
       pickupId: pickupId,
       destinationId: destinationId,
@@ -153,6 +166,7 @@ class TripViewModel extends ChangeNotifier {
       driverId: driverId,
     );
 
+    // Get ETA and update trip info
     int duration = await _driverService.getETA(scheduleId);
     endDateTime = selectedDateTime.add(Duration(minutes: duration));
     final updatedTrip = Trip(
@@ -170,7 +184,7 @@ class TripViewModel extends ChangeNotifier {
     upcomingConfirmedTrips.add(updatedTrip);
     upcomingAllTrips.add(updatedTrip);
 
-    // sorting the list
+    // Add and sort the updated trips
     upcomingConfirmedTrips = await sortList(upcomingConfirmedTrips);
     upcomingAllTrips = await sortList(upcomingAllTrips);
 
@@ -178,12 +192,15 @@ class TripViewModel extends ChangeNotifier {
     notifyListeners();
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text("Journey added successfully!")));
+
+    // Reset fields
     dateController.clear();
     pickedTime = null;
     selectedPickup = null;
     selectedDestination = null;
   }
 
+  /// Helper function to sort trips based on their start date & time
   Future<List<Trip>> sortList(List<Trip> trips) async {
     List<MapEntry<Trip, DateTime>> tripDateTimePairs = [];
     for (var trip in trips) {
@@ -194,7 +211,7 @@ class TripViewModel extends ChangeNotifier {
     return tripDateTimePairs.map((entry) => entry.key).toList();
   }
 
-
+  /// Fetch passengers registered for a specific trip
   Future<void> fetchPassengerDetails(String scheduleId) async {
     isLoading = true;
     notifyListeners();
@@ -213,6 +230,4 @@ class TripViewModel extends ChangeNotifier {
     currentTripDetails = null;
     notifyListeners();
   }
-
-
 }

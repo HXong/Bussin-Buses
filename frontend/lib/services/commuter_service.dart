@@ -4,11 +4,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/Booking.dart';
 
-// Simple API debouncer to prevent rapid successive calls
+/// Simple API debouncer to prevent rapid successive calls
 class ApiDebouncer {
   static final Map<String, DateTime> _lastCallTime = {};
   static final Duration _minInterval = Duration(seconds: 10);
   
+  /// Checks if enough time has passed since the last API call with this key
+  /// Returns true if the call should proceed, false if it should be skipped
   static bool shouldProceed(String key) {
     final now = DateTime.now();
     final lastTime = _lastCallTime[key];
@@ -22,6 +24,7 @@ class ApiDebouncer {
   }
 }
 
+/// Service for handling commuter-related API calls and data management
 class CommuterService {
   final SupabaseClient _supabase = SupabaseClientService.client;
   
@@ -30,26 +33,29 @@ class CommuterService {
   static const String _basePath = "api";
   static const String _calculateEtaPath = "$_basePath/get-eta";
   
-  // Cache for ETAs to reduce API calls
+  /// Cache for ETAs to reduce API calls
   final Map<int, int> _etaCache = {};
   final Map<int, DateTime> _etaCacheTimestamp = {};
   final Duration _etaCacheValidity = Duration(minutes: 5); // Cache valid for 5 minutes
   
-  // Shared static ETA cache for use across ViewModels
+  /// Shared static ETA cache for use across ViewModels
   static final Map<int, int> sharedEtaCache = {};
   static final Map<int, DateTime> sharedEtaCacheTimestamp = {};
   static final Duration sharedEtaCacheValidity = Duration(minutes: 5);
   
-  // Static methods to access the shared ETA cache
+  /// Gets an ETA from the shared cache
+  /// Returns default value of 30 minutes if not found
   static int getSharedETA(int scheduleId) {
     return sharedEtaCache[scheduleId] ?? 30; // Default to 30 minutes if not found
   }
   
+  /// Updates the shared ETA cache with a new value
   static void updateSharedETA(int scheduleId, int etaMinutes) {
     sharedEtaCache[scheduleId] = etaMinutes;
     sharedEtaCacheTimestamp[scheduleId] = DateTime.now();
   }
   
+  /// Checks if a shared ETA cache entry is still valid
   static bool isSharedETAValid(int scheduleId) {
     final timestamp = sharedEtaCacheTimestamp[scheduleId];
     if (timestamp == null) return false;
@@ -57,6 +63,8 @@ class CommuterService {
     return DateTime.now().difference(timestamp) < sharedEtaCacheValidity;
   }
 
+  /// Fetches upcoming bookings for a commuter
+  /// Filters out past bookings and caches ETAs
   Future<List<Booking>> fetchUpcomingBookings(String commuterId) async {
     final response = await _supabase
         .from('bookings')
@@ -66,7 +74,7 @@ class CommuterService {
     final List data = response as List;
     final now = DateTime.now();
 
-    // Process bookings and cache ETAs
+    /// Process bookings and cache ETAs
     final bookings = data.where((bookingMap) {
       final schedule = bookingMap['schedule_id'];
       final dateStr = schedule?['date'];
@@ -75,6 +83,7 @@ class CommuterService {
       if (dateStr == null || timeStr == null || !timeStr.contains(':')) return false;
 
       try {
+        /// Parse date and time to check if booking is in the future
         final date = DateTime.parse(dateStr);
         final parts = timeStr.split(':');
         final departure = DateTime(date.year, date.month, date.day, int.parse(parts[0]), int.parse(parts[1]));
@@ -83,7 +92,7 @@ class CommuterService {
         return false;
       }
     }).map((b) {
-      // Cache ETA if available
+      /// Cache ETA if available
       if (b['schedule_id'] != null && b['schedule_id']['eta'] != null) {
         final scheduleId = b['schedule_id']['schedule_id'] ?? 
                           int.tryParse(b['schedule_id'].toString().split('_').last) ?? 0;
@@ -91,7 +100,7 @@ class CommuterService {
           _etaCache[scheduleId] = b['schedule_id']['eta'];
           _etaCacheTimestamp[scheduleId] = DateTime.now();
           
-          // Update shared cache as well
+          /// Update shared cache as well
           updateSharedETA(scheduleId, b['schedule_id']['eta']);
         }
       }
@@ -101,10 +110,12 @@ class CommuterService {
     return bookings;
   }
 
+  /// Cancels a booking by ID
   Future<void> cancelBooking(int bookingId) async {
     await _supabase.from('bookings').delete().eq('booking_id', bookingId);
   }
 
+  /// Marks a booking as checked in
   Future<void> checkInBooking(dynamic bookingId) async {
     await _supabase
         .from('bookings')
@@ -113,6 +124,8 @@ class CommuterService {
         .select();
   }
 
+  /// Fetches details for a specific schedule
+  /// Caches ETA if available
   Future<Map<String, dynamic>?> fetchScheduleDetails(int scheduleId) async {
     final data = await _supabase
         .from('schedules')
@@ -120,18 +133,19 @@ class CommuterService {
         .eq('schedule_id', scheduleId)
         .maybeSingle();
     
-    // Cache ETA if available
+    /// Cache ETA if available
     if (data != null && data['eta'] != null) {
       _etaCache[scheduleId] = data['eta'];
       _etaCacheTimestamp[scheduleId] = DateTime.now();
       
-      // Update shared cache as well
+      /// Update shared cache as well
       updateSharedETA(scheduleId, data['eta']);
     }
     
     return data;
   }
 
+  /// Fetches booked seat numbers for a schedule
   Future<List<String>> fetchBookedSeatNumbers(int scheduleId) async {
     final seatIds = await _supabase
         .from('bookings')
@@ -153,6 +167,8 @@ class CommuterService {
     return booked;
   }
 
+  /// Confirms a seat booking for a schedule
+  /// Throws exception if seat is already booked or not found
   Future<bool> confirmSeatBooking({
     required String commuterId,
     required int scheduleId,
@@ -175,6 +191,7 @@ class CommuterService {
       throw Exception("Seat not found");
     }
 
+    /// Check if seat is already booked for this schedule
     final alreadyBooked = await _supabase
         .from('bookings')
         .select('seat_id')
@@ -187,6 +204,7 @@ class CommuterService {
       throw Exception("Seat already booked");
     }
 
+    /// Create the booking
     await _supabase.from('bookings').insert({
       'commuter_id': commuterId,
       'schedule_id': scheduleId,
@@ -198,10 +216,12 @@ class CommuterService {
     return true;
   }
 
+  /// Gets the current commuter ID from auth
   String? getCommuterId() {
     return _supabase.auth.currentUser?.id;
   }
 
+  /// Fetches location names and IDs
   Future<Map<int, String>> fetchLocationNames() async {
     try {
       final response = await _supabase
@@ -219,6 +239,8 @@ class CommuterService {
     }
   }
 
+  /// Fetches all schedules with ETAs
+  /// Caches ETAs from the response
   Future<List<Map<String, dynamic>>> fetchAllSchedules() async {
     try {
       final response = await _supabase
@@ -226,13 +248,13 @@ class CommuterService {
           .select('*, eta')
           .order('time');
       
-      // Cache ETAs from the response
+      /// Cache ETAs from the response
       for (var schedule in response) {
         if (schedule['schedule_id'] != null && schedule['eta'] != null) {
           _etaCache[schedule['schedule_id']] = schedule['eta'];
           _etaCacheTimestamp[schedule['schedule_id']] = DateTime.now();
           
-          // Update shared cache as well
+          /// Update shared cache as well
           updateSharedETA(schedule['schedule_id'], schedule['eta']);
         }
       }
@@ -244,7 +266,7 @@ class CommuterService {
     }
   }
 
-  // New methods for HomeNav
+  /// Fetches username for a user ID
   Future<String?> fetchUsername(String userId) async {
     try {
       final userData = await _supabase
@@ -260,6 +282,7 @@ class CommuterService {
     }
   }
 
+  /// Adds minutes to a time string and returns the new time
   String addTimeToString(String timeStr, int minutes) {
     final parts = timeStr.split(':');
     final hour = int.parse(parts[0]);
@@ -271,15 +294,16 @@ class CommuterService {
     return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
   }
   
-  // New method to calculate ETA with debouncing and error handling
+  /// Calculates ETA for a schedule by calling the API
+  /// Uses debouncing to prevent too many API calls
   Future<void> calculateETA(int scheduleId) async {
-    // Skip if we called this API recently for this schedule
+    /// Skip if we called this API recently for this schedule
     if (!ApiDebouncer.shouldProceed('eta_$scheduleId')) {
       print("Skipping ETA calculation - called too recently");
       return;
     }
     
-    // First get the driver_id for this schedule
+    /// First get the driver_id for this schedule
     final scheduleData = await _supabase
         .from('schedules')
         .select('driver_id')
@@ -310,14 +334,14 @@ class CommuterService {
       } else {
         print("ETA calculated and stored successfully.");
         
-        // Try to parse the response to get the actual ETA
+        /// Try to parse the response to get the actual ETA
         try {
           final jsonResponse = jsonDecode(response.body);
           if (jsonResponse.containsKey('eta')) {
             _etaCache[scheduleId] = jsonResponse['eta'];
             _etaCacheTimestamp[scheduleId] = DateTime.now();
             
-            // Update shared cache as well
+            /// Update shared cache as well
             updateSharedETA(scheduleId, jsonResponse['eta']);
           }
         } catch (e) {
@@ -329,20 +353,22 @@ class CommuterService {
     }
   }
   
-  // Get the current ETA for a schedule with caching
+  /// Gets the current ETA for a schedule with caching
+  /// Checks shared cache, local cache, and database
+  /// Calculates a new ETA if needed
   Future<int> getScheduleETA(int scheduleId) async {
-    // First, check if we have a valid shared cached value
+    /// First, check if we have a valid shared cached value
     if (isSharedETAValid(scheduleId)) {
       print("Using shared cached ETA for schedule $scheduleId: ${getSharedETA(scheduleId)} minutes");
       return getSharedETA(scheduleId);
     }
     
-    // Otherwise, check local cache
+    /// Otherwise, check local cache
     final cachedTimestamp = _etaCacheTimestamp[scheduleId];
     if (cachedTimestamp != null && 
         DateTime.now().difference(cachedTimestamp) < _etaCacheValidity &&
         _etaCache.containsKey(scheduleId)) {
-      // Update shared cache with local cache
+      /// Update shared cache with local cache
       updateSharedETA(scheduleId, _etaCache[scheduleId]!);
       print("Using local cached ETA for schedule $scheduleId: ${_etaCache[scheduleId]} minutes");
       return _etaCache[scheduleId]!;
@@ -356,7 +382,7 @@ class CommuterService {
           .maybeSingle();
       
       if (scheduleData != null && scheduleData['eta'] != null) {
-        // Cache the result in both local and shared cache
+        /// Cache the result in both local and shared cache
         _etaCache[scheduleId] = scheduleData['eta'];
         _etaCacheTimestamp[scheduleId] = DateTime.now();
         updateSharedETA(scheduleId, scheduleData['eta']);
@@ -364,12 +390,12 @@ class CommuterService {
         print("Retrieved ETA from database for schedule $scheduleId: ${scheduleData['eta']} minutes");
         return scheduleData['eta'];
       } else {
-        // Only calculate if we don't have a cached value
+        /// Only calculate if we don't have a cached value
         if (!_etaCache.containsKey(scheduleId)) {
           print("No ETA found, attempting to calculate for schedule $scheduleId");
           await calculateETA(scheduleId);
           
-          // Try to get the updated ETA
+          /// Try to get the updated ETA
           final updatedData = await _supabase
               .from('schedules')
               .select('eta')
@@ -377,7 +403,7 @@ class CommuterService {
               .maybeSingle();
               
           if (updatedData != null && updatedData['eta'] != null) {
-            // Cache the result in both local and shared cache
+            /// Cache the result in both local and shared cache
             _etaCache[scheduleId] = updatedData['eta'];
             _etaCacheTimestamp[scheduleId] = DateTime.now();
             updateSharedETA(scheduleId, updatedData['eta']);
@@ -388,7 +414,7 @@ class CommuterService {
         }
       }
       
-      // Return shared cache value, local cached value, or default
+      /// Return shared cache value, local cached value, or default
       if (sharedEtaCache.containsKey(scheduleId)) {
         return sharedEtaCache[scheduleId]!;
       }
@@ -400,7 +426,7 @@ class CommuterService {
     } catch (e) {
       print("Error getting schedule ETA: $e");
       
-      // Return shared cache value, local cached value, or default
+      /// Return shared cache value, local cached value, or default
       if (sharedEtaCache.containsKey(scheduleId)) {
         return sharedEtaCache[scheduleId]!;
       }
@@ -411,4 +437,3 @@ class CommuterService {
     }
   }
 }
-

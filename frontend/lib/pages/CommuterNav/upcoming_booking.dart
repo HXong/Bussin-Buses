@@ -7,6 +7,8 @@ import 'package:bussin_buses/pages/CommuterNav/booking_detail_screen.dart';
 import 'package:bussin_buses/pages/CommuterNav/ticket_nav.dart';
 import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 
+/// Widget that displays a single booking as a card
+/// Shows route information, times, seat number, and action buttons
 class BookingCard extends StatelessWidget {
   final Booking booking;
   final Function(int)? onViewLiveLocation;
@@ -29,19 +31,22 @@ class BookingCard extends StatelessWidget {
     String arrivalTime = 'N/A';
     String scheduleDate = 'N/A';
     
-    // Extract schedule ID from booking
+    /// Extract schedule ID from booking
     final scheduleId = viewModel.getScheduleIdFromBooking(booking);
     
-    // Get ETA for this schedule
+    /// Get ETA for this schedule
     final etaMinutes = viewModel.getETA(scheduleId);
     
-    // Format ETA as hours and minutes
+    /// Format ETA as hours and minutes
+    /// If ETA is more than an hour, show hours and minutes
+    /// Otherwise just show minutes
     final etaHours = etaMinutes ~/ 60;
     final etaRemainingMinutes = etaMinutes % 60;
     final etaFormatted = etaHours > 0 
         ? "${etaHours}h ${etaRemainingMinutes}m" 
         : "${etaRemainingMinutes}m";
 
+    /// Parse and format schedule date and times if schedule exists
     if (schedule != null) {
       try {
         final parsedDate = DateTime.parse(schedule.date);
@@ -52,7 +57,7 @@ class BookingCard extends StatelessWidget {
         final minute = int.tryParse(parts[1]) ?? 0;
         final departureDateTime = DateTime(2025, 1, 20, hour, minute);
         
-        // Calculate arrival time using the dynamic ETA
+        /// Calculate arrival time using the dynamic ETA
         final arrivalDateTime = departureDateTime.add(Duration(minutes: etaMinutes));
 
         departureTime = DateFormat('HH:mm').format(departureDateTime);
@@ -144,6 +149,9 @@ class BookingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            /// Show different UI based on check-in status
+            /// If checked in, show "Checked In" text and "Live Location" button
+            /// If not checked in, show "Details" button to navigate to booking details
             booking.isCheckedIn
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -176,6 +184,7 @@ class BookingCard extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
+                          /// Navigate to booking details and refresh bookings if result is true
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -202,4 +211,3 @@ class BookingCard extends StatelessWidget {
     );
   }
 }
-

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 
+/// Screen that displays all upcoming bookings
 class TicketNav extends StatefulWidget {
   final Function(int)? onBookingSelected;
   
@@ -20,11 +21,13 @@ class TicketNavState extends State<TicketNav> {
     _loadData();
   }
   
+  /// Loads user ID and fetches ETAs for all bookings
   Future<void> _loadData() async {
     final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
     await viewModel.obtainId();
     
-    // Ensure ETAs are loaded for all bookings
+    /// Ensure ETAs are loaded for all bookings
+    /// Iterates through each booking to fetch its ETA
     for (var booking in viewModel.bookings) {
       final scheduleId = viewModel.getScheduleIdFromBooking(booking);
       if (scheduleId > 0) {
@@ -33,6 +36,8 @@ class TicketNavState extends State<TicketNav> {
     }
   }
 
+  /// Public method to refresh bookings data
+  /// Called from other screens when bookings are updated
   void fetchBookings() {
     _loadData();
   }
@@ -62,6 +67,7 @@ class TicketNavState extends State<TicketNav> {
           ),
         ],
       ),
+      /// Conditionally show loading indicator, empty message, or bookings list
       body: commuterVM.isLoading
           ? const Center(child: CircularProgressIndicator())
           : bookings.isEmpty

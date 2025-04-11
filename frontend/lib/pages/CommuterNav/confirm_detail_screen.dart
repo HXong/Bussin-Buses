@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 
+/// Screen for confirming booking details
 class ConfirmDetailScreen extends StatefulWidget {
   final int scheduleId;
   final String seatNumber;
@@ -16,6 +17,8 @@ class ConfirmDetailScreen extends StatefulWidget {
 class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
   bool isConfirm = false;
 
+  /// Handles booking confirmation
+  /// Checks if user is signed in and calls view model to create booking
   void confirmBooking() async {
     final commuterId = Supabase.instance.client.auth.currentUser?.id;
     if (commuterId == null) {
@@ -33,6 +36,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
     }
   }
 
+  /// Exits screen and refreshes bookings list
   void exitScreen() async {
     // Get the commuter view model to refresh the bookings list
     final commuterVM = Provider.of<CommuterViewModel>(context, listen: false);
@@ -53,6 +57,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
     final schedule = commuterVM.selectedSchedule;
 
     return GestureDetector(
+      /// Allows tapping anywhere to exit after confirmation
       onTap: isConfirm ? exitScreen : null,
       child: Scaffold(
         appBar: AppBar(
@@ -63,6 +68,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
+            /// Dims the form when confirmed
             Opacity(
               opacity: isConfirm ? 0.3 : 1,
               child: Padding(
@@ -138,6 +144,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
                           ),
                           SizedBox(height: 40),
                           ElevatedButton(
+                            /// Disables button after confirmation
                             onPressed: isConfirm ? null : confirmBooking,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey[500],
@@ -152,6 +159,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
                 ),
               ),
             ),
+            /// Shows confirmation overlay when booking is confirmed
             if (isConfirm)
               Container(
                 color: Colors.black.withOpacity(0.2),
@@ -176,4 +184,3 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
     );
   }
 }
-

@@ -3,6 +3,17 @@ const {
     insertNotification
 } = require('../services/supabaseService');
 
+/**
+ * @description Notify the driver of high congestion ahead on their route.
+ * Checks existing notification in the table to see whether the notification already exists
+ * inserts the notification into the table if it does not exist
+ * @param {String} driver_id
+ * @param {String} message
+ * @param {String} cameraId
+ * @param {Date} timeStamp
+ * @param {boolean} seen
+ * @returns 
+ */
 exports.notifyDriver = async (req, res) => {
     const { driver_id, message, cameraId, timeStamp, seen } = req.body;
 

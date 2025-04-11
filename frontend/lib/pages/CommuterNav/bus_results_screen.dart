@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/commuter_viewmodel.dart';
 import './booking_nav.dart';
 
+/// Screen that displays bus search results
 class BusResultsScreen extends StatefulWidget {
   final String pickup;
   final String destination;
@@ -29,6 +30,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
     _initializeData();
   }
   
+  /// Initializes data and filters schedules based on search parameters
   Future<void> _initializeData() async {
     final viewModel = Provider.of<CommuterViewModel>(context, listen: false);
     await viewModel.initializeBusResults();
@@ -39,6 +41,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
     );
   }
   
+  /// Handles navigation to booking screen when a schedule is selected
   void _navigateToBooking(int scheduleId) {
     // First call the onScheduleSelected callback to update the parent state
     widget.onScheduleSelected(scheduleId);
@@ -52,6 +55,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
     );
   }
   
+  /// Helper method to get month abbreviation from date string
   String _getMonthAbbreviation(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
@@ -81,6 +85,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
+              /// Shows different title based on whether all schedules are shown or filtered results
               viewModel.showingAllSchedules 
                   ? "All Bus Schedules" 
                   : "${widget.pickup} - ${widget.destination}",
@@ -114,6 +119,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
                 ),
               ),
               child: Text(
+                /// Button text changes based on current filter state
                 viewModel.showingAllSchedules ? "Show Filtered Results" : "Show All Schedules",
                 style: const TextStyle(
                   color: Colors.black,
@@ -124,6 +130,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
             
             const SizedBox(height: 24),
             
+            /// Conditionally shows loading indicator, empty message, or schedules list
             viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : viewModel.filteredSchedules.isEmpty
@@ -315,6 +322,7 @@ class _BusResultsScreenState extends State<BusResultsScreen> {
     );
   }
   
+  /// Helper method to format date string
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);

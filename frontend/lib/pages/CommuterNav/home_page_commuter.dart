@@ -10,6 +10,7 @@ import 'package:bussin_buses/pages/CommuterNav/live_location_nav.dart';
 import './bus_search_screen.dart';
 import './bus_results_screen.dart';
 
+/// Main commuter home page with bottom navigation
 class HomePageCommuter extends StatefulWidget {
   const HomePageCommuter({super.key});
 
@@ -23,6 +24,8 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
   int? selectedScheduleId;
   int? selectedBookingId;
 
+  /// Handles when a schedule is selected from search results
+  /// Updates state and switches to Booking tab
   void _onScheduleSelected(int id) {
     setState(() {
       selectedScheduleId = id;
@@ -30,6 +33,8 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
     });
   }
   
+  /// Handles when a booking is selected from tickets
+  /// Updates state and switches to Live Location tab
   void _onBookingSelected(int id) {
     setState(() {
       selectedBookingId = id;
@@ -37,15 +42,18 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
     });
   }
   
+  /// Handles tap on upcoming booking
+  /// Switches to Ticket tab
   void _onUpcomingBookingTap() {
     setState(() {
       _selectedIndex = 2; // switch to Ticket tab
     });
   }
   
+  /// Handles search form submission
+  /// If time is provided, navigates directly to results
+  /// Otherwise, navigates to search screen to complete the form
   void _onSearchSubmitted(String pickup, String destination, String date, String time) {
-    // If time is provided, go directly to results
-    // Otherwise, go to search screen to complete the form
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -67,6 +75,8 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
     );
   }
 
+  /// Handles user logout
+  /// Calls auth service to sign out
   Future<void> logout() async {
     try {
       await authService.signOut();
@@ -85,10 +95,14 @@ class _HomePageCommuterState extends State<HomePageCommuter> {
         onSearchSubmitted: _onSearchSubmitted,
         onUpcomingBookingTap: _onUpcomingBookingTap,
       ),
+      /// If a schedule is selected, show booking nav with that schedule
+      /// Otherwise show a message to select a schedule
       selectedScheduleId != null
           ? BookingNav(scheduleId: selectedScheduleId!)
           : Center(child: Text("No schedule selected")),
       TicketNav(onBookingSelected: _onBookingSelected),
+      /// If a booking is selected, show live location with that booking
+      /// Otherwise show default live location
       selectedBookingId != null
           ? LiveLocationNav(bookingId: selectedBookingId)
           : const LiveLocationNav(),

@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import '../../viewmodels/live_location_viewmodel.dart';
 import '../../services/live_location_service.dart';
 
+/// Screen that displays live bus location and journey details
 class LiveLocationNav extends StatefulWidget {
   final int? bookingId;
   
@@ -22,6 +23,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
     super.initState();
     _viewModel = LiveLocationViewModel(LiveLocationService());
     
+    /// Initialize with booking ID if provided
     if (widget.bookingId != null) {
       _viewModel.init(widget.bookingId!);
     }
@@ -83,6 +85,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
+                              /// Shows route information with fallbacks if data is missing
                               "${busLocation['stops']?.first['name'] ?? 'Origin'} - ${busLocation['destination'] ?? 'Destination'}",
                               style: const TextStyle(
                                 fontSize: 20,
@@ -135,6 +138,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                        /// Shows minutes in parentheses if available
                                         if (busLocation.containsKey('eta_minutes'))
                                           Text(
                                             " (${busLocation['eta_minutes']}m)",
@@ -229,6 +233,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                   height: 16,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
+                                    /// Changes color based on progress
                                     color: (busLocation['progress'] ?? 0.0) > 0.1 ? Colors.green : Colors.grey[400],
                                   ),
                                   child: (busLocation['progress'] ?? 0.0) > 0.1
@@ -285,6 +290,7 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
                                   height: 16,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
+                                    /// Changes color based on progress
                                     color: (busLocation['progress'] ?? 0.0) >= 1.0 ? Colors.green : Colors.grey[400],
                                   ),
                                   child: (busLocation['progress'] ?? 0.0) >= 1.0
@@ -336,6 +342,8 @@ class _LiveLocationNavState extends State<LiveLocationNav> {
     );
   }
   
+  /// Builds map widget with bus location marker
+  /// Shows placeholder if location data is unavailable
   Widget _buildMap(LiveLocationViewModel viewModel) {
     final currentLocation = viewModel.getCurrentLocation();
     

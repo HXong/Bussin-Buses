@@ -6,7 +6,25 @@ import cv2
 from ultralytics import YOLO
 from road_area import estimate_road_area
 
+
 def count_cars(image_path):
+    """
+    This script counts the number of cars in an image and estimates the road area.
+    It uses the YOLO model for object detection and OpenCV for image processing.
+
+    Parameters
+    ----------
+    image_path : str
+        Path to the input image.
+    
+    Raises
+    ------
+    Error
+        If no image path is passed in as a
+        parameter.
+
+    """
+
     try:
         if not os.path.exists(image_path):
             return {"error": f"Image not found: {image_path}"}
@@ -54,6 +72,25 @@ def count_cars(image_path):
         return 0
 
 def calculate_congestion_level(vehicle_area, road_area, vehicle_count):
+    """
+    Calculate the congestion level based on vehicle area, road area, and vehicle count.
+    The congestion level is classified as "low", "moderate", or "high".
+
+    Parameters
+    ----------
+    vehicle_area : float
+        The area occupied by vehicles in the image.
+    road_area : float
+        The area of the road in the image.
+    vehicle_count : int
+        The number of vehicles detected in the image.
+    
+    Raises
+    ---------
+    ZeroDivisionError
+        If road_area is zero, indicating no road area detected.
+        
+    """
     try:
         if road_area == 0:
             if vehicle_count > 30:

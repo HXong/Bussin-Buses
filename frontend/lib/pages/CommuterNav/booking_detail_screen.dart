@@ -3,6 +3,7 @@ import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// Screen that displays booking details and allows check-in and cancellation
 class BookingDetailScreen extends StatelessWidget {
   final Booking booking;
   const BookingDetailScreen({required this.booking});
@@ -90,6 +91,7 @@ class BookingDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
+                    /// Disables check-in button if already checked in
                     onPressed: commuterVM.isCheckIn(booking.id)
                         ? null
                         : () async {
@@ -109,9 +111,11 @@ class BookingDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
+                    /// Disables cancel button if already canceled
                     onPressed: commuterVM.isCanceled(booking.id)
                         ? null
                         : () async {
+                      /// Checks if cancellation is allowed (30 minutes before departure)
                       final isEligible = await commuterVM.handleCancelWithTimeCheck(booking);
                       if (!isEligible) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -119,6 +123,8 @@ class BookingDetailScreen extends StatelessWidget {
                         );
                         return;
                       }
+                      
+                      /// Shows confirmation dialog
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (BuildContext context) {

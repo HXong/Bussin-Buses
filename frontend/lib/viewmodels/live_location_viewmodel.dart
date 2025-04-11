@@ -6,6 +6,7 @@ import '../services/live_location_service.dart';
 import '../services/commuter_service.dart';
 import 'package:intl/intl.dart';
 
+/// View model for tracking and displaying live bus location
 class LiveLocationViewModel extends ChangeNotifier {
   final LiveLocationService _service;
   final CommuterService _commuterService = CommuterService();
@@ -20,6 +21,8 @@ class LiveLocationViewModel extends ChangeNotifier {
 
   LiveLocationViewModel(this._service);
 
+  /// Initializes the view model with a booking ID
+  /// Sets up periodic refresh of location data
   Future<void> init(int bookingId) async {
     isLoading = true;
     _bookingId = bookingId;
@@ -29,7 +32,7 @@ class LiveLocationViewModel extends ChangeNotifier {
       await _fetchLocationData();
       hasData = true;
       
-      // Set up a timer to refresh the location every 30 seconds
+      /// Set up a timer to refresh the location every 30 seconds
       _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
         refreshLocation();
       });
@@ -41,15 +44,16 @@ class LiveLocationViewModel extends ChangeNotifier {
     }
   }
   
+  /// Fetches live location data for the current booking
   Future<void> _fetchLocationData() async {
     busLocation = await _service.getBusLiveLocation(_bookingId);
     
-    // Extract schedule ID if needed for ETA updates
+    /// Extract schedule ID if needed for ETA updates
     if (_scheduleId == 0 && busLocation.containsKey('schedule_id')) {
       _scheduleId = busLocation['schedule_id'];
     }
     
-    // Check the shared cache for updates
+    /// Check the shared cache for updates
     if (_scheduleId > 0 && CommuterService.isSharedETAValid(_scheduleId)) {
       final sharedEta = CommuterService.getSharedETA(_scheduleId);
       if (busLocation['eta_minutes'] != sharedEta) {
@@ -57,13 +61,13 @@ class LiveLocationViewModel extends ChangeNotifier {
       }
     }
     
-    // Update times based on current time
+    /// Update times based on current time
     _updateTimesWithCurrentTime();
     
     notifyListeners();
   }
   
-  // New method to update all times based on current time
+  /// Updates all time-related fields based on current time and ETA
   void _updateTimesWithCurrentTime() {
     if (busLocation.containsKey('eta_minutes')) {
       final etaMinutes = busLocation['eta_minutes'] as int;
@@ -72,29 +76,30 @@ class LiveLocationViewModel extends ChangeNotifier {
       final arrivalTime = now.add(Duration(minutes: etaMinutes));
       final formattedArrivalTime = DateFormat('HH:mm').format(arrivalTime);
       
-      // Update current time
+      /// Update current time
       busLocation['current_time'] = currentTime;
       
-      // Update the ETA time
+      /// Update the ETA time
       busLocation['eta'] = formattedArrivalTime;
       
-      // Update the stops if they exist
+      /// Update the stops if they exist
       if (busLocation.containsKey('stops') && 
           busLocation['stops'] is List && 
           busLocation['stops'].length >= 2) {
         
-        // Update departure time (first stop) to current time
+        /// Update departure time (first stop) to current time
         busLocation['stops'][0]['time'] = currentTime;
         
-        // Update arrival time (last stop) to current time + ETA
+        /// Update arrival time (last stop) to current time + ETA
         busLocation['stops'][busLocation['stops'].length - 1]['time'] = formattedArrivalTime;
       }
     }
   }
   
+  /// Refreshes location data and updates ETA if needed
   Future<void> refreshLocation() async {
     try {
-      // First check the shared cache for updates
+      /// First check the shared cache for updates
       if (_scheduleId > 0 && CommuterService.isSharedETAValid(_scheduleId)) {
         final sharedEta = CommuterService.getSharedETA(_scheduleId);
         if (busLocation['eta_minutes'] != sharedEta) {
@@ -106,7 +111,7 @@ class LiveLocationViewModel extends ChangeNotifier {
       
       await _fetchLocationData();
       
-      // Check if we should update the ETA
+      /// Check if we should update the ETA based on time interval
       final now = DateTime.now();
       if (now.difference(_lastEtaUpdate) >= _etaUpdateInterval && _scheduleId > 0) {
         await _updateETA();
@@ -117,20 +122,21 @@ class LiveLocationViewModel extends ChangeNotifier {
     }
   }
   
+  /// Forces an update of the ETA from the service
   Future<void> _updateETA() async {
     if (_scheduleId <= 0) return;
     
     try {
-      // Force a fresh ETA calculation
+      /// Force a fresh ETA calculation
       await _commuterService.calculateETA(_scheduleId);
       
-      // Get the updated ETA
+      /// Get the updated ETA
       final eta = await _commuterService.getScheduleETA(_scheduleId);
       
-      // Update the busLocation with the ETA
+      /// Update the busLocation with the ETA
       busLocation['eta_minutes'] = eta;
       
-      // Update times based on current time
+      /// Update times based on current time
       _updateTimesWithCurrentTime();
       
       notifyListeners();
@@ -139,6 +145,7 @@ class LiveLocationViewModel extends ChangeNotifier {
     }
   }
   
+  /// Helper method to add minutes to a time string
   String _addMinutesToTime(String timeStr, int minutes) {
     final parts = timeStr.split(':');
     final hour = int.parse(parts[0]);
@@ -150,6 +157,8 @@ class LiveLocationViewModel extends ChangeNotifier {
     return '${newTime.hour.toString().padLeft(2, '0')}:${newTime.minute.toString().padLeft(2, '0')}';
   }
   
+  /// Gets the current bus location as a LatLng object
+  /// Returns null if location data is not available
   LatLng? getCurrentLocation() {
     if (busLocation.containsKey('latitude') && busLocation.containsKey('longitude')) {
       return LatLng(
@@ -160,7 +169,7 @@ class LiveLocationViewModel extends ChangeNotifier {
     return null;
   }
   
-  // Force an immediate ETA update
+  /// Forces an immediate ETA update regardless of time interval
   Future<void> forceEtaUpdate() async {
     await _updateETA();
   }
@@ -171,4 +180,3 @@ class LiveLocationViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

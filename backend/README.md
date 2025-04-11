@@ -13,3 +13,7 @@ to start the Express web server:
 
 using the `.env.example` file format, create a `.env` file on your local machine and add the necessary API keys. 
 run node src/services/scheduler.js to start query of the LTA Data and start Vehicle detection. 
+
+To test out the scheduler: `npm run start:scheduler`
+Do note that the fetching of APIs has been fixed at a certain datetime for presentation purposes. 
+To get live data, look into the `fetchCameraService.js` comments for instructions to retrieve live data.

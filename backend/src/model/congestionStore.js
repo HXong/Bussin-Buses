@@ -3,6 +3,10 @@ const path = require('path');
 
 const CONGESTION_FILE = path.join(__dirname, '../../congestion_data.json');
 
+/**
+ * @description Load congestion data from a JSON file.
+ * @returns {Array} - Array of congestion data objects
+ */
 function loadCongestionData() {
     if (!fs.existsSync(CONGESTION_FILE)) return [];
 
@@ -14,6 +18,12 @@ function loadCongestionData() {
     }
 }
 
+/**
+ * @description Save congestion data to a JSON file.
+ * if the file does not exist, it will be created.
+ * if the file exists, it will be overwritten.
+ * @param {Array} congestionData 
+ */
 function saveCongestionData(congestionData) {
     try {
         fs.writeFileSync(CONGESTION_FILE, JSON.stringify(congestionData, null, 2));

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:bussin_buses/viewmodels/commuter_viewmodel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Screen for selecting seats and making bookings
 class BookingNav extends StatefulWidget {
   final int scheduleId;
   const BookingNav({super.key, required this.scheduleId});
@@ -15,6 +16,7 @@ class _BookingNavState extends State<BookingNav> {
   @override
   void initState() {
     super.initState();
+    /// Load schedule and booked seats data when screen initializes
     final commuterVM = Provider.of<CommuterViewModel>(context, listen: false);
     commuterVM.loadSchedule(widget.scheduleId);
     commuterVM.loadBookedSeats(widget.scheduleId);
@@ -28,6 +30,7 @@ class _BookingNavState extends State<BookingNav> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
+          /// Shows route if schedule is loaded, otherwise shows loading
           schedule != null ? "${schedule.pickup} - ${schedule.destination}" : "Loading...",
           style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
@@ -94,6 +97,9 @@ class _BookingNavState extends State<BookingNav> {
     );
   }
 
+  /// Creates a seat icon widget with seat number
+  /// Handles tap to navigate to confirmation screen
+  /// Colors the seat red if already booked
   Widget seatIcon(String seatNumber) {
     final commuterVM = Provider.of<CommuterViewModel>(context);
     final isBooked = commuterVM.bookedSeats.contains(seatNumber);
@@ -101,6 +107,7 @@ class _BookingNavState extends State<BookingNav> {
     return Column(
       children: [
         GestureDetector(
+          /// Disables tap if seat is already booked
           onTap: isBooked
               ? null
               : () {
@@ -138,6 +145,7 @@ class _BookingNavState extends State<BookingNav> {
   }
 }
 
+/// Screen for confirming booking details
 class ConfirmDetailScreen extends StatefulWidget {
   final int scheduleId;
   final String seatNumber;
@@ -151,6 +159,7 @@ class ConfirmDetailScreen extends StatefulWidget {
 class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
   bool isConfirm = false;
 
+  /// Handles booking confirmation
   void confirmBooking() async {
     final commuterId = Supabase.instance.client.auth.currentUser?.id;
     if (commuterId == null) {
@@ -168,6 +177,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
     }
   }
 
+  /// Exits the screen after confirmation
   void exitScreen() => Navigator.pop(context, true);
 
   @override
@@ -176,6 +186,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
     final schedule = commuterVM.selectedSchedule;
 
     return GestureDetector(
+      /// Allows tapping anywhere to exit after confirmation
       onTap: isConfirm ? exitScreen : null,
       child: Scaffold(
         appBar: AppBar(
@@ -186,6 +197,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
+            /// Dims the form when confirmed
             Opacity(
               opacity: isConfirm ? 0.3 : 1,
               child: Padding(
@@ -261,6 +273,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
                           ),
                           SizedBox(height: 40),
                           ElevatedButton(
+                            /// Disables button after confirmation
                             onPressed: isConfirm ? null : confirmBooking,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey[500],
@@ -275,6 +288,7 @@ class _ConfirmDetailScreen extends State<ConfirmDetailScreen> {
                 ),
               ),
             ),
+            /// Shows confirmation overlay when booking is confirmed
             if (isConfirm)
               Container(
                 color: Colors.black.withOpacity(0.2),

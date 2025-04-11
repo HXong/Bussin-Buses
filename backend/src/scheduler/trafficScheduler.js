@@ -1,9 +1,17 @@
 const cron = require("node-cron");
-const processTrafficData = require("../services/LTADataPollerService");
+const { processTrafficData } = require("../services/LTADataPollerService");
 const { analyzeTraffic } = require("../services/trafficProcessorService");
 
 let isRunning = false
 
+/**
+ * @description Run the traffic update cycle.
+ * This function fetches new traffic images, analyzes traffic congestion,
+ * and updates the congestion data.
+ * It is scheduled to run every 3 minutes using cron.
+ * To start the scheduler, run npm start:scheduler.
+ * @returns {Promise<void>}
+ */
 async function runTrafficUpdate() {
 
     console.log("Running traffic update cycle...");

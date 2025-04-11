@@ -1,6 +1,10 @@
-const fetchTrafficCameras = require('./fetchCameraService');
+const { fetchTrafficCameras } = require('./fetchCameraService');
 const { saveCameraData, downloadImage } = require('../model/cameraData');
 
+/**
+ * @description Fetch traffic camera data, save it, and download images.
+ * @returns {Promise<Boolean>} - Returns true if the process is successful, false otherwise.
+ */
 async function processTrafficData() {
 
     const cameras = await fetchTrafficCameras();
@@ -27,7 +31,7 @@ async function processTrafficData() {
     return true;
 }
 
-module.exports = processTrafficData;
+module.exports = { processTrafficData };
 
 if (require.main === module) {
     console.log("LTADataPoller.js is running as a script.");
