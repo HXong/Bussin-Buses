@@ -1,11 +1,13 @@
+/**
+ * This is the entry point of the backend application.
+ * It sets up the Express server and configures the API routes.
+ */
 const express = require('express');
 const app = express();
-const port = 3000;
+const router = require('./src/routes/index');
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.use(express.json());
+app.use('/api', router);
 
-app.listen(port, () => {
-  console.log(`Bussin Buses Web Server listening at http://localhost:${port}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

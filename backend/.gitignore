@@ -1,1 +1,8 @@
 node_modules
+images
+sample_frontend
+.env
+src/routes/frontendServer.js
+src/scripts/draw_road_masks.py
+congested_roads
+tests

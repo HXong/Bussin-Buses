@@ -4,12 +4,33 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:scheduler": "node src/scheduler/trafficScheduler.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Stack:\r - NodeJS with Javascript\r - Express.js for web server",
   "dependencies": {
-    "express": "^4.21.2"
+    "@here/flexpolyline": "^0.1.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "@turf/turf": "^7.2.0",
+    "axios": "^1.7.9",
+    "backend": "file:",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "polyline": "^0.2.0",
+    "sharp": "^0.33.5"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.1.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
